@@ -7,3 +7,4 @@ dist/*
 /.wepycache
 /.wepyignore
 /package-lock.json
+.DS_Store
