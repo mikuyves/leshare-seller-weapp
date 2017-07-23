@@ -89,7 +89,7 @@
     <view slot="title">商品品牌</view>
     <view slot="content" class="weui-cells-form">
       <radio-group id="inner" key="" bindchange="radio" @tap="selectInner">
-        <label class="weui-cell weui-check__label" wx:for="{{innerCategories}}" wx:key="value">
+        <label class="weui-cell weui-check__label" wx:for="{{innerBrands}}" wx:key="value">
           <radio class="weui-check" value="{{item.name}}" checked="{{input.inner == item.name}}"/>
           <view class="weui-cell__bd">{{item.name}}</view>
           <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.inner == item.name}}">
@@ -171,6 +171,7 @@
       }],
       mode: 'create',
       innerCategories: [],
+      innerBrands: [],
       init: true,
       isInnerCateDisplay: 'false',
       isInnerBrandDisplay: 'false'
