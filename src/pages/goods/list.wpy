@@ -31,7 +31,7 @@
 
   export default class GoodsList extends wepy.page {
     def = {
-      init: false,
+      init: true,
       page: {
         list: []
       },
@@ -45,15 +45,15 @@
         categoryId: '0',
         scroll: false
       },
-      categories: []
+      categories: ['1', '2', '3']
     }
     data = {...this.def};
     async onLoad () {
       this.page = goods.page(this);
       this.goods = this.page.list;
-      this.categories = await goods.getInnerCategories();
-      await this.next();
-      Event.listen(Event.GOODS_LIST_UPDATE, this.update.bind(this), this);
+      // this.categories = await goods.getInnerCategories();
+      // await this.next();
+      // Event.listen(Event.GOODS_LIST_UPDATE, this.update.bind(this), this);
     };
     // 获取分页参数
     params() {
@@ -67,7 +67,7 @@
         this.$navigate('edit?mode=create');
       },
       change() {
-        this.reload();
+        // this.reload();
       }
     }
     events = {};

@@ -1,22 +1,44 @@
 <template>
-  <view class="tab-border" />
+  <view class="page">
+    <view class="brand column-center">
+      <image class="icon-xxl" src="{{user.avatarUrl}}"/>
+      <text>{{user.nickName}}</text>
+    </view>
+    </view>
+  </view>
 </template>
 
 <script>
   import wepy from 'wepy'
+  import AV from '../../utils/av-weapp-min'
 
   export default class UserIndex extends wepy.page {
+    def = {
+      user: {}
+    }
+    data = {...this.def};
     config = {
       navigationBarTitleText: '我的信息'
     };
     components = {};
     methods = {};
     events = {};
-    onLoad () {};
-    data = {};
+    onLoad () {
+      this.user = AV.User.current();
+      this.loaded;
+    };
   }
 </script>
 
 <style lang="scss">
   @import "../../styles/variable";
+  .brand{
+    padding-top: 60rpx;
+    padding-bottom: 60rpx;
+
+    text{
+      margin-top: 15rpx;
+      font-size: $text-form;
+    }
+  }
 </style>

@@ -56,7 +56,7 @@
     methods = {
       // 处理输入事件
       input(e) {
-        const fieldName = e.currentTarget.id;
+        const fieldName = e.currentTarget.id;  // 用 id 指定 input.fieldName
         this.input[fieldName] = e.detail.value;
       },
       // 处理单选事件

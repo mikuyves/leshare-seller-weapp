@@ -28,7 +28,7 @@
   export default class OrderIndex extends wepy.page {
     // 页面数据
     data = {
-      init: false,
+      init: true,
       page: {
         list: [
           {orderGoodsInfos: []}
@@ -49,7 +49,7 @@
     async onLoad () {
       this.page = order.page(this);
       this.orders = this.page.list;
-      await this.next();
+      // await this.next();
       Event.listen(Event.ORDER_LIST_UPDATE, this.update.bind(this), this);
     };
     // 获取分页参数
@@ -71,7 +71,7 @@
     mixins = [pagination];
     watch = {
       tab() {
-        this.reload();
+        // this.reload();
       }
     }
   }

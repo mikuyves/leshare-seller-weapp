@@ -8,3 +8,4 @@ dist/*
 /.wepyignore
 /package-lock.json
 .DS_Store
+secret.js

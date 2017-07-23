@@ -1,11 +1,12 @@
 
 import base from './base';
+import AV from '../utils/av-weapp-min'
 
 export default class shop extends base {
 
   static async list() {
-    const url = `${this.baseUrl}/sellers/shop_list`;
-    return await this.get(url);
+  	let query = new AV.Query('Shop')
+  	return await query.find()
   }
 
   static async info() {

@@ -7,64 +7,49 @@
 <script>
 import wepy from 'wepy'
 import 'wepy-async-function'
+import AV from './utils/av-weapp-min'
+import {APPID, APPKEY} from './config/secret'
+
+// 初始化 leancloud 应用。
+AV.init({
+  appId: APPID,
+  appKey: APPKEY
+})
 
 export default class extends wepy.app {
   constructor () {
     super()
-    // 注册中间件
+    // // 注册中间件
     this.use('requestfix');
     this.use('promisify');
-    this.intercept('request', {
-      config (p) {
-        p.header = this.createAuthHeader();
-        return p;
-      }
-    });
-    this.intercept('uploadFile', {
-      config (p) {
-        p.header = this.createAuthHeader();
-        return p;
-      },
-      success (p) {
-        return p.data;
-      }
-    });
   }
 
-  /**
-   * 构造权限头部
-   */
-  createAuthHeader () {
-    const loginCode = wepy.$instance.globalData.auth.login_code;
-    const shopId = wepy.$instance.globalData.auth.shop_id;
-    const header = {};
-    if (loginCode) {
-      header['login_code'] = loginCode;
-    }
-    if (shopId) {
-      header['shop_id'] = shopId;
-    }
-    return header;
+  login() {
+    return AV.Promise.resolve(AV.User.current()).then(user =>
+      user ? (user.isAuthenticated().then(authed => authed ? user : null)) : null
+    ).then(user => user ? user : AV.User.loginWithWeapp());
   }
 
   async onLaunch() {
-    await this.syncStoreConfig('login_code');
-    await this.syncStoreConfig('shop_id');
+    // await this.syncStoreConfig('login_code');
+    // await this.syncStoreConfig('shop_id');
+    let user = await this.login()
+    wepy.$instance.globalData.user = user.toJSON()
   }
-  async syncStoreConfig(key) {
-    const result = await wepy.getStorage({key: key});
-    const value = result.data;
-    if (value !== '') {
-      wepy.$instance.globalData.auth[key] = value;
-    }
-  }
+
+  // async syncStoreConfig(key) {
+  //   const result = await wepy.getStorage({key: key});
+  //   const value = result.data;
+  //   if (value !== '') {
+  //     wepy.$instance.globalData.auth[key] = value;
+  //   }
+  // }
 
   globalData = {
     auth: {},
     shop: {},
-    baseUrl: 'https://api.ioman.cc/api/v1/seller'
-    // baseUrl: 'http://leshare.shop:9999/api/v1/seller'
-    // baseUrl: 'http://192.168.31.124:9999/api/v1/seller'
+    user: {},
+    avUser: {},
   }
 
   config = {

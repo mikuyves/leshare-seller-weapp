@@ -2,11 +2,13 @@
   <Tips />
   <view class="page" wx:if="{{init}}">
     <view class="brand column-center">
-      <image class="icon-xxl" src="/images/home/shop-logo.png"/>
-      <text>乐享商家助手</text>
+      <image class="icon-xxl" src="{{avUser.avatarUrl}}"/>
+      <text>{{avUser.nickName}}, 欢迎进入结算中心！</text>
     </view>
-    <view class="page__bd form">
+<!--     <view class="page__bd form">
       <view class="weui-cells weui-cells_after-title">
+
+        验证手机
         <view class="weui-cell weui-cell_input weui-cell_vcode">
           <view class="weui-cell__hd">
             <view class="weui-label">手机号</view>
@@ -15,7 +17,6 @@
             <input class="weui-input" id="phone" @input="input" maxlength="11" placeholder="请输入手机号" />
           </view>
           <view class="weui-cell__ft">
-            <!--<view class="weui-vcode-btn {{isWaiting ? 'muted' : ''}}" @tap="onCodeTap">{{btnText}}</view>-->
             <VCode  @tap.user="code" />
           </view>
         </view>
@@ -27,17 +28,17 @@
             <input class="weui-input" id="code" maxlength="6"  @input="input" placeholder="请输入验证码" />
           </view>
         </view>
-      </view>
-      <view class="weui-cells__tips">提示：未注册用户请联系客服专员</view>
 
+      </view>
+ -->
       <view class="weui-btn-area">
-        <button class="weui-btn" type="primary" @tap="confirm">确定</button>
+        <button class="weui-btn" type="primary" @tap="confirm">工作人员登录</button>
       </view>
     </view>
   </view>
-
-
+  <view class="weui-cells__tips">提示：未登记之工作人员请咨询管理员。</view>
 </template>
+
 <script>
   import wepy from 'wepy';
   import auth from '../../api/auth';
@@ -46,40 +47,43 @@
   import FormTips from '../../components/weui/tips';
   import VCode from '../../components/weui/vcode';
   import Tips from '../../utils/Tips';
+  import AV from '../../utils/av-weapp-min'
   export default class Login extends wepy.page {
     def = {
-      init: false
+      init: false,
+      avatarUrl: '',
+      avUser: {}
     };
     data = {...this.def}
     async onLoad () {
-      try {
-        const loginCode = auth.getConfig('login_code');
-        if (loginCode != null) {
-          const result = await auth.check(loginCode);
-          if (result == 'SUCCESS') {
-            const shopId = auth.getConfig('shop_id');
-            if (shopId != null) {
-              this.$switch('index');
-            } else {
-              this.$redirect('shops');
-            }
-          }
-        }
-      } catch (e) {
-        await auth.removeConfig('login_code');
-      } finally {
-        this.loaded();
-      }
+      // this.$switch('index')
+      this.avUser = AV.User.current();
+      this.loaded();
+      // try {
+      //   const loginCode = auth.getConfig('login_code');
+      //   if (loginCode != null) {
+      //     const result = await auth.check(loginCode);
+      //     if (result == 'SUCCESS') {
+      //       const shopId = auth.getConfig('shop_id');
+      //       if (shopId != null) {
+      //         this.$switch('index');
+      //       } else {
+      //         this.$redirect('shops');
+      //       }
+      //     }
+      //   }
+      // } catch (e) {
+      //   await auth.removeConfig('login_code');
+      // } finally {
+      //   this.loaded();
+      // }
     }
     methods = {
       async confirm() {
-        if (!this.isValid()) {
-          return;
-        }
+        // if (!this.isValid()) {
+        //   return;
+        // }
         try {
-          const loginCode = await auth.login(this.input.phone, this.input.code);
-          await auth.setConfig('login_code', loginCode);
-          await auth.removeConfig('shop_id');
           this.$redirect('shops');
         } catch (e) {
           this.tips(e.message);
@@ -102,6 +106,10 @@
         } finally {
           this.loaded();
         }
+      },
+      async test () {
+        this.avUser.
+        console.log(res)
       }
     };
     mixins = [input, base];
