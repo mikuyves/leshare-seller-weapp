@@ -2,6 +2,7 @@ import base from './base';
 import wepy from 'wepy';
 import Page from '../utils/Page';
 import Lang from '../utils/Lang';
+import AV from '../utils/av-weapp-min';
 
 export default class goods extends base {
 
@@ -16,21 +17,54 @@ export default class goods extends base {
    * 商品分类
    */
   static async getInnerCategories() {
-    const url = `${this.baseUrl}/goods/inner_category`;
-    return await this.get(url);
+    const query = new AV.Query('Cate')
+    return await query.find()
   }
 
   /**
    *  新增商品分类
    */
   static async addInnerCategories(name) {
-    const url = `${this.baseUrl}/goods/inner_category`;
-    const param = {
-      name: name,
-      pid: 0,
-      seq: 0
-    }
-    return await this.post(url, param);
+    let cate = new AV.Object('Cate', {
+      name: name
+    });
+    return await cate.save()
+  }
+
+  /**
+   * 商品品牌
+   */
+  static async getInnerBrands() {
+    const query = new AV.Query('Brand')
+    return await query.find()
+  }
+
+  /**
+   *  新增商品品牌
+   */
+  static async addInnerBrands(name) {
+    let brand = new AV.Object('Brand', {
+      name: name
+    });
+    return await brand.save()
+  }
+
+  /**
+   *  新增内页选项
+   */
+  static async addInner(name, clsName) {
+    let brand = new AV.Object(clsName, {
+      name: name
+    });
+    return await brand.save()
+  }
+
+  /**
+   *  获取内页选项
+   */
+  static async getInner(clsName) {
+    const query = new AV.Query(clsName)
+    return await query.find()
   }
 
   /**

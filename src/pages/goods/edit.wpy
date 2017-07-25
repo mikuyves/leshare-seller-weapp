@@ -2,6 +2,7 @@
   <Tips />
   <view class="container" wx:if="{{init}}">
 
+
     <!--照片上传区域-->
     <ImageUploader :pictures.sync="pictures" />
 
@@ -27,7 +28,7 @@
             <view class="weui-label">商品品牌</view>
           </view>
           <view class="weui-cell__bd" >
-            {{input.inner ? input.inner : '请选择商品品牌'}}
+            {{input.innerBrand ? input.innerBrand : '未知品牌'}}
           </view>
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
@@ -37,17 +38,17 @@
             <view class="weui-label">商品分类</view>
           </view>
           <view class="weui-cell__bd" >
-            {{input.inner ? input.inner : '请选择商品分类'}}
+            {{input.innerCate ? input.innerCate : '未分类'}}
           </view>
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
 
         <view class="weui-cell"  @tap="select">
           <view class="weui-cell__hd">
-            <view class="weui-label">运费</view>
+            <view class="weui-label">供应商</view>
           </view>
           <view class="weui-cell__bd">
-            请选择运费模板
+            未知供应商
           </view>
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
@@ -88,11 +89,11 @@
   <SliderPanelBrand :display.sync="isInnerBrandDisplay" btn='false'>
     <view slot="title">商品品牌</view>
     <view slot="content" class="weui-cells-form">
-      <radio-group id="inner" key="" bindchange="radio" @tap="selectInner">
+      <radio-group id="innerBrand" key="" bindchange="radio" @tap="selectInner">
         <label class="weui-cell weui-check__label" wx:for="{{innerBrands}}" wx:key="value">
-          <radio class="weui-check" value="{{item.name}}" checked="{{input.inner == item.name}}"/>
+          <radio class="weui-check" value="{{item.name}}" checked="{{input.innerBrand == item.name}}"/>
           <view class="weui-cell__bd">{{item.name}}</view>
-          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.inner == item.name}}">
+          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.innerBrand == item.name}}">
             <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
           </view>
         </label>
@@ -107,7 +108,7 @@
           <input class="weui-input" id="newInner" @input="input" placeholder="输入品牌名称" />
         </view>
         <view class="weui-cell__ft">
-          <view class="weui-vcode-btn" @tap="addInner">确定</view>
+          <view id="innerBrands" class="weui-vcode-btn" @tap="addInner('Brand')">确定</view>
         </view>
       </view>
     </view>
@@ -118,11 +119,11 @@
     <view slot="title">商品分类</view>
     <view slot="content" class="weui-cells-form">
       <!-- 注意这里 selectInner 是否需要修改 -->
-      <radio-group id="inner" key="" bindchange="radio" @tap="selectInner">
+      <radio-group id="innerCate" key="" bindchange="radio" @tap="selectInner">
         <label class="weui-cell weui-check__label" wx:for="{{innerCategories}}" wx:key="value">
-          <radio class="weui-check" value="{{item.name}}" checked="{{input.inner == item.name}}"/>
+          <radio class="weui-check" value="{{item.name}}" checked="{{input.innerCate == item.name}}"/>
           <view class="weui-cell__bd">{{item.name}}</view>
-          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.inner == item.name}}">
+          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.innerCate == item.name}}">
             <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
           </view>
         </label>
@@ -137,7 +138,7 @@
           <input class="weui-input" id="newInner" @input="input" placeholder="输入分类名称" />
         </view>
         <view class="weui-cell__ft">
-          <view class="weui-vcode-btn" @tap="addInner">确定</view>
+          <view id="innerCategories" class="weui-vcode-btn" @tap="addInner('Cate')">确定</view>
         </view>
       </view>
     </view>
@@ -179,7 +180,8 @@
     data = {...this.def};
     async onLoad ({goodsId, mode}) {
       this.mode = mode;
-      // this.innerCategories = await goods.getInnerCategories();
+      this.innerCategories = await goods.getInnerCategories();
+      this.innerBrands = await goods.getInnerBrands();
       if (this.mode == 'edit') {
         const detail = await goods.detail(goodsId);
         this.pictures = detail.pictures;
@@ -267,15 +269,17 @@
         wepy.navigateBack();
       },
       // 新增分类
-      async addInner() {
+      async addInner(clsName, e) {
+        let newInnerId = e.currentTarget.id
         const name = this.input.newInner;
-        await goods.addInnerCategories(name);
-        this.innerCategories = await goods.getInnerCategories();
+        await goods.addInner(name, clsName);
+        this[newInnerId] = await goods.getInner(clsName);
         this.loaded();
       },
       // 选择分类
       selectInner() {
         this.isInnerCateDisplay = 'false';
+        this.isInnerBrandDisplay = 'false';
       },
       // 展现分类
       showInner(e) {
@@ -288,7 +292,7 @@
           details: JSON.stringify(this.details)
         }
 
-        this.$navigateTo('detail', param);
+        this.$navigate('detail', param);
       }
     };
     // 商品详情更新
@@ -402,6 +406,13 @@
       detailText() {
         const size = this.details.length;
         return size > 0 ? `已保存${size}条详情` : '请点击编辑详情';
+      }
+    };
+    events = {
+      getInner(e, ent) {
+        console.log(e)
+        let innerId = e.currentTarget.id
+        this[innerId] = 'true';
       }
     };
     components = {
