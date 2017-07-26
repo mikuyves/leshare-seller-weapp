@@ -1,130 +1,102 @@
 <template>
   <view class="sku-box row mt10">
+
     <view class="info-box">
       <view class="weui-cells-form">
 
-<!--         <view class="weui-cell weui-cell_input">
-          <view class="weui-cell__hd" >
-            <view class="weui-label sku-label">尺寸1</view>
-          </view>
-          <view class="weui-cell__bd">
-            <input class="weui-input" id="sku" @input="input({{index}})" value="{{info.sku}}" placeholder="m"/>
-          </view>
-          <view class="weui-cell__ft">
-          </view>
-        </view>
- -->
-          <view class="weui-cell"  id="size1" @tap="getInner({{index}}, 'isInnerSizeDisplay')">
-            <view class="weui-cell__hd">
-              <view class="weui-label sku-label">尺寸1</view>
-            </view>
-            <view class="weui-cell__bd" >
-              {{info.size1 ? info.size1 : '未选择'}}
-            </view>
-            <view class="weui-cell__ft weui-cell__ft_in-access"></view>
-          </view>
-
         <view class="weui-cell weui-cell_input">
           <view class="weui-cell__hd" >
-            <view class="weui-label sku-label">尺寸2</view>
+            <view class="weui-label sku-label">标码</view>
           </view>
           <view class="weui-cell__bd">
-            <input class="weui-input" id="size2" type="text" @input="input({{index}})" value="{{info.size2}}" placeholder="38"/>
+            <input class="weui-input" id="size2" type="text" @input="input({{index}})" value="{{info.size2}}" placeholder="自定义尺寸"/>
           </view>
           <view class="weui-cell__ft">
           </view>
         </view>
-        <view class="weui-cell weui-cell_input" >
-          <view class="weui-cell__hd" >
+
+        <view class="weui-cell"  id="size1" @tap="getInner({{index}}, 'isInnerSizeDisplay')">
+          <view class="weui-cell__hd">
+            <view class="weui-label sku-label">尺码</view>
+          </view>
+          <view class="weui-cell__bd" style="color: {{info.size1 ? 'default' : 'grey'}};" >
+            {{info.size1 ? info.size1 : '未选择'}}
+          </view>
+          <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+        </view>
+
+        <view class="weui-cell"  id="color" @tap="getInner({{index}}, 'isInnerColorDisplay')">
+          <view class="weui-cell__hd">
             <view class="weui-label sku-label">颜色</view>
           </view>
-          <view class="weui-cell__bd">
-            <input class="weui-input" id="color" type="text" @input="input({{index}})" value="{{info.color}}"  placeholder="红"/>
+          <view class="weui-cell__bd" style="color: {{info.color ? 'default' : 'grey'}};" >
+            {{info.color ? info.color : '未选择'}}
           </view>
-          <view class="weui-cell__ft">
-          </view>
+          <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
+
         <view class="weui-cell weui-cell_input" >
           <view class="weui-cell__hd" >
             <view class="weui-label sku-label">库存</view>
           </view>
           <view class="weui-cell__bd">
-            <input class="weui-input" id="stock" type="number" @input="input({{index}})" value="{{info.stock}}"  placeholder="20"/>
+            <input class="weui-input" id="stock" type="number" @input="input({{index}})" value="{{info.stock}}"  placeholder="未有库存"/>
           </view>
           <view class="weui-cell__ft">
           </view>
         </view>
-        <view class="weui-cell weui-cell_switch" >
-          <view class="weui-cell__hd" >
-            <view class="weui-label sku-label">断货</view>
-          </view>
-          <view class="weui-cell__bd">
-            <!-- <input class="weui-input" id="stock" type="number" @input="input({{index}})" value="{{info.stock}}"  placeholder="否"/> -->
-              <switch checked="{{info.soldOut}}" id="soldOut" @change="input({{index}})" />
-          </view>
-          <view class="weui-cell__ft">
-          </view>
-        </view>
+
       </view>
     </view>
 
     <view class="info-box">
       <view class="weui-cells-form">
-        <view class="weui-cell weui-cell_input">
-          <view class="weui-cell__hd" >
-            <view class="weui-label sku-label">价格1</view>
-          </view>
-          <view class="weui-cell__bd">
 
-<!--             <input class="weui-input" id="sku" @input="input({{index}})" value="{{info.sku}}" placeholder="200"/>
- -->
-            <input class="weui-input" id="price1" type="digit" @input="input({{index}})" value="{{info.price1}}" placeholder="200"/>
-          </view>
-          <view class="weui-cell__ft">
-          </view>
-        </view>
         <view class="weui-cell weui-cell_input">
           <view class="weui-cell__hd" >
-            <view class="weui-label sku-label">价格2</view>
+            <view class="weui-label sku-label">大货价</view>
           </view>
           <view class="weui-cell__bd">
-            <input class="weui-input" id="price2" type="digit" @input="input({{index}})" value="{{info.price2}}" placeholder="300"/>
+            <input class="weui-input" id="price1" type="digit" @input="input({{index}})" value="{{info.price1}}" placeholder="￥"/>
           </view>
           <view class="weui-cell__ft">
           </view>
         </view>
+
+        <view class="weui-cell weui-cell_input">
+          <view class="weui-cell__hd" >
+            <view class="weui-label sku-label">批发价</view>
+          </view>
+          <view class="weui-cell__bd">
+            <input class="weui-input" id="price2" type="digit" @input="input({{index}})" value="{{info.price2}}" placeholder="￥"/>
+          </view>
+          <view class="weui-cell__ft">
+          </view>
+        </view>
+
         <view class="weui-cell weui-cell_input" >
           <view class="weui-cell__hd" >
-            <view class="weui-label sku-label">价格3</view>
+            <view class="weui-label sku-label">零售价</view>
           </view>
           <view class="weui-cell__bd">
-            <input class="weui-input" id="price3" type="digit" @input="input({{index}})" value="{{info.price3}}"  placeholder="400"/>
+            <input class="weui-input" id="price3" type="digit" @input="input({{index}})" value="{{info.price3}}"  placeholder="￥"/>
           </view>
           <view class="weui-cell__ft">
           </view>
         </view>
-        <view class="weui-cell weui-cell_input" >
+
+        <view class="weui-cell weui-cell_switch" >
           <view class="weui-cell__hd" >
-            <view class="weui-label sku-label">供应商</view>
+            <view class="weui-label sku-label">断货</view>
           </view>
           <view class="weui-cell__bd">
-            <input class="weui-input" id="supplier" type="text" @input="input({{index}})" value="{{info.supplier}}"  placeholder="DGHL"/>
+              <switch checked="{{info.soldOut}}" id="soldOut" @change="input({{index}})" />
           </view>
           <view class="weui-cell__ft">
           </view>
         </view>
-        <view class="weui-cell weui-cell_input" >
-          <view class="weui-cell__hd" >
-            <view class="weui-label sku-label"></view>
-          </view>
-          <view class="weui-cell__bd">
-            <input class="weui-input" id="stock" type="number" @input="input({{index}})" value="{{info.stock}}"  placeholder=""/>
-          </view>
-          <view class="weui-cell__ft">
-          </view>
-        </view>
+
       </view>
-
     </view>
 
     <view class="op-box column-center" wx:if="{{skuEditable}}" @tap="remove({{index}})">
@@ -147,14 +119,9 @@
     data = {};
     methods = {
       input(index, e) {
-        console.log(e)
         const fieldName = e.currentTarget.id;
         const fieldValue = e.detail.value;
         this.$emit('change', {index, fieldName, fieldValue});
-      },
-      radio(index, e) {
-        console.log(index, e)
-
       },
       remove(index) {
         this.$emit('remove', index);

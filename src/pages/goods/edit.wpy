@@ -17,7 +17,7 @@
     </view>
 
     <!-- SKU 列表 -->
-    <SkuList :skuList.sync="skuList" />
+    <SkuList :skuList.sync="skuList" :isSamePrice.sync="isSamePrice" :isOnePrice.sync="isOnePrice" />
 
     <!-- 其他详细信息 -->
      <view class="detail-box">
@@ -27,8 +27,8 @@
           <view class="weui-cell__hd">
             <view class="weui-label">商品品牌</view>
           </view>
-          <view class="weui-cell__bd" >
-            {{input.innerBrand ? input.innerBrand : '未知品牌'}}
+          <view class="weui-cell__bd" style="color: {{input.innerBrand ? 'default' : 'grey'}};">
+            {{input.innerBrand ? input.innerBrand : '未选择'}}
           </view>
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
@@ -37,23 +37,23 @@
           <view class="weui-cell__hd">
             <view class="weui-label">商品分类</view>
           </view>
-          <view class="weui-cell__bd" >
-            {{input.innerCate ? input.innerCate : '未分类'}}
+          <view class="weui-cell__bd" style="color: {{input.innerBrand ? 'default' : 'grey'}};" >
+            {{input.innerCate ? input.innerCate : '未选择'}}
           </view>
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
 
-        <view class="weui-cell"  @tap="select">
+        <view class="weui-cell"  id="isInnerSupplierDisplay" @tap="showInner">
           <view class="weui-cell__hd">
             <view class="weui-label">供应商</view>
           </view>
-          <view class="weui-cell__bd">
-            未知供应商
+          <view class="weui-cell__bd" style="color: {{input.innerBrand ? 'default' : 'grey'}};" >
+            {{input.innerSupplier ? input.innerSupplier : '未选择'}}
           </view>
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
 
-        <view class="weui-cell"  @tap="details">
+<!--         <view class="weui-cell"  @tap="details">
           <view class="weui-cell__hd">
             <view class="weui-label">商品详情</view>
           </view>
@@ -62,17 +62,17 @@
           </view>
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
-
+ -->
         <view class="weui-cell weui-cell_switch">
-          <view class="weui-cell__bd">立即上架</view>
+          <view class="weui-cell__bd">所有规格同价</view>
           <view class="weui-cell__ft">
-            <switch checked="{{input.status}}" id="status" @change="input" />
+            <switch checked="{{isSamePrice}}" id="isSamePrice" @change="samePrice" />
           </view>
         </view>
         <view class="weui-cell weui-cell_switch">
-          <view class="weui-cell__bd">推荐商品</view>
+          <view class="weui-cell__bd">一口价</view>
           <view class="weui-cell__ft">
-            <switch checked="{{input.isRecommend}}" id="isRecommend" @change="input" />
+            <switch checked="{{isOnePrice}}" id="isOnePrice" @change="onePrice" />
           </view>
         </view>
       </view>
@@ -144,7 +144,36 @@
     </view>
   </SliderPanelCate>
 
-  <!-- 标准尺寸 -->
+  <!-- 供应商选择框 -->
+  <SliderPanelSupplier :display.sync="isInnerSupplierDisplay" btn='false'>
+    <view slot="title">供应商</view>
+    <view slot="content" class="weui-cells-form">
+      <radio-group id="innerSupplier" key="" bindchange="radio" @tap="selectInner">
+        <label class="weui-cell weui-check__label" wx:for="{{innerSuppliers}}" wx:key="value">
+          <radio class="weui-check" value="{{item.name}}" checked="{{input.innerSupplier == item.name}}"/>
+          <view class="weui-cell__bd">{{item.name}}</view>
+          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.innerSupplier == item.name}}">
+            <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
+          </view>
+        </label>
+      </radio-group>
+
+      <!-- 新增分类 -->
+      <view class="weui-cell weui-cell_input weui-cell_vcode">
+        <view class="weui-cell__hd">
+          <view class="weui-label"> + 新增供应商</view>
+        </view>
+        <view class="weui-cell__bd">
+          <input class="weui-input" id="newInner" value="{{input.newInner}}" @input="input" placeholder="输入分类名称" />
+        </view>
+        <view class="weui-cell__ft">
+          <view id="innerCategories" class="weui-vcode-btn" @tap="addInner('Supplier')">确定</view>
+        </view>
+      </view>
+    </view>
+  </SliderPanelSupplier>
+
+  <!-- SKU 标准尺寸 -->
   <SliderPanelSize :display.sync="isInnerSizeDisplay" btn='false'>
     <view slot="title">标准尺寸</view>
     <view slot="content" class="weui-cells-form">
@@ -160,6 +189,24 @@
       </radio-group>
     </view>
   </SliderPanelSize>
+
+  <!-- SKU 颜色 -->
+  <SliderPanelColor :display.sync="isInnerColorDisplay" btn='false'>
+    <view slot="title">颜色</view>
+    <view slot="content" class="weui-cells-form">
+      <!-- 注意这里 selectInner 是否需要修改 -->
+      <radio-group id="color" key="" bindchange="skuRadio({{editingInfo}})" @tap="selectInner">
+        <label class="weui-cell weui-check__label flex-color" wx:for="{{innerColors}}" wx:key="value">
+          <radio class="weui-check" value="{{item.name}}" checked="{{input.innerSize == item.name}}"/>
+          <view class="weui-cell__bd flex-color-name">{{item.name}}</view>
+          <view class="weui-cell__bd flex-color-sample" style="background-color: {{item.nameEn}};">{{item.nameEn}}</view>
+          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.innerSize == item.name}}">
+            <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
+          </view>
+        </label>
+      </radio-group>
+    </view>
+  </SliderPanelColor>
 </template>
 
 <script>
@@ -183,18 +230,29 @@
       details: [],
       pictures: [],
       skuList: [{
-        sku: '',
-        price: '',
-        stock: ''
+        size1: '',
+        size2: '',
+        color: '',
+        price1: null,
+        price2: null,
+        price3: null,
+        stock: null,
+        soldOut: false
       }],
       mode: 'create',
+      isSamePrice: true,
+      isOnePrice: false,
       innerCategories: [],
       innerBrands: [],
+      innerSuppliers: [],
       innerSizes: [],
+      innerColors: [],
       init: true,
       isInnerCateDisplay: 'false',
       isInnerBrandDisplay: 'false',
+      isInnerSupplierDisplay: 'false',
       isInnerSizeDisplay: 'false',
+      isInnerColorDisplay: 'false',
       editingInfo: {}
     }
     data = {...this.def};
@@ -202,14 +260,16 @@
       this.mode = mode;
       this.innerCategories = await goods.getInner('Cate');
       this.innerBrands = await goods.getInner('Brand');
+      this.innerSuppliers = await goods.getInner('Supplier');
       this.innerSizes = await goods.getInner('Size');
+      this.innerColors = await goods.getInner('Color');
       if (this.mode == 'edit') {
         const detail = await goods.detail(goodsId);
         this.pictures = detail.pictures;
         this.input = detail.input;
         this.details = detail.details;
         this.skuList = detail.skuList;
-        this.input.inner = this.innerCategories.find(item => item.id == this.input.innerCid).name
+        this.input.innerCategoies = this.innerCategories.find(item => item.id == this.input.innerCid).name
       }
       Event.listen(Event.GOODS_DETAILS_UPDATE, this.detailsUpdate.bind(this), this);
       this.loaded();
@@ -302,11 +362,14 @@
       selectInner() {
         this.isInnerCateDisplay = 'false';
         this.isInnerBrandDisplay = 'false';
+        this.isInnerSupplierDisplay = 'false';
         this.isInnerSizeDisplay = 'false';
+        this.isInnerColorDisplay = 'false';
       },
       // 展现分类
       showInner(e) {
         let innerId = e.currentTarget.id
+        console.log(innerId)
         this[innerId] = 'true';
       },
       // 跳转到详情页面
@@ -316,6 +379,15 @@
         }
 
         this.$navigate('detail', param);
+      },
+      samePrice(e) {
+        // const fieldName = e.currentTarget.id;
+        // this.input[fieldName] = e.detail.value;
+        // this.isSamePrice = !this.isSamePrice
+        this.isSamePrice = e.detail.value
+      },
+      onePrice(e) {
+        this.isOnePrice = e.detail.value
       }
     };
     // 商品详情更新
@@ -444,7 +516,9 @@
       ImageUploader: ImageUploader,
       SliderPanelCate: SliderPanel,
       SliderPanelBrand: SliderPanel,
-      SliderPanelSize: SliderPanel
+      SliderPanelSupplier: SliderPanel,
+      SliderPanelSize: SliderPanel,
+      SliderPanelColor: SliderPanel
     };
     mixins = [base, input];
     config = {
@@ -458,5 +532,13 @@
   .detail-box{
     border-top: $border;
   }
-
+  .flex-color{
+    display: flex;
+  }
+  .flex-color-name{
+    flex: 1;
+  }
+  .flex-color-sample{
+    flex: 9;
+  }
 </style>

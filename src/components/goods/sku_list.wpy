@@ -17,7 +17,9 @@
     props = {
       skuList: {
         twoWay: true
-      }
+      },
+      isSamePrice: Boolean,
+      isOnePrice: Boolean
     };
     data = {
       skuEditable: true
@@ -39,11 +41,40 @@
     watch = {
       skuList() {
         this.resetSkuEditable();
+        this.keepOnePrice();
+        this.keepSamePrice();
+        this.$apply();
+      },
+      isSamePrice() {
+        this.keepSamePrice();
+        this.$apply();
+      },
+      isOnePrice() {
+        this.keepOnePrice();
+        this.keepSamePrice();
         this.$apply();
       }
     }
     resetSkuEditable() {
       this.skuEditable = this.skuList.length > 1;
+    }
+    keepSamePrice() {
+      if (this.skuList.length > 1 && this.isSamePrice) {
+        let sku1 = this.skuList[0];
+        for (let sku of this.skuList.slice(1)) {
+          sku.price1 = sku1.price1;
+          sku.price2 = sku1.price2;
+          sku.price3 = sku1.price3;
+        };
+      };
+    }
+    keepOnePrice() {
+      if (this.isOnePrice) {
+        for (let sku of this.skuList) {
+          sku.price2 = sku.price1;
+          sku.price3 = sku.price1;
+        }
+      }
     }
     events = {};
     onLoad() {
