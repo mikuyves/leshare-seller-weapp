@@ -6,6 +6,21 @@
     <!--照片上传区域-->
     <ImageUploader :pictures.sync="pictures" />
 
+    <!-- 编码区域 -->
+    <view class="weui-cells-form">
+      <view class="weui-cell weui-cell__input weui-cell__vcode">
+        <view class="weui-cell__hd">
+            <view class="weui-label">商品编码</view>
+        </view>
+        <view class="weui-cell__bd">
+          <input class="weui-input" id="pid" value="{{input.pid}}" placeholder="请输入7位商品编码"  maxlength="7" type="number" @input="input" />
+        </view>
+        <view @tap="scanCode" class="weui-cell__ft">
+          <image class="weui-vcode-img" style="width: 45px;" src="../../images/icons/barcode.png"/>
+        </view>
+      </view>
+    </view>
+
     <!-- 标题区域 -->
     <view class="weui-cells-form">
       <view class="weui-cell">
@@ -225,7 +240,8 @@
   export default class GoodsEdit extends wepy.page {
     def = {
       input: {
-        status: true
+        status: true,
+        pid: ''
       },
       details: [],
       pictures: [],
@@ -381,13 +397,14 @@
         this.$navigate('detail', param);
       },
       samePrice(e) {
-        // const fieldName = e.currentTarget.id;
-        // this.input[fieldName] = e.detail.value;
-        // this.isSamePrice = !this.isSamePrice
         this.isSamePrice = e.detail.value
       },
       onePrice(e) {
         this.isOnePrice = e.detail.value
+      },
+      async scanCode() {
+        let code = await wepy.scanCode()
+        console.log(code)
       }
     };
     // 商品详情更新
@@ -397,6 +414,7 @@
     // 检验
     validate() {
       const picturesNum = this.pictures.length;
+      const pidNum = this.input.pid.length;
       const prices = this.skuList.map(item => item.price);
       const stocks = this.skuList.map(item => item.stock);
       let rules = [
@@ -405,6 +423,12 @@
           method: 'min',
           param: 1,
           message: '请上传商品图片'
+        },
+        {
+          value: pidNum,
+          method: 'min',
+          param: 7,
+          message: '商品编码必须要7位数字'
         },
         {
           value: this.input.name,
