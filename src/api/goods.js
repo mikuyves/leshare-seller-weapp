@@ -68,6 +68,19 @@ export default class goods extends base {
   }
 
   /**
+   *  获取获取商品详情
+   */
+  static async getProdDetails(pid) {
+    let query = new AV.Query('Prod')
+    query.equalTo('pid', Number(pid))
+    query.include('size1')
+    let res = await query.first()
+    let input = {name: res.get('name'), pid, innerCate: '大衣'}
+    let details = {input}
+    return details
+  }
+
+  /**
    * 上传图片
    */
   static async image(filePath) {
