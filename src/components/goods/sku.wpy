@@ -14,12 +14,12 @@
           </view>
         </view>
  -->
-          <view class="weui-cell"  id="isInnerBrandDisplay" @tap="getInner">
+          <view class="weui-cell"  id="size1" @tap="getInner({{index}}, 'isInnerSizeDisplay')">
             <view class="weui-cell__hd">
               <view class="weui-label sku-label">尺寸1</view>
             </view>
             <view class="weui-cell__bd" >
-              {{input.inner ? input.inner : '未选择'}}
+              {{info.size1 ? info.size1 : '未选择'}}
             </view>
             <view class="weui-cell__ft weui-cell__ft_in-access"></view>
           </view>
@@ -152,11 +152,17 @@
         const fieldValue = e.detail.value;
         this.$emit('change', {index, fieldName, fieldValue});
       },
+      radio(index, e) {
+        console.log(index, e)
+
+      },
       remove(index) {
         this.$emit('remove', index);
       },
-      getInner(e) {
-        this.$emit('getInner', e);
+      getInner(index, innerId, e) {
+        const fieldName = e.currentTarget.id;
+        const fieldValue = e.detail.value;
+        this.$emit('getInner', innerId, {index, fieldName, fieldValue});
       }
     };
     events = {};

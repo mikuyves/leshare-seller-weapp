@@ -63,6 +63,10 @@
       radio(e) {
         const fieldName = e.currentTarget.id;
         this.input[fieldName] = e.detail.value;
+      },
+      skuRadio(info, e) {
+        this.skuList[info.index][info.fieldName] = e.detail.value;
+        this.editingInfo = {}
       }
     };
   }

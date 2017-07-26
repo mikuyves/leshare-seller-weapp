@@ -135,7 +135,7 @@
           <view class="weui-label"> + 新增分类</view>
         </view>
         <view class="weui-cell__bd">
-          <input class="weui-input" id="newInner" @input="input" placeholder="输入分类名称" />
+          <input class="weui-input" id="newInner" value="{{input.newInner}}" @input="input" placeholder="输入分类名称" />
         </view>
         <view class="weui-cell__ft">
           <view id="innerCategories" class="weui-vcode-btn" @tap="addInner('Cate')">确定</view>
@@ -143,6 +143,23 @@
       </view>
     </view>
   </SliderPanelCate>
+
+  <!-- 标准尺寸 -->
+  <SliderPanelSize :display.sync="isInnerSizeDisplay" btn='false'>
+    <view slot="title">标准尺寸</view>
+    <view slot="content" class="weui-cells-form">
+      <!-- 注意这里 selectInner 是否需要修改 -->
+      <radio-group id="size1" key="" bindchange="skuRadio({{editingInfo}})" @tap="selectInner">
+        <label class="weui-cell weui-check__label" wx:for="{{innerSizes}}" wx:key="value">
+          <radio class="weui-check" value="{{item.name}}" checked="{{input.innerSize == item.name}}"/>
+          <view class="weui-cell__bd">{{item.name}}</view>
+          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.innerSize == item.name}}">
+            <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
+          </view>
+        </label>
+      </radio-group>
+    </view>
+  </SliderPanelSize>
 </template>
 
 <script>
@@ -173,15 +190,19 @@
       mode: 'create',
       innerCategories: [],
       innerBrands: [],
+      innerSizes: [],
       init: true,
       isInnerCateDisplay: 'false',
-      isInnerBrandDisplay: 'false'
+      isInnerBrandDisplay: 'false',
+      isInnerSizeDisplay: 'false',
+      editingInfo: {}
     }
     data = {...this.def};
     async onLoad ({goodsId, mode}) {
       this.mode = mode;
-      this.innerCategories = await goods.getInnerCategories();
-      this.innerBrands = await goods.getInnerBrands();
+      this.innerCategories = await goods.getInner('Cate');
+      this.innerBrands = await goods.getInner('Brand');
+      this.innerSizes = await goods.getInner('Size');
       if (this.mode == 'edit') {
         const detail = await goods.detail(goodsId);
         this.pictures = detail.pictures;
@@ -274,12 +295,14 @@
         const name = this.input.newInner;
         await goods.addInner(name, clsName);
         this[newInnerId] = await goods.getInner(clsName);
+        this.input.newInner = '';
         this.loaded();
       },
       // 选择分类
       selectInner() {
         this.isInnerCateDisplay = 'false';
         this.isInnerBrandDisplay = 'false';
+        this.isInnerSizeDisplay = 'false';
       },
       // 展现分类
       showInner(e) {
@@ -409,9 +432,8 @@
       }
     };
     events = {
-      getInner(e, ent) {
-        console.log(e)
-        let innerId = e.currentTarget.id
+      getInner(innerId, info, e) {
+        this.editingInfo = info
         this[innerId] = 'true';
       }
     };
@@ -421,7 +443,8 @@
       SkuList: SkuList,
       ImageUploader: ImageUploader,
       SliderPanelCate: SliderPanel,
-      SliderPanelBrand: SliderPanel
+      SliderPanelBrand: SliderPanel,
+      SliderPanelSize: SliderPanel
     };
     mixins = [base, input];
     config = {
