@@ -15,7 +15,7 @@
           </view>
         </view>
 
-        <view class="weui-cell"  id="size1" @tap="getInner({{index}}, 'isInnerSizeDisplay')">
+        <view class="weui-cell"  id="size1" @tap="getInner({{index}}, 'isSizeDisplay')">
           <view class="weui-cell__hd">
             <view class="weui-label sku-label">尺码</view>
           </view>
@@ -25,7 +25,7 @@
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
 
-        <view class="weui-cell"  id="color" @tap="getInner({{index}}, 'isInnerColorDisplay')">
+        <view class="weui-cell"  id="color" @tap="getInner({{index}}, 'isColorDisplay')">
           <view class="weui-cell__hd">
             <view class="weui-label sku-label">颜色</view>
           </view>

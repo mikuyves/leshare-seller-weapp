@@ -38,32 +38,32 @@
      <view class="detail-box">
       <view class="weui-cells-form">
 
-        <view class="weui-cell"  id="isInnerBrandDisplay" @tap="showInner">
+        <view class="weui-cell"  id="isBrandDisplay" @tap="showInner">
           <view class="weui-cell__hd">
             <view class="weui-label">商品品牌</view>
           </view>
-          <view class="weui-cell__bd" style="color: {{input.innerBrand ? 'default' : 'grey'}};">
-            {{input.innerBrand ? input.innerBrand : '未选择'}}
+          <view class="weui-cell__bd" style="color: {{input.brand ? 'default' : 'grey'}};">
+            {{input.brand ? input.brand : '未选择'}}
           </view>
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
 
-        <view class="weui-cell"  id="isInnerCateDisplay" @tap="showInner">
+        <view class="weui-cell"  id="isCateDisplay" @tap="showInner">
           <view class="weui-cell__hd">
             <view class="weui-label">商品分类</view>
           </view>
-          <view class="weui-cell__bd" style="color: {{input.innerBrand ? 'default' : 'grey'}};" >
-            {{input.innerCate ? input.innerCate : '未选择'}}
+          <view class="weui-cell__bd" style="color: {{input.cate ? 'default' : 'grey'}};" >
+            {{input.cate ? input.cate : '未选择'}}
           </view>
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
 
-        <view class="weui-cell"  id="isInnerSupplierDisplay" @tap="showInner">
+        <view class="weui-cell"  id="isSupplierDisplay" @tap="showInner">
           <view class="weui-cell__hd">
             <view class="weui-label">供应商</view>
           </view>
-          <view class="weui-cell__bd" style="color: {{input.innerBrand ? 'default' : 'grey'}};" >
-            {{input.innerSupplier ? input.innerSupplier : '未选择'}}
+          <view class="weui-cell__bd" style="color: {{input.supplier ? 'default' : 'grey'}};" >
+            {{input.supplier ? input.supplier : '未选择'}}
           </view>
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
@@ -101,14 +101,14 @@
   <!-- 品牌 -->
   <!-- 注意这里 selectInner 是否需要修改 -->
   <!-- <SliderPanelBrand btn='false'> -->
-  <SliderPanelBrand :display.sync="isInnerBrandDisplay" btn='false'>
+  <SliderPanelBrand :display.sync="isBrandDisplay" btn='false'>
     <view slot="title">商品品牌</view>
     <view slot="content" class="weui-cells-form">
-      <radio-group id="innerBrand" key="" bindchange="radio" @tap="selectInner">
-        <label class="weui-cell weui-check__label" wx:for="{{innerBrands}}" wx:key="value">
-          <radio class="weui-check" value="{{item.name}}" checked="{{input.innerBrand == item.name}}"/>
+      <radio-group id="brand" key="" @change="radio" @tap="selectInner">
+        <label class="weui-cell weui-check__label" wx:for="{{brands}}" wx:key="value">
+          <radio class="weui-check" value="{{item.name}}" checked="{{input.brand == item.name}}"/>
           <view class="weui-cell__bd">{{item.name}}</view>
-          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.innerBrand == item.name}}">
+          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.brand == item.name}}">
             <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
           </view>
         </label>
@@ -123,22 +123,22 @@
           <input class="weui-input" id="newInner" @input="input" placeholder="输入品牌名称" />
         </view>
         <view class="weui-cell__ft">
-          <view id="innerBrands" class="weui-vcode-btn" @tap="addInner('Brand')">确定</view>
+          <view id="brands" class="weui-vcode-btn" @tap="addInner('Brand')">确定</view>
         </view>
       </view>
     </view>
   </SliderPanelBrand>
 
   <!-- 分类 -->
-  <SliderPanelCate :display.sync="isInnerCateDisplay" btn='false'>
+  <SliderPanelCate :display.sync="isCateDisplay" btn='false'>
     <view slot="title">商品分类</view>
     <view slot="content" class="weui-cells-form">
       <!-- 注意这里 selectInner 是否需要修改 -->
-      <radio-group id="innerCate" key="" bindchange="radio" @tap="selectInner">
-        <label class="weui-cell weui-check__label" wx:for="{{innerCategories}}" wx:key="value">
-          <radio class="weui-check" value="{{item.name}}" checked="{{input.innerCate == item.name}}"/>
+      <radio-group id="cate" key="" @change="radio" @tap="selectInner">
+        <label class="weui-cell weui-check__label" wx:for="{{cates}}" wx:key="value">
+          <radio class="weui-check" value="{{item.name}}" checked="{{input.cate == item.name}}"/>
           <view class="weui-cell__bd">{{item.name}}</view>
-          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.innerCate == item.name}}">
+          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.cate == item.name}}">
             <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
           </view>
         </label>
@@ -153,21 +153,21 @@
           <input class="weui-input" id="newInner" value="{{input.newInner}}" @input="input" placeholder="输入分类名称" />
         </view>
         <view class="weui-cell__ft">
-          <view id="innerCategories" class="weui-vcode-btn" @tap="addInner('Cate')">确定</view>
+          <view id="cates" class="weui-vcode-btn" @tap="addInner('Cate')">确定</view>
         </view>
       </view>
     </view>
   </SliderPanelCate>
 
   <!-- 供应商选择框 -->
-  <SliderPanelSupplier :display.sync="isInnerSupplierDisplay" btn='false'>
+  <SliderPanelSupplier :display.sync="isSupplierDisplay" btn='false'>
     <view slot="title">供应商</view>
     <view slot="content" class="weui-cells-form">
-      <radio-group id="innerSupplier" key="" bindchange="radio" @tap="selectInner">
-        <label class="weui-cell weui-check__label" wx:for="{{innerSuppliers}}" wx:key="value">
-          <radio class="weui-check" value="{{item.name}}" checked="{{input.innerSupplier == item.name}}"/>
+      <radio-group id="supplier" key="" @change="radio" @tap="selectInner">
+        <label class="weui-cell weui-check__label" wx:for="{{suppliers}}" wx:key="value">
+          <radio class="weui-check" value="{{item.name}}" checked="{{input.supplier == item.name}}"/>
           <view class="weui-cell__bd">{{item.name}}</view>
-          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.innerSupplier == item.name}}">
+          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.supplier == item.name}}">
             <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
           </view>
         </label>
@@ -182,42 +182,36 @@
           <input class="weui-input" id="newInner" value="{{input.newInner}}" @input="input" placeholder="输入分类名称" />
         </view>
         <view class="weui-cell__ft">
-          <view id="innerCategories" class="weui-vcode-btn" @tap="addInner('Supplier')">确定</view>
+          <view id="cates" class="weui-vcode-btn" @tap="addInner('Supplier')">确定</view>
         </view>
       </view>
     </view>
   </SliderPanelSupplier>
 
   <!-- SKU 标准尺寸 -->
-  <SliderPanelSize :display.sync="isInnerSizeDisplay" btn='false'>
+  <SliderPanelSize :display.sync="isSizeDisplay" btn='false'>
     <view slot="title">标准尺寸</view>
     <view slot="content" class="weui-cells-form">
       <!-- 注意这里 selectInner 是否需要修改 -->
-      <radio-group id="size1" key="" bindchange="skuRadio({{editingInfo}})" @tap="selectInner">
-        <label class="weui-cell weui-check__label" wx:for="{{innerSizes}}" wx:key="value">
-          <radio class="weui-check" value="{{item.name}}" checked="{{input.innerSize == item.name}}"/>
+      <radio-group id="size1" key="" @change="skuRadio({{editingInfo}})" @tap="selectInner">
+        <label class="weui-cell weui-check__label" wx:for="{{sizes}}" wx:key="value">
+          <radio class="weui-check" value="{{item.name}}"/>
           <view class="weui-cell__bd">{{item.name}}</view>
-          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.innerSize == item.name}}">
-            <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
-          </view>
         </label>
       </radio-group>
     </view>
   </SliderPanelSize>
 
   <!-- SKU 颜色 -->
-  <SliderPanelColor :display.sync="isInnerColorDisplay" btn='false'>
+  <SliderPanelColor :display.sync="isColorDisplay" btn='false'>
     <view slot="title">颜色</view>
     <view slot="content" class="weui-cells-form">
       <!-- 注意这里 selectInner 是否需要修改 -->
-      <radio-group id="color" key="" bindchange="skuRadio({{editingInfo}})" @tap="selectInner">
-        <label class="weui-cell weui-check__label flex-color" wx:for="{{innerColors}}" wx:key="value">
-          <radio class="weui-check" value="{{item.name}}" checked="{{input.innerSize == item.name}}"/>
+      <radio-group id="color" key="" @change="skuRadio({{editingInfo}})" @tap="selectInner">
+        <label class="weui-cell weui-check__label flex-color" wx:for="{{colors}}" wx:key="value">
+          <radio class="weui-check" value="{{item.name}}"/>
           <view class="weui-cell__bd flex-color-name">{{item.name}}</view>
           <view class="weui-cell__bd flex-color-sample" style="background-color: {{item.nameEn}};">{{item.nameEn}}</view>
-          <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{input.innerSize == item.name}}">
-            <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
-          </view>
         </label>
       </radio-group>
     </view>
@@ -258,34 +252,34 @@
       mode: 'create',
       isSamePrice: true,
       isOnePrice: false,
-      innerCategories: [],
-      innerBrands: [],
-      innerSuppliers: [],
-      innerSizes: [],
-      innerColors: [],
+      cates: [],
+      brands: [],
+      suppliers: [],
+      sizes: [],
+      colors: [],
       init: true,
-      isInnerCateDisplay: 'false',
-      isInnerBrandDisplay: 'false',
-      isInnerSupplierDisplay: 'false',
-      isInnerSizeDisplay: 'false',
-      isInnerColorDisplay: 'false',
+      isCateDisplay: 'false',
+      isBrandDisplay: 'false',
+      isSupplierDisplay: 'false',
+      isSizeDisplay: 'false',
+      isColorDisplay: 'false',
       editingInfo: {}
     }
     data = {...this.def};
     async onLoad ({goodsId, mode}) {
       this.mode = mode;
-      this.innerCategories = await goods.getInner('Cate');
-      this.innerBrands = await goods.getInner('Brand');
-      this.innerSuppliers = await goods.getInner('Supplier');
-      this.innerSizes = await goods.getInner('Size');
-      this.innerColors = await goods.getInner('Color');
+      this.cates = await goods.getInner('Cate');
+      this.brands = await goods.getInner('Brand');
+      this.suppliers = await goods.getInner('Supplier');
+      this.sizes = await goods.getInner('Size');
+      this.colors = await goods.getInner('Color');
       if (this.mode == 'edit') {
         const detail = await goods.detail(goodsId);
         this.pictures = detail.pictures;
         this.input = detail.input;
         this.details = detail.details;
         this.skuList = detail.skuList;
-        this.input.innerCategoies = this.innerCategories.find(item => item.id == this.input.innerCid).name
+        this.input.innerCategoies = this.cates.find(item => item.id == this.input.innerCid).name
       }
       Event.listen(Event.GOODS_DETAILS_UPDATE, this.detailsUpdate.bind(this), this);
       this.loaded();
@@ -318,7 +312,7 @@
         data.isRecommend = this.input.isRecommend ? 1 : 0;
         data.globalCid = 1; // 待完善
         data.status = this.input.status ? 0 : 1;
-        data.innerCid = this.innerCategories.find(item => item.name == this.input.inner).id;
+        data.innerCid = this.cates.find(item => item.name == this.input.inner).id;
         // 详情信息
         data.goodsDetails = this.details;
         // 处理SKU信息
@@ -376,11 +370,11 @@
       },
       // 选择分类
       selectInner() {
-        this.isInnerCateDisplay = 'false';
-        this.isInnerBrandDisplay = 'false';
-        this.isInnerSupplierDisplay = 'false';
-        this.isInnerSizeDisplay = 'false';
-        this.isInnerColorDisplay = 'false';
+        this.isCateDisplay = 'false';
+        this.isBrandDisplay = 'false';
+        this.isSupplierDisplay = 'false';
+        this.isSizeDisplay = 'false';
+        this.isColorDisplay = 'false';
       },
       // 展现分类
       showInner(e) {
@@ -403,8 +397,12 @@
         this.isOnePrice = e.detail.value
       },
       async scanCode() {
-        let code = await wepy.scanCode()
-        console.log(code)
+        let res = await wepy.scanCode();
+        let pid = res.result;
+        let details = await goods.getProdDetails(pid);
+        console.log(details)
+        this.input = details.input
+        this.$apply()
       }
     };
     // 商品详情更新
@@ -414,7 +412,7 @@
     // 检验
     validate() {
       const picturesNum = this.pictures.length;
-      const pidNum = this.input.pid.length;
+      // const pidNum = this.input.pid.length;
       const prices = this.skuList.map(item => item.price);
       const stocks = this.skuList.map(item => item.stock);
       let rules = [
@@ -424,12 +422,12 @@
           param: 1,
           message: '请上传商品图片'
         },
-        {
-          value: pidNum,
-          method: 'min',
-          param: 7,
-          message: '商品编码必须要7位数字'
-        },
+        // {
+        //   value: pidNum,
+        //   method: 'min',
+        //   param: 7,
+        //   message: '商品编码必须要7位数字'
+        // },
         {
           value: this.input.name,
           method: 'required',
@@ -528,6 +526,7 @@
       }
     };
     events = {
+      // 打开 SKU 的内页选择框，尺码和颜色。
       getInner(innerId, info, e) {
         this.editingInfo = info
         this[innerId] = 'true';
