@@ -119,12 +119,45 @@ export default class goods extends base {
     }
     return await wepy.uploadFile(param);
   }
+
+  static async uploadImage(filePath, filename) {
+    let picture = new AV.File(filename, {
+      blob: {
+        uri: filePath
+      }
+    })
+    return await picture.save()
+  }
+
   /**
    * 创建商品
    */
-  static async create(goods) {
-    const url = `${this.baseUrl}/goods`;
-    return await this.post(url, goods);
+  static async create(data) {
+    let prod = new AV.Object('Prod');
+    prod.set('name', data.name);
+    prod.set('pid', data.pid);
+    prod.set('isSamePrice', data.isSamePrice);
+    prod.set('isOnePrice', data.isOnePrice);
+    prod.set('cate', data.cate)
+    prod.set('brand', data.brand)
+    prod.set('supplier', data.supplier)
+    prod.set('mainPic', data.images[0])
+    prod = await prod.save();
+    console.log(prod)
+    for (let pic of data.images) {
+      // 中间表，为每张票对应一个商品，创建一行数据。
+      let ppm = new AV.Object('ProdPicMap');
+      ppm.set('prod', prod);
+      ppm.set('pic', pic);
+      let res = await ppm.save();
+      console.log(res)
+    }
+    for (let sku of data.skuList) {
+      let avSku = new AV.Object('Sku', sku);
+      avSku.set('prod', prod)
+      avSku = await avSku.save()
+      console.log(avSku)
+    }
   }
   /**
    * 更新商品

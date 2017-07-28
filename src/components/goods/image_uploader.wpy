@@ -9,7 +9,7 @@
   <view class="swiper-box" wx:if="{{pictures.length > 0}}" @tap="manage">
     <swiper class="picture-swiper" indicator-dots="true" indicator-active-color="#EEE" >
       <swiper-item wx:for="{{pictures}}" wx:key="index" wx:index="index">
-        <image mode="aspectFill" src="{{item.url}}"></image>
+        <image mode="aspectFit" src="{{item.url}}"></image>
       </swiper-item>
     </swiper>
     <image class="photo-btn icon-xl"  @tap.stop="photo" src="/images/icons/camera.png"></image>

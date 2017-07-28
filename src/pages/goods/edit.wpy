@@ -288,77 +288,101 @@
     methods = {
       // 提交表单
       async submit() {
-        if (!this.validate()) {
-          return;
-        }
+        // if (!this.validate()) {
+        //   return;
+        // }
         const data = {
           goodsDetails: [],
           goodsSkuInfo: {},
           goodsStocks: [],
           images: []
         }
-        Tips.loading();
+        // Tips.loading();
         // 处理图片信息
         for (let picture of this.pictures) {
-          if (picture.url.substring(0, 6) == 'wxfile') {
-            const result = await goods.image(picture.url);
-            const image = JSON.parse(result);
-            data.images.push(image);
+          if (picture.url.startsWith('wxfile')) {
+            const avFile = await goods.uploadImage(picture.url, this.input.name);
+            data.images.push(avFile);
           } else {
             data.images.push(picture);
           }
         }
         // 字段信息
         data.name = this.input.name;
-        data.isRecommend = this.input.isRecommend ? 1 : 0;
-        data.globalCid = 1; // 待完善
-        data.status = this.input.status ? 0 : 1;
-        data.innerCid = this.cates.find(item => item.name == this.input.inner).id;
-        // 详情信息
-        data.goodsDetails = this.details;
-        // 处理SKU信息
-        const skuList = this.skuList;
-        if (skuList.length == 1) {
-          // 单个SKU模式
-          const sku = skuList[0];
-          const stock = {
-            sku: null,
-            stock: sku.stock
-          }
-          data.goodsSkuInfo = null;
-          data.stock = sku.stock;
-          data.goodsStocks.push(stock);
-          data.sellPrice = sku.price;
-          data.originalPrice = sku.price;
-        } else {
-          // 多个SKU模式
-          data.goodsSkuInfo.goodsSkuDetails = skuList.map(item => {
-            const detail = {};
-            detail.sku = item.sku;
-            const base = {};
-            base.imageUrl = data.images[0].url; // 第一张图
-            base.price = item.price;
-            detail.goodsSkuDetailBase = base;
-            return detail;
-          });
-          data.goodsSkuInfo.prop1 = '规格';
-          data.goodsSkuInfo.value1 = skuList.map(item => item.sku).join(',');
-          data.goodsStocks = skuList.map(item => {
-            return {
-              sku: item.sku,
-              stock: item.stock
-            }
-          });
-        }
-        if (this.mode == 'create') {
-          await goods.create(data);
-          await Tips.success('商品新增成功！');
-        } else {
-          await goods.update(this.input.goodsId, data);
-          await Tips.success('商品更新成功！');
-        }
-        Event.emit(Event.GOODS_LIST_UPDATE);
-        wepy.navigateBack();
+        data.isSamePrice = this.isSamePrice;
+        data.isOnePrice = this.isOnePrice;
+        data.pid = Number(this.input.pid);
+        data.cate = this.cates.find(item => item.toJSON().name == this.input.cate);
+        data.supplier = this.suppliers.find(item => item.toJSON().name == this.input.supplier)
+        data.brand = this.brands.find(item => item.toJSON().name == this.input.brand)
+        // 处理 SKU。 
+        const skuList = this.skuList
+        data.skuList = skuList.map(skuItem => {
+          const sku = {}
+          sku.size1 = this.sizes.find(item => item.toJSON().name == skuItem.size1);
+          sku.color = this.colors.find(item => item.toJSON().name == skuItem.color);
+          sku.size2 = skuItem.size2;
+          // TODO：为每个 price 设置一个 class，然后设置 ACL 权限。
+          sku.price1 = Number(skuItem.price1);
+          sku.price2 = Number(skuItem.price2);
+          sku.price3 = Number(skuItem.price3);
+          sku.stock = Number(skuItem.stock);
+          sku.soldOut = skuItem.soldOut;
+          sku.name = [skuItem.color, skuItem.size1].join('-')
+          sku.fullName = data.name + ' ' + sku.name
+          return sku
+        })
+        console.log(data)
+        let prod = goods.create(data)
+        // console.log(prod)
+        // data.globalCid = 1; // 待完善
+        // data.status = this.input.status ? 0 : 1;
+        // data.innerCid = this.cates.find(item => item.name == this.input.inner).id;
+        // // 详情信息
+        // data.goodsDetails = this.details;
+        // // 处理SKU信息
+        // const skuList = this.skuList;
+        // if (skuList.length == 1) {
+        //   // 单个SKU模式
+        //   const sku = skuList[0];
+        //   const stock = {
+        //     sku: null,
+        //     stock: sku.stock
+        //   }
+        //   data.goodsSkuInfo = null;
+        //   data.stock = sku.stock;
+        //   data.goodsStocks.push(stock);
+        //   data.sellPrice = sku.price;
+        //   data.originalPrice = sku.price;
+        // } else {
+        //   // 多个SKU模式
+        //   data.goodsSkuInfo.goodsSkuDetails = skuList.map(item => {
+        //     const detail = {};
+        //     detail.sku = item.sku;
+        //     const base = {};
+        //     base.imageUrl = data.images[0].url; // 第一张图
+        //     base.price = item.price;
+        //     detail.goodsSkuDetailBase = base;
+        //     return detail;
+        //   });
+        //   data.goodsSkuInfo.prop1 = '规格';
+        //   data.goodsSkuInfo.value1 = skuList.map(item => item.sku).join(',');
+        //   data.goodsStocks = skuList.map(item => {
+        //     return {
+        //       sku: item.sku,
+        //       stock: item.stock
+        //     }
+        //   });
+        // }
+        // if (this.mode == 'create') {
+        //   await goods.create(data);
+        //   await Tips.success('商品新增成功！');
+        // } else {
+        //   await goods.update(this.input.goodsId, data);
+        //   await Tips.success('商品更新成功！');
+        // }
+        // Event.emit(Event.GOODS_LIST_UPDATE);
+        // wepy.navigateBack();
       },
       // 新增分类
       async addInner(clsName, e) {
