@@ -16,11 +16,10 @@ export default class goods extends base {
   /**
    * 商品分类
    */
-  static async getInnerCategories() {
-    const query = new AV.Query('Cate')
+  static async getCates() {
+    let query = new AV.Query('Cate')
     return await query.find()
   }
-
   /**
    *  新增商品分类
    */
@@ -32,13 +31,31 @@ export default class goods extends base {
   }
 
   /**
+   * 获取尺码列表，按指定顺序。
+   */
+   static async getSizes() {
+     let query = new AV.Query('Size');
+     query.ascending('order');
+     return await query.find()
+   }
+
+  /**
+   * 获取颜色列表，按指定顺序。
+   */
+   static async getColors() {
+     let query = new AV.Query('Color');
+     query.ascending('order');
+     return await query.find()
+   }
+
+  /**
    * 商品品牌
    */
-  static async getInnerBrands() {
-    const query = new AV.Query('Brand')
+  static async getBrands() {
+    let query = new AV.Query('Brand')
+    query.ascending('name')
     return await query.find()
   }
-
   /**
    *  新增商品品牌
    */
@@ -64,6 +81,15 @@ export default class goods extends base {
    */
   static async getInner(clsName) {
     const query = new AV.Query(clsName)
+    return await query.find()
+  }
+
+  /**
+   * 获取供应是列表
+   */
+  static async getSuppliers() {
+    let query = new AV.Query('Supplier')
+    query.ascending('name')
     return await query.find()
   }
 

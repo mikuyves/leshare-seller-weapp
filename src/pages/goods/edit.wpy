@@ -211,7 +211,7 @@
         <label class="weui-cell weui-check__label flex-color" wx:for="{{colors}}" wx:key="value">
           <radio class="weui-check" value="{{item.name}}"/>
           <view class="weui-cell__bd flex-color-name">{{item.name}}</view>
-          <view class="weui-cell__bd flex-color-sample" style="background-color: {{item.nameEn}};">{{item.nameEn}}</view>
+          <view class="weui-cell__bd flex-color-sample" style="background: {{item.nameEn === 'multicolor' ? 'linear-gradient(to right,  red 0%,green 30%,blue 60%, yellow 100%)' : item.nameEn}};">{{item.nameEn}}</view>
         </label>
       </radio-group>
     </view>
@@ -230,6 +230,7 @@
   import FormTips from '../../components/weui/tips';
   import ActionBar from '../../components/common/action_bar';
   import SliderPanel from '../../components/common/slider_panel';
+  import AV from '../../utils/av-weapp-min';
 
   export default class GoodsEdit extends wepy.page {
     def = {
@@ -268,11 +269,11 @@
     data = {...this.def};
     async onLoad ({goodsId, mode}) {
       this.mode = mode;
-      this.cates = await goods.getInner('Cate');
-      this.brands = await goods.getInner('Brand');
-      this.suppliers = await goods.getInner('Supplier');
-      this.sizes = await goods.getInner('Size');
-      this.colors = await goods.getInner('Color');
+      this.cates = await goods.getCates();
+      this.brands = await goods.getBrands();
+      this.suppliers = await goods.getSuppliers();
+      this.sizes = await goods.getSizes();
+      this.colors = await goods.getColors();
       if (this.mode == 'edit') {
         const detail = await goods.detail(goodsId);
         this.pictures = detail.pictures;
@@ -412,9 +413,15 @@
     // 检验
     validate() {
       const picturesNum = this.pictures.length;
-      // const pidNum = this.input.pid.length;
-      const prices = this.skuList.map(item => item.price);
-      const stocks = this.skuList.map(item => item.stock);
+      const pidNum = this.input.pid.length;
+      let price1s = this.skuList.map(sku => sku.price1)
+      let price2s = this.skuList.map(sku => sku.price2)
+      let price3s = this.skuList.map(sku => sku.price3)
+      const prices = [...price1s, ...price2s, ...price3s]
+      let size1s = this.skuList.map(sku => sku.size1)
+      let size2s = this.skuList.map(sku => sku.size2)
+      let colors = this.skuList.map(sku => sku.color)
+      const stocks = this.skuList.map(sku => sku.stock);
       let rules = [
         {
           value: picturesNum,
@@ -422,12 +429,12 @@
           param: 1,
           message: '请上传商品图片'
         },
-        // {
-        //   value: pidNum,
-        //   method: 'min',
-        //   param: 7,
-        //   message: '商品编码必须要7位数字'
-        // },
+        {
+          value: pidNum,
+          method: 'min',
+          param: 7,
+          message: '商品编码必须要7位数字'
+        },
         {
           value: this.input.name,
           method: 'required',
@@ -484,9 +491,20 @@
           message: '商品库存过高'
         },
         {
-          value: this.input.inner,
+          value: size2s,
+          method: 'maxlength',
+          param: 6,
+          message: '自定义规格不能大于6个字符'
+        },
+        {
+          value: size1s,
           method: 'required',
-          message: '请选择商品分类'
+          message: '请选择规格尺码'
+        },
+        {
+          value: colors,
+          method: 'required',
+          message: '请选择规格颜色'
         }
       ];
       const sku = this.skuList.map(item => item.sku);
@@ -559,9 +577,11 @@
     display: flex;
   }
   .flex-color-name{
-    flex: 1;
+    flex: 2;
+    color: grey;
   }
   .flex-color-sample{
     flex: 9;
+    text-align: center;
   }
 </style>
