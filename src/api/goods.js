@@ -16,11 +16,10 @@ export default class goods extends base {
   /**
    * 商品分类
    */
-  static async getInnerCategories() {
-    const query = new AV.Query('Cate')
+  static async getCates() {
+    let query = new AV.Query('Cate')
     return await query.find()
   }
-
   /**
    *  新增商品分类
    */
@@ -32,13 +31,31 @@ export default class goods extends base {
   }
 
   /**
+   * 获取尺码列表，按指定顺序。
+   */
+   static async getSizes() {
+     let query = new AV.Query('Size');
+     query.ascending('order');
+     return await query.find()
+   }
+
+  /**
+   * 获取颜色列表，按指定顺序。
+   */
+   static async getColors() {
+     let query = new AV.Query('Color');
+     query.ascending('order');
+     return await query.find()
+   }
+
+  /**
    * 商品品牌
    */
-  static async getInnerBrands() {
-    const query = new AV.Query('Brand')
+  static async getBrands() {
+    let query = new AV.Query('Brand')
+    query.ascending('name')
     return await query.find()
   }
-
   /**
    *  新增商品品牌
    */
@@ -68,6 +85,15 @@ export default class goods extends base {
   }
 
   /**
+   * 获取供应是列表
+   */
+  static async getSuppliers() {
+    let query = new AV.Query('Supplier')
+    query.ascending('name')
+    return await query.find()
+  }
+
+  /**
    *  获取获取商品详情
    */
   static async getProdDetails(pid) {
@@ -93,12 +119,45 @@ export default class goods extends base {
     }
     return await wepy.uploadFile(param);
   }
+
+  static async uploadImage(filePath, filename) {
+    let picture = new AV.File(filename, {
+      blob: {
+        uri: filePath
+      }
+    })
+    return await picture.save()
+  }
+
   /**
    * 创建商品
    */
-  static async create(goods) {
-    const url = `${this.baseUrl}/goods`;
-    return await this.post(url, goods);
+  static async create(data) {
+    let prod = new AV.Object('Prod');
+    prod.set('name', data.name);
+    prod.set('pid', data.pid);
+    prod.set('isSamePrice', data.isSamePrice);
+    prod.set('isOnePrice', data.isOnePrice);
+    prod.set('cate', data.cate)
+    prod.set('brand', data.brand)
+    prod.set('supplier', data.supplier)
+    prod.set('mainPic', data.images[0])
+    prod = await prod.save();
+    console.log(prod)
+    for (let pic of data.images) {
+      // 中间表，为每张票对应一个商品，创建一行数据。
+      let ppm = new AV.Object('ProdPicMap');
+      ppm.set('prod', prod);
+      ppm.set('pic', pic);
+      let res = await ppm.save();
+      console.log(res)
+    }
+    for (let sku of data.skuList) {
+      let avSku = new AV.Object('Sku', sku);
+      avSku.set('prod', prod)
+      avSku = await avSku.save()
+      console.log(avSku)
+    }
   }
   /**
    * 更新商品

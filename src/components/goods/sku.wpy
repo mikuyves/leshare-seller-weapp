@@ -9,7 +9,7 @@
             <view class="weui-label sku-label">标码</view>
           </view>
           <view class="weui-cell__bd">
-            <input class="weui-input" id="size2" type="text" @input="input({{index}})" value="{{info.size2}}" placeholder="自定义尺寸"/>
+            <input class="weui-input" id="size2" type="number" maxlength="2" @input="input({{index}})" value="{{info.size2}}" placeholder="自定义尺寸"/>
           </view>
           <view class="weui-cell__ft">
           </view>
