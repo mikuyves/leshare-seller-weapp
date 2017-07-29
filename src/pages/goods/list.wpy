@@ -51,7 +51,8 @@
     async onLoad () {
       this.page = goods.page(this);
       this.goods = this.page.list;
-      // this.categories = await goods.getInnerCategories();
+      this.categories = await goods.getCates();
+      this.$apply();
       // await this.next();
       // Event.listen(Event.GOODS_LIST_UPDATE, this.update.bind(this), this);
     };
