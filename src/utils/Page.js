@@ -116,7 +116,8 @@ export default class Pagination {
 
       let skuList = skus.map(item => item.toJSON());
 
-      let skuNames = skuList.map(item => item.color.name).join(' ');
+      let skuNames = [...new Set(skuList.map(item => item.color.name))].join(' ');
+      let skuSizes = [...new Set(skuList.map(item => item.size1.name))].join(' ');
 
       let skuStocks = skuList.map(item => item.stock);
       let sumStock = skuStocks.reduce((total, num) => total + num);
@@ -127,7 +128,8 @@ export default class Pagination {
 
       prod.set('skuList', skuList);
       prod.set('stock', sumStock);
-      prod.set('skuNames', skuNames);
+      prod.set('skuColorsTxt', skuNames);
+      prod.set('skuSizesTxt', skuSizes);
       if (maxPrice != minPrice) {
         prod.set('priceText', `￥${minPrice} ~ ${maxPrice}`);
       } else {

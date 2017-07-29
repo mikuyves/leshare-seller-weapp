@@ -8,7 +8,8 @@
         </view>
         <view class="price-box row">
           <text class="major lg">{{goods.priceText}}</text>
-          <text class="muted xs ml10">  [{{goods.skuNames}}]</text>
+          <text class="muted xs ml10">  [{{goods.skuColorsTxt}}]</text>
+          <text class="muted xs ml10">  [{{goods.skuSizesTxt}}]</text>
         </view>
         <view class="desc-box row">
           <text class="muted">库存：{{goods.stock}}</text>
