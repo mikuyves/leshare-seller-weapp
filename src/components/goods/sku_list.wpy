@@ -29,7 +29,13 @@
     };
     methods = {
       add() {
-        this.skuList.push({});
+        this.skuList.push({
+          // 由于父组件内的选择弹框，存在选择同上次相同的选项时，没有触发 change 事件。
+          // 只能在这里新建一个 sku 时，复制上次的选项，修复这个 bug 。
+          // 有待改善。
+          size1: this.skuList[this.skuList.length - 1].size1,
+          color: this.skuList[this.skuList.length - 1].color,
+        });
       },
       remove(index) {
         this.skuList.splice(index, 1);

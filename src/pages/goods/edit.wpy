@@ -268,7 +268,7 @@
     }
     data = {...this.def};
     async onLoad ({goodsId, mode}) {
-      this.mode = mode;
+      this.mode = 'create';
       this.cates = await goods.getCates();
       this.brands = await goods.getBrands();
       this.suppliers = await goods.getSuppliers();
@@ -288,16 +288,16 @@
     methods = {
       // 提交表单
       async submit() {
-        // if (!this.validate()) {
-        //   return;
-        // }
+        if (!this.validate()) {
+          return;
+        }
         const data = {
           goodsDetails: [],
           goodsSkuInfo: {},
           goodsStocks: [],
           images: []
         }
-        // Tips.loading();
+        Tips.loading();
         // 处理图片信息
         for (let picture of this.pictures) {
           if (picture.url.startsWith('wxfile')) {
@@ -332,57 +332,15 @@
           sku.fullName = data.name + ' ' + sku.name
           return sku
         })
-        console.log(data)
-        let prod = goods.create(data)
-        // console.log(prod)
-        // data.globalCid = 1; // 待完善
-        // data.status = this.input.status ? 0 : 1;
-        // data.innerCid = this.cates.find(item => item.name == this.input.inner).id;
-        // // 详情信息
-        // data.goodsDetails = this.details;
-        // // 处理SKU信息
-        // const skuList = this.skuList;
-        // if (skuList.length == 1) {
-        //   // 单个SKU模式
-        //   const sku = skuList[0];
-        //   const stock = {
-        //     sku: null,
-        //     stock: sku.stock
-        //   }
-        //   data.goodsSkuInfo = null;
-        //   data.stock = sku.stock;
-        //   data.goodsStocks.push(stock);
-        //   data.sellPrice = sku.price;
-        //   data.originalPrice = sku.price;
-        // } else {
-        //   // 多个SKU模式
-        //   data.goodsSkuInfo.goodsSkuDetails = skuList.map(item => {
-        //     const detail = {};
-        //     detail.sku = item.sku;
-        //     const base = {};
-        //     base.imageUrl = data.images[0].url; // 第一张图
-        //     base.price = item.price;
-        //     detail.goodsSkuDetailBase = base;
-        //     return detail;
-        //   });
-        //   data.goodsSkuInfo.prop1 = '规格';
-        //   data.goodsSkuInfo.value1 = skuList.map(item => item.sku).join(',');
-        //   data.goodsStocks = skuList.map(item => {
-        //     return {
-        //       sku: item.sku,
-        //       stock: item.stock
-        //     }
-        //   });
-        // }
-        // if (this.mode == 'create') {
-        //   await goods.create(data);
-        //   await Tips.success('商品新增成功！');
-        // } else {
-        //   await goods.update(this.input.goodsId, data);
-        //   await Tips.success('商品更新成功！');
-        // }
-        // Event.emit(Event.GOODS_LIST_UPDATE);
-        // wepy.navigateBack();
+        if (this.mode == 'create') {
+          await goods.create(data);
+          await Tips.success('商品新增成功！');
+        } else {
+          await goods.update(this.input.goodsId, data);
+          await Tips.success('商品更新成功！');
+        }
+        Event.emit(Event.GOODS_LIST_UPDATE);
+        wepy.navigateBack();
       },
       // 新增分类
       async addInner(clsName, e) {
@@ -531,28 +489,11 @@
           message: '请选择规格颜色'
         }
       ];
-      const sku = this.skuList.map(item => item.sku);
-      if (sku.length > 1) {
+      const skuNames = this.skuList.map(item => item.color + item.size1);
+      if (skuNames.length > 1) {
         rules = rules.concat([
           {
-            value: sku,
-            method: 'required',
-            message: '型号不能为空'
-          },
-          {
-            value: sku,
-            method: 'minlength',
-            param: 1,
-            message: '型号名称太短'
-          },
-          {
-            value: sku,
-            method: 'maxlength',
-            param: 10,
-            message: '型号名称太长'
-          },
-          {
-            value: sku,
+            value: skuNames,
             method: 'noDuplicate',
             message: '型号名称不能重复'
           }
