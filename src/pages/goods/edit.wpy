@@ -268,7 +268,7 @@
     }
     data = {...this.def};
     async onLoad ({goodsId, mode}) {
-      this.mode = 'create';
+      this.mode = mode;
       this.cates = await goods.getCates();
       this.brands = await goods.getBrands();
       this.suppliers = await goods.getSuppliers();
