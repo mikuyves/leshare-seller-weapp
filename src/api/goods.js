@@ -10,8 +10,8 @@ export default class goods extends base {
    * 分页方法
    */
   static page() {
-    const url = `${this.baseUrl}/goods`;
-    return new Page(url, this._processGoodsListItem.bind(this));
+    const clsName = 'Prod';
+    return new Page(clsName, this._processGoodsListItem.bind(this));
   }
   /**
    * 商品分类

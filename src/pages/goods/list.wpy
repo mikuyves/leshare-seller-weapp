@@ -25,8 +25,7 @@
   import CategoryTab from '../../components/zanui/category-tab';
   import ActionBar from '../../components/common/action_bar';
   import Placeholder from '../../components/common/placeholder';
-
-  // import Tips from '../../utils/Tips';
+  import AV from '../../utils/av-weapp-min.js'
   import Event from '../../utils/Event';
 
   export default class GoodsList extends wepy.page {
@@ -51,10 +50,9 @@
     async onLoad () {
       this.page = goods.page(this);
       this.goods = this.page.list;
-      this.categories = await goods.getCates();
+      await this.next();
+      Event.listen(Event.GOODS_LIST_UPDATE, this.update.bind(this), this);
       this.$apply();
-      // await this.next();
-      // Event.listen(Event.GOODS_LIST_UPDATE, this.update.bind(this), this);
     };
     // 获取分页参数
     params() {
@@ -69,6 +67,19 @@
       },
       change() {
         // this.reload();
+      },
+      async test() {
+        let query = new AV.Query('Prod');
+        query.descending('createdAt');
+        query.limit(10)
+        let prods = await query.find();
+        console.log(prods)
+        for (let prod of prods) {
+          let q = new AV.Query('Sku')
+          q.equalTo('prod', prod)
+          q.find().then(skus => console.log(skus))
+        }
+
       }
     }
     events = {};
