@@ -70,10 +70,10 @@ export default class goods extends base {
    *  新增内页选项
    */
   static async addInner(name, clsName) {
-    let brand = new AV.Object(clsName, {
+    let avObj = new AV.Object(clsName, {
       name: name
     });
-    return await brand.save()
+    return await avObj.save()
   }
 
   /**
@@ -81,6 +81,7 @@ export default class goods extends base {
    */
   static async getInner(clsName) {
     const query = new AV.Query(clsName)
+    query.ascending('name')
     return await query.find()
   }
 

@@ -342,16 +342,22 @@
         Event.emit(Event.GOODS_LIST_UPDATE);
         wepy.navigateBack();
       },
-      // 新增分类
+      // 新增内页选项
       async addInner(clsName, e) {
         let newInnerId = e.currentTarget.id
         const name = this.input.newInner;
-        await goods.addInner(name, clsName);
-        this[newInnerId] = await goods.getInner(clsName);
-        this.input.newInner = '';
-        this.loaded();
+        try {
+          await goods.addInner(name, clsName);
+        } catch(err) {
+          console.log(err)
+        } finally {
+          this[newInnerId] = await goods.getInner(clsName);
+          // TODO: 新增选项后，如果出错，未能清空输入框。
+          this.input.newInner = '';
+          this.loaded();
+        }
       },
-      // 选择分类
+      // 选择内页选项
       selectInner() {
         this.isCateDisplay = 'false';
         this.isBrandDisplay = 'false';
@@ -359,7 +365,7 @@
         this.isSizeDisplay = 'false';
         this.isColorDisplay = 'false';
       },
-      // 展现分类
+      // 展现内页选项
       showInner(e) {
         let innerId = e.currentTarget.id
         console.log(innerId)
@@ -373,9 +379,11 @@
 
         this.$navigate('detail', param);
       },
+      // 所有 SKU 同价。
       samePrice(e) {
         this.isSamePrice = e.detail.value
       },
+      // 一口价。
       onePrice(e) {
         this.isOnePrice = e.detail.value
       },

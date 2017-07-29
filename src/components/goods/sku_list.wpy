@@ -82,9 +82,23 @@
         }
       }
     }
+    clearData() {
+      this.skuList = [{
+        size1: '',
+        size2: '',
+        color: '',
+        price1: null,
+        price2: null,
+        price3: null,
+        stock: null,
+        soldOut: false
+      }];
+      this.$apply();
+    }
     events = {};
     onLoad() {
       this.resetSkuEditable();
+      this.clearData();
     }
   }
 </script>
