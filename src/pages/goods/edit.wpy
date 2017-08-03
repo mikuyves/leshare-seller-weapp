@@ -25,7 +25,7 @@
     <view class="weui-cells-form">
       <view class="weui-cell">
         <view class="weui-cell__bd">
-          <input class="weui-textarea" id="name" value="{{input.name}}" placeholder="请输入商品标题" style="height: 2.3em" maxlength="30" @input="input" />
+          <input class="weui-textarea" id="name" value="{{input.name}}" placeholder="请输入商品标题" style="height: 2.3em" maxlength="30" @input="inputUpper"/>
           <view class="weui-textarea-counter">{{input.name ? input.name.length : 0}}/30</view>
         </view>
       </view>
@@ -120,7 +120,7 @@
           <view class="weui-label"> + 新增品牌</view>
         </view>
         <view class="weui-cell__bd">
-          <input class="weui-input" id="newInner" @input="input" placeholder="输入品牌名称" />
+          <input class="weui-input" id="newInner" value="{{input.newInner}}" @input="inputUpper" placeholder="输入品牌名称" />
         </view>
         <view class="weui-cell__ft">
           <view id="brands" class="weui-vcode-btn" @tap="addInner('Brand')">确定</view>
@@ -150,7 +150,7 @@
           <view class="weui-label"> + 新增分类</view>
         </view>
         <view class="weui-cell__bd">
-          <input class="weui-input" id="newInner" value="{{input.newInner}}" @input="input" placeholder="输入分类名称" />
+          <input class="weui-input" id="newInner" value="{{input.newInner}}" @input="inputUpper" placeholder="输入分类名称" />
         </view>
         <view class="weui-cell__ft">
           <view id="cates" class="weui-vcode-btn" @tap="addInner('Cate')">确定</view>
@@ -173,16 +173,16 @@
         </label>
       </radio-group>
 
-      <!-- 新增分类 -->
+      <!-- 新增供应商 -->
       <view class="weui-cell weui-cell_input weui-cell_vcode">
         <view class="weui-cell__hd">
           <view class="weui-label"> + 新增供应商</view>
         </view>
         <view class="weui-cell__bd">
-          <input class="weui-input" id="newInner" value="{{input.newInner}}" @input="input" placeholder="输入分类名称" />
+          <input class="weui-input" id="newInner" value="{{input.newInner}}" @input="inputUpper" placeholder="输入分类名称" />
         </view>
         <view class="weui-cell__ft">
-          <view id="cates" class="weui-vcode-btn" @tap="addInner('Supplier')">确定</view>
+          <view id="suppliers" class="weui-vcode-btn" @tap="addInner('Supplier')">确定</view>
         </view>
       </view>
     </view>
@@ -326,6 +326,7 @@
         if (!this.validate()) {
           return;
         }
+        await Tips.confirm(this.input.name, {}, '是否确认新建商品？')
         const data = {
           goodsDetails: [],
           goodsSkuInfo: {},
@@ -369,10 +370,10 @@
         })
         if (this.mode == 'create') {
           await goods.create(data);
-          await Tips.success('商品新增成功！');
+          await Tips.success('商品新增成功！', 800);
         } else {
-          await goods.update(this.input.goodsId, data);
-          await Tips.success('商品更新成功！');
+          // await goods.update(this.input.goodsId, data);
+          await Tips.success('更新功能未完善！请稍后再试...', 800);
         }
         Event.emit(Event.GOODS_LIST_UPDATE);
         wepy.navigateBack();
@@ -387,6 +388,7 @@
           console.log(err)
         } finally {
           this[newInnerId] = await goods.getInner(clsName);
+          console.log(this[newInnerId])
           // TODO: 新增选项后，如果出错，未能清空输入框。
           this.input.newInner = '';
           this.loaded();
@@ -399,6 +401,7 @@
         this.isSupplierDisplay = 'false';
         this.isSizeDisplay = 'false';
         this.isColorDisplay = 'false';
+        this.input.newInner = ''
       },
       // 展现内页选项
       showInner(e) {

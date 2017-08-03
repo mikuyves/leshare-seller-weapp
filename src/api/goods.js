@@ -97,7 +97,7 @@ export default class goods extends base {
   static async getInner(clsName) {
     const query = new AV.Query(clsName)
     query.ascending('name')
-    return await query.find()
+    return query.find()
   }
   /**
    * 获取供应是列表。

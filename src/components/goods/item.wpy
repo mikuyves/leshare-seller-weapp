@@ -24,8 +24,10 @@
       <text class="muted xs ml20">{{goods.brand.name}}</text>
       <view>
         <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="delete({{goods.id}})" >删除</view>
-        <view class="zan-btn zan-btn--small" wx:if="{{goods.status != 1}}" @tap="offSale({{goods.id}})">下架</view>
+        <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="offSale({{goods.id}})">下架</view>
         <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="onSale({{goods.id}})">上架</view>
+        <view class="zan-btn zan-btn--small">调度</view>
+        <view class="zan-btn zan-btn--small">补货</view>
         <view class="zan-btn zan-btn--small zan-btn--primary" @tap="edit({{goods.objectId}})">编辑</view>
       </view>
     </view>
