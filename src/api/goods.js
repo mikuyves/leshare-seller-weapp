@@ -102,7 +102,43 @@ export default class goods extends base {
     return details
   }
   /**
-   *  分页处理。获取获取商品列表，包括 Pointer 的数据。
+   *  获取单个商品列表，包括 Pointer 的数据。
+   */
+  static async getProdWithDetail(goodsId) {
+    let prod = AV.Object.createWithoutData('Prod', goodsId)
+    return prod.fetch({
+      include: [
+        'mainPic',
+        'brand',
+        'cate',
+        'supplier'
+      ]
+    })
+  }
+  /**
+   *  获取单个商品的图片列表。
+   */
+  static async getProdPics(prod) {
+    let query = new AV.Query('ProdPicMap')
+    query.equalTo('prod', prod)
+    query.include('pic')
+    let ppm = await query.find()
+    let pics = ppm.map(item => item.toJSON().pic.url)
+    return pics
+  }
+  /**
+   *  获取单个商品的 SKU 列表。
+   */
+  static async getSkuListFromProd(prod) {
+    let skus = await new AV.Query('Sku')
+      .equalTo('prod', prod)  // 此方法可以省去数倍请求次数。但获得的数据需要后续处理。
+      .include('color')
+      .include('size1')
+      .find()
+    return skus
+  }
+  /**
+   *  分页处理。获取商品列表，包括 Pointer 的数据。
    */
   static async getProdListWithDetail(start, count) {
     let query = new AV.Query('Prod')
@@ -113,10 +149,10 @@ export default class goods extends base {
     query.include('brand')
     query.include('cate')
     query.include('supplier')
-    return await query.find();
+    return query.find();
   }
   /**
-   *  分页处理。获取获取指定商品对应的 SKU 列表，包括 Pointer 的数据。
+   *  分页处理。获取指定商品对应的 SKU 列表，包括 Pointer 的数据。
    */
   static async getSkuListWithDetail(prods) {
     let skus = await new AV.Query('Sku')

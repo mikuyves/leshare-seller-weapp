@@ -1,0 +1,69 @@
+<style lang="less">
+@import "../../styles/zanui/index.wxss";
+
+.container {
+  background: #F9F9F9;
+  overflow: hidden;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.container::before {
+  position: fixed;
+  top: 0;
+  left: 0;
+  content: ' ';
+  width: 100%;
+  height: 1rpx;
+  background-color: #e2e2e2;
+  z-index: 5;
+}
+
+.doc-title {
+  font-size: 25px;
+  line-height: 25px;
+  color: #666;
+  padding: 15px 0;
+  margin: 20px 15px;
+  border-bottom: 1rpx solid #e5e5e5;
+}
+</style>
+
+<template>
+
+    <view class="doc-title">LABEL</view>
+
+    <view class="zan-panel">
+      <view class="zan-cell zan-cell--last-child">
+        <view class="zan-label">蓝色</view>
+        <view class="zan-label zan-label--primary">红色</view>
+        <view class="zan-label zan-label--disabled">黑色</view>
+      </view>
+    </view>
+    <view class="zan-panel">
+      <view class="zan-cell zan-cell--last-child">
+        <view class="zan-label zan-label--primary zan-label--small">会员折扣</view>
+        <view class="zan-label zan-label--primary zan-label--small">返现</view>
+      </view>
+    </view>
+
+    <view class="zan-panel">
+      <view class="zan-cell zan-cell--last-child">
+        <view class="zan-label zan-label--primary zan-label--small zan-label--plain">会员折扣</view>
+        <view class="zan-label zan-label--primary zan-label--small zan-label--plain">返现</view>
+      </view>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class Label extends wepy.page {
+  config = {}
+  components = {}
+  data = {}
+  events = {}
+  methods = {}
+  onLoad() { }
+}
+</script>

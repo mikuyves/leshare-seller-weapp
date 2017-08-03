@@ -1,0 +1,203 @@
+<template>
+  <view class="page">
+
+    <view class="doc-title">
+      {{prod.name}}
+      <view class="zan-label zan-label--small">{{prod.pid}}</view>
+    </view>
+
+    <view class="prod-image">
+      <image style="width: 100%; background-color: #eeeeee;" mode="aspectFit" src="{{showUrl}}" />
+    </view>
+
+    <view class="flex-wrap">
+      <view wx:for="{{picUrls}}" wx:key="item">
+        <view @tap="changePic({{item}})">
+          <image mode="aspectFit" src="{{item}}"/>
+        </view>
+      </view>
+    </view>
+
+    <!-- SKU 列表 -->
+    <view class="zan-panel">
+      <view wx:for="{{skuList}}" wx:for-item="sku" wx:key="color.name" class="zan-cell zan-cell--last-child">
+        <!-- 有赞 label 遇上 wx:for 需要放在 block 里面？否则会换行。 -->
+        <block>
+          <!-- <view class="zan-label" :class="{zan-label--primary: sku.color.name == '白色'}">{{sku.color.name}}</view> -->
+          <view class="zan-label" style="background-color: {{sku.color.nameEn}};"></view>
+          <view class="zan-label">{{sku.name}}</view>
+          <view class="zan-label">现货库存： {{sku.stock}} 件</view>
+          <view class="zan-label zan-label--primary small" wx:if="{{sku.soldOut}}">已断货</view>
+
+        </block>
+      </view>
+    </view>
+
+    <view class="zan-c-gray-darker zan-pull-right">现货总库存：{{totalStock}} 件</view>
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy';
+  import base from '../../mixins/base';
+  import goods from '../../api/goods';
+  import Event from '../../utils/Event';
+  import zanQuantity from '../../components/zanui/zan-quantity'
+
+  export default class GoodsList extends wepy.page {
+    def = {
+        goodsId: '',
+        prod: {},
+        skuList: [],
+        showUrl: '',
+        picUrls: [],
+        inputColor: '',
+        inputSize1: '',
+        showStock: 10,
+        minStock: 0,
+        maxStock: 100,
+        totalStock: 0,
+    }
+    data = {...this.def};
+    async onLoad ({goodsId}) {
+      this.goodsId = goodsId;
+      let prod = await goods.getProdWithDetail(goodsId);
+      let skus = await goods.getSkuListFromProd(prod);
+      let picUrls = await goods.getProdPics(prod);
+      this.prod = prod.toJSON();
+      this.skuList = skus.map(item => item.toJSON());
+      this.picUrls = picUrls;
+      this.showUrl = this.prod.mainPic.url;
+      // Event.listen(Event.GOODS_LIST_UPDATE, this.update.bind(this), this);
+      this.$apply();
+    }
+
+    methods = {
+      changePic(item) {
+        // 触发时间 target 会返回 id，tagName 和 dataset。其中 dataset 可以自定义数据。
+        this.showUrl = item;
+      },
+      changeColor(colorName) {
+        if (colorName == this.inputColor) {
+          this.inputColor = ''
+        } else {
+          this.inputColor = colorName;
+        }
+      },
+      changeSize(sizeName) {
+        if (sizeName == this.inputSize1) {
+          this.inputSize1 = ''
+        } else {
+          this.inputSize1 = sizeName;
+        }
+      }
+    }
+
+    events = {
+      zanQuantityChange({ componentId, quantity }, event) {
+        console.log(componentId, quantity, event)
+        this[componentId] = quantity
+        this.$apply()
+      }
+    }
+
+    watch = {
+      // inputColor() {
+      //   this.skuList = this.skuList.map(item => {
+      //     if (item.color.name === this.inputColor) {
+      //       item.color.cssPrimary = 'zan-label--primary'
+      //     } else {
+      //       item.color.cssPrimary = ''
+      //     }
+      //   })
+      // }
+    }
+
+    computed = {
+      // // 注意顺序问题，很重要！
+      // skuName() {
+      //   if (this.inputColor === '' && this.inputSize1 === '') {
+      //     return ''
+      //   };
+      //   let skuName = this.inputColor + '-' + this.inputSize1;
+      //   let res = this.skuList.find(item => item.name === skuName);
+      //   if (res) {
+      //     return skuName;
+      //   } else {
+      //     return ''
+      //   }
+      // },
+      totalStock() {
+        let skuStocks = this.skuList.map(item => item.stock);
+        if (skuStocks.length > 0) {
+          return skuStocks.reduce((total, num) => total + num);
+        }
+      }
+      // showStock() {
+      //   if (this.inputColor === '' || this.inputSize1 === '') {
+      //     return 0
+      //   }
+      //   let sku = this.skuList.find(item => item.name === this.skuName)
+      //   if (sku) {
+      //     return sku.stock
+      //   } else {
+      //     return 0
+      //   }
+      // }
+    }
+
+    events = {};
+    components = {
+      zanQuantity: zanQuantity
+    }
+    mixins = [base];
+    config = {
+      navigationBarTitleText: '商品详情',
+      enablePullDownRefresh: true
+    };
+  }
+</script>
+
+<style lang="scss">
+@import "../../styles/zanui/index.wxss";
+
+.container {
+  background: #F9F9F9;
+  overflow: hidden;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.container::before {
+  position: fixed;
+  top: 0;
+  left: 0;
+  content: ' ';
+  width: 100%;
+  height: 1rpx;
+  background-color: #e2e2e2;
+  z-index: 5;
+}
+
+.doc-title {
+  font-size: 25px;
+  line-height: 25px;
+  color: #666;
+  padding: 15px 0;
+  margin: 20px;
+  border-bottom: 1rpx solid #e5e5e5;
+}
+.prod-title {
+  margin-top: 20rpx;
+  margin-bottom: 20rpx;
+}
+.flex-wrap {
+    display: -webkit-flex;
+}
+.flex-wrap image {
+    width: 80rpx;
+    height: 80rpx;
+    margin: 30rpx;
+}
+</style>
