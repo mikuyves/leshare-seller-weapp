@@ -236,7 +236,8 @@
     def = {
       input: {
         status: true,
-        pid: ''
+        pid: '',
+        name: ''
       },
       details: [],
       pictures: [],
@@ -275,12 +276,27 @@
       this.sizes = await goods.getSizes();
       this.colors = await goods.getColors();
       if (this.mode == 'edit') {
-        const detail = await goods.detail(goodsId);
-        this.pictures = detail.pictures;
-        this.input = detail.input;
-        this.details = detail.details;
-        this.skuList = detail.skuList;
-        this.input.innerCategoies = this.cates.find(item => item.id == this.input.innerCid).name
+        let detail = await goods.edit(goodsId);
+        console.log(detail)
+        this.prod = detail.prod.toJSON()
+        this.skuList = detail.skus.map(item => {
+          item = item.toJSON();
+          item.color = item.color.name;
+          item.size1 = item.size1.name;
+          return item
+        })
+        this.pictures = detail.picUrls;
+        this.input.pid = Number(this.prod.pid);
+        this.input.name = this.prod.name;
+        this.input.cate = this.prod.cate.name;
+        this.input.brand = this.prod.brand.name;
+        this.input.supplier = this.prod.supplier.name;
+        this.input.isSamePrice = this.prod.isSamePrice;
+        this.input.isOnePrice = this.prod.isOnePrice;
+        // this.pictures = detail.picUrls;
+        // this.prod = detail.prod;
+        // this.skuList = detail.skuList;
+        // this.input.innerCategoies = this.cates.find(item => item.id == this.input.innerCid).name
       }
       Event.listen(Event.GOODS_DETAILS_UPDATE, this.detailsUpdate.bind(this), this);
       this.loaded();

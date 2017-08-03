@@ -16,6 +16,15 @@ export default class goods extends base {
     );
   }
   /**
+   * 修改商品详情。
+   */
+  static async edit(goodsId) {
+    let prod = await this.getProdWithDetail(goodsId)
+    let skus = await goods.getSkuListFromProd(prod);
+    let picUrls = await goods.getProdPics(prod);
+    return {prod, skus, picUrls}
+  }
+  /**
    * 商品分类。
    */
   static async getCates() {
