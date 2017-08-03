@@ -13,7 +13,7 @@
             <view class="weui-label">商品编码</view>
         </view>
         <view class="weui-cell__bd">
-          <input class="weui-input" id="pid" value="{{input.pid}}" placeholder="请输入7位商品编码"  maxlength="7" type="number" @input="input" />
+          <input class="weui-input" id="pid" disabled="{{mode === 'edit'}}" value="{{input.pid}}" placeholder="请输入7位商品编码"  maxlength="7" type="number" @input="input" />
         </view>
         <view @tap="scanCode" class="weui-cell__ft">
           <image class="weui-vcode-img" style="width: 45px;" src="../../images/icons/barcode.png"/>
@@ -259,7 +259,7 @@
       suppliers: [],
       sizes: [],
       colors: [],
-      init: true,
+      init: false,
       isCateDisplay: 'false',
       isBrandDisplay: 'false',
       isSupplierDisplay: 'false',
@@ -268,24 +268,34 @@
       editingInfo: {}
     }
     data = {...this.def};
+
     async onLoad ({goodsId, mode}) {
+      // 新建模式。
       this.mode = mode;
       this.cates = await goods.getCates();
       this.brands = await goods.getBrands();
       this.suppliers = await goods.getSuppliers();
       this.sizes = await goods.getSizes();
       this.colors = await goods.getColors();
+
+      // 编辑模式。
       if (this.mode == 'edit') {
         let detail = await goods.edit(goodsId);
-        console.log(detail)
+        // 处理原始数据。
         this.prod = detail.prod.toJSON()
+        // 转换 skuList 的值，与原来模板匹配。
         this.skuList = detail.skus.map(item => {
           item = item.toJSON();
           item.color = item.color.name;
           item.size1 = item.size1.name;
           return item
         })
-        this.pictures = detail.picUrls;
+        // pictures 的格式为 [{url: 'xxx'}, {url: 'xxxx'}]
+        // TODO: pictures 未做调整顺序处理。
+        this.pictures = detail.picUrls.map(item => {
+          return {url: item}
+        });
+        // 处理输入框和选择框。
         this.input.pid = Number(this.prod.pid);
         this.input.name = this.prod.name;
         this.input.cate = this.prod.cate.name;
@@ -293,12 +303,12 @@
         this.input.supplier = this.prod.supplier.name;
         this.input.isSamePrice = this.prod.isSamePrice;
         this.input.isOnePrice = this.prod.isOnePrice;
-        // this.pictures = detail.picUrls;
-        // this.prod = detail.prod;
-        // this.skuList = detail.skuList;
-        // this.input.innerCategoies = this.cates.find(item => item.id == this.input.innerCid).name
       }
       Event.listen(Event.GOODS_DETAILS_UPDATE, this.detailsUpdate.bind(this), this);
+      // 先 $apply 一次，初始化时不要被 watcher 记录。
+      this.$apply()
+      // 初始化完成。
+      this.init = true
       this.loaded();
     };
     methods = {
@@ -532,6 +542,18 @@
         return size > 0 ? `已保存${size}条详情` : '请点击编辑详情';
       }
     };
+
+    watch = {
+      input() {
+        // 新建模式及未完成初始化时，不需要观察。
+        if (!this.init || this.mode === 'create') {
+          return
+        } else {
+          console.log('Data changed.')
+        }
+      }
+    }
+
     events = {
       // 打开 SKU 的内页选择框，尺码和颜色。
       getInner(innerId, info, e) {
