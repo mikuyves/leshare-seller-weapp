@@ -237,7 +237,10 @@
       input: {
         status: true,
         pid: '',
-        name: ''
+        name: '',
+        cate: '',
+        brand: '',
+        supplier: ''
       },
       details: [],
       pictures: [],
@@ -271,6 +274,7 @@
 
     async onLoad ({goodsId, mode}) {
       // 新建模式。
+      this.input.pid = goodsId ? goodsId : '';
       this.mode = mode;
       this.cates = await goods.getCates();
       this.brands = await goods.getBrands();
@@ -281,8 +285,12 @@
       // 编辑模式。
       if (this.mode == 'edit') {
         let detail = await goods.edit(goodsId);
+        // 如果没有结果，跳转至新建商品。
+        if (!detail) {
+          this.$root.$navigate('edit', {goodsId, mode: 'create'});
+        };
         // 处理原始数据。
-        this.prod = detail.prod.toJSON()
+        let prod = detail.prod.toJSON()
         // 转换 skuList 的值，与原来模板匹配。
         this.skuList = detail.skus.map(item => {
           item = item.toJSON();
@@ -296,13 +304,14 @@
           return {url: item}
         });
         // 处理输入框和选择框。
-        this.input.pid = Number(this.prod.pid);
-        this.input.name = this.prod.name;
-        this.input.cate = this.prod.cate.name;
-        this.input.brand = this.prod.brand.name;
-        this.input.supplier = this.prod.supplier.name;
-        this.input.isSamePrice = this.prod.isSamePrice;
-        this.input.isOnePrice = this.prod.isOnePrice;
+        this.input.pid = Number(prod.pid);
+        this.input.name = prod.name;
+        this.input.cate = prod.cate.name;
+        this.input.brand = prod.brand.name;
+        this.input.supplier = prod.supplier.name;
+        this.isSamePrice = prod.isSamePrice;
+        this.isOnePrice = prod.isOnePrice;
+        this.prod = prod
       }
       Event.listen(Event.GOODS_DETAILS_UPDATE, this.detailsUpdate.bind(this), this);
       // 先 $apply 一次，初始化时不要被 watcher 记录。
@@ -413,13 +422,12 @@
       onePrice(e) {
         this.isOnePrice = e.detail.value
       },
+      // 扫码功能。
       async scanCode() {
         let res = await wepy.scanCode();
-        let pid = res.result;
-        let details = await goods.getProdDetails(pid);
-        console.log(details)
-        this.input = details.input
-        this.$apply()
+        let goodsId = res.result;
+        this.init = false;
+        this.$root.$navigate('edit', {goodsId, mode: 'edit'});
       }
     };
     // 商品详情更新

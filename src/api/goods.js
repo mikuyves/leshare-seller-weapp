@@ -19,7 +19,16 @@ export default class goods extends base {
    * 修改商品详情。
    */
   static async edit(goodsId) {
-    let prod = await this.getProdWithDetail(goodsId)
+    let prod = {}
+    // 扫码入口，未完善。TODO
+    if (goodsId.length === 7 && Number(goodsId)) {
+      prod = await this.getProdByPid(goodsId)
+      if (!prod) {
+        return null
+      }
+    } else {
+      prod = await this.getProdWithDetail(goodsId)
+    }
     let skus = await goods.getSkuListFromProd(prod);
     let picUrls = await goods.getProdPics(prod);
     return {prod, skus, picUrls}
@@ -99,16 +108,16 @@ export default class goods extends base {
     return await query.find()
   }
   /**
-   *  获取获取商品详情。
+   *  通过7位商品编码获取商品详情。
    */
-  static async getProdDetails() {
+  static async getProdByPid(pid) {
     let query = new AV.Query('Prod')
     query.equalTo('pid', Number(pid))
-    query.include('size1')
-    let res = await query.first()
-    let input = {name: res.get('name'), pid, innerCate: '大衣'}
-    let details = {input}
-    return details
+    query.include('mainPic')
+    query.include('brand')
+    query.include('cate')
+    query.include('supplier')
+    return query.first()
   }
   /**
    *  获取单个商品列表，包括 Pointer 的数据。
