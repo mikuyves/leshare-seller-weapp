@@ -21,11 +21,24 @@
       </view>
     </view>
 
-    <!-- 标题区域 -->
+    <!-- 商品特征，用于自动生成商品名称 -->
+    <view class="weui-cells-form">
+      <view class="weui-cell weui-cell__input weui-cell__vcode">
+        <view class="weui-cell__hd">
+            <view class="weui-label">商品特征</view>
+        </view>
+        <view class="weui-cell__bd">
+          <input class="weui-input" id="feat" value="{{input.feat}}" placeholder="请输入商品特征" @input="input" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 商品名称区域 -->
     <view class="weui-cells-form">
       <view class="weui-cell">
         <view class="weui-cell__bd">
-          <input class="weui-textarea" id="name" value="{{input.name}}" placeholder="请输入商品标题" style="height: 2.3em" maxlength="30" @input="inputUpper"/>
+          <!-- <input class="weui-textarea" id="name" value="{{input.name}}" placeholder="请输入商品标题" style="height: 2.3em" maxlength="30" @input="inputUpper"/> -->
+          <input class="weui-textarea" id="name" value="{{autoTitle}}" placeholder="自动生成商品名称" disabled style="height: 2.3em" maxlength="30"/>
           <view class="weui-textarea-counter">{{input.name ? input.name.length : 0}}/30</view>
         </view>
       </view>
@@ -237,6 +250,7 @@
       input: {
         status: true,
         pid: '',
+        feat: '',
         name: '',
         cate: '',
         brand: '',
@@ -268,7 +282,8 @@
       isSupplierDisplay: 'false',
       isSizeDisplay: 'false',
       isColorDisplay: 'false',
-      editingInfo: {}
+      editingInfo: {},
+      autoTitle: ''
     }
     data = {...this.def};
 
@@ -551,6 +566,9 @@
       detailText() {
         const size = this.details.length;
         return size > 0 ? `已保存${size}条详情` : '请点击编辑详情';
+      },
+      autoTitle() {
+        return `${this.input.brand} ${this.input.feat}${this.input.cate}`
       }
     };
 
