@@ -335,7 +335,7 @@ export default class goods extends base {
 
     // 处理显示的规格名称。
     let skuNames = [...new Set(skuList.map(item => item.color.name))].join(' ');
-    let skuSizes = [...new Set(skuList.map(item => item.size1.name))].join(' ');
+    let skuSizes = [...new Set(skuList.map(item => item.size1.name))].join('-');
 
     // 处理商品总库存
     let skuStocks = skuList.map(item => item.stock);

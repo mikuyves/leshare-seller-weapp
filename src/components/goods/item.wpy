@@ -1,18 +1,18 @@
 <template>
   <view class="item-box">
     <view class="goods-box row">
-      <image mode="aspectFit" class="goods-image" @tap="test({{goods.objectId}})" src="{{goods.mainPic.url ? goods.mainPic.url : '/images/icons/empty.png'}}" />
+      <image mode="aspectFit" class="goods-image" @tap="goToItem({{goods.objectId}})" src="{{goods.mainPic.url ? goods.mainPic.url : '/images/icons/empty.png'}}" />
       <view class="info-box column">
         <view class="title-box">
-          <text class="title">{{goods.name}}</text>
+          <text class="title" @tap="goToItem({{goods.objectId}})">{{goods.name}}</text>
         </view>
-        <view class="price-box row">
+        <view class="price-box">
           <text class="major lg">{{goods.priceText}}</text>
-          <text class="muted xs ml10">  [{{goods.skuColorsTxt}}]</text>
-          <text class="muted xs ml10">  [{{goods.skuSizesTxt}}]</text>
+          <text class="muted xs ml10">{{goods.skuColorsTxt}}</text>
+          <text class="muted xs ml10"> | {{goods.skuSizesTxt}}</text>
         </view>
-        <view class="desc-box row">
-          <text class="muted">库存：{{goods.stock}}</text>
+        <view class="desc-box row-between">
+          <text class="muted">现货：{{goods.stock}}</text>
           <text class="muted ml20">销量：{{0}}</text>
           <text class="muted ml20">喜欢：{{0}}</text>
         </view>
@@ -21,13 +21,14 @@
     </view>
 
     <view class="item-action row-between">
-      <text class="muted xs ml20">{{goods.brand.name}}</text>
+      <view class="row">
+        <text class="muted xs ml10">{{goods.pid}}</text>
+        <text class="muted xs ml10">{{goods.supplier.name}}</text>
+      </view>
       <view>
-        <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="delete({{goods.id}})" >删除</view>
+        <view class="zan-btn zan-btn--small" @tap="delete({{goods.id}})" >删除</view>
         <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="offSale({{goods.id}})">下架</view>
         <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="onSale({{goods.id}})">上架</view>
-        <view class="zan-btn zan-btn--small">调度</view>
-        <view class="zan-btn zan-btn--small">补货</view>
         <view class="zan-btn zan-btn--small zan-btn--primary" @tap="edit({{goods.objectId}})">编辑</view>
       </view>
     </view>
@@ -54,7 +55,7 @@
       async edit(goodsId) {
         this.$root.$navigate('edit', {goodsId, mode: 'edit'});
       },
-      async test(goodsId) {
+      async goToItem(goodsId) {
         console.log(goodsId)
         this.$root.$navigate('prod', {goodsId});
       },
@@ -79,6 +80,7 @@
 
 <style lang="scss">
   @import "../../styles/variable";
+  @import "../../styles/zanui/index.wxss";
   .item-box{
     background-color: #FFF;
     margin-top: 10rpx;
