@@ -39,7 +39,7 @@
         <view class="weui-cell__bd">
           <!-- <input class="weui-textarea" id="name" value="{{input.name}}" placeholder="请输入商品标题" style="height: 2.3em" maxlength="30" @input="inputUpper"/> -->
           <input class="weui-textarea" id="name" value="{{autoTitle}}" placeholder="自动生成商品名称" disabled style="height: 2.3em" maxlength="30"/>
-          <view class="weui-textarea-counter">{{input.name ? input.name.length : 0}}/30</view>
+          <view class="weui-textarea-counter">{{autoTitle ? autoTitle.length : 0}}/30</view>
         </view>
       </view>
     </view>
@@ -341,7 +341,7 @@
         if (!this.validate()) {
           return;
         }
-        await Tips.confirm(this.input.name, {}, '是否确认新建商品？')
+        await Tips.confirm(this.autoTitle, {}, '是否确认新建商品？')
         const data = {
           goodsDetails: [],
           goodsSkuInfo: {},
@@ -352,14 +352,15 @@
         // 处理图片信息
         for (let picture of this.pictures) {
           if (picture.url.startsWith('wxfile')) {
-            const avFile = await goods.uploadImage(picture.url, this.input.name);
+            const avFile = await goods.uploadImage(picture.url, this.autoTitle);
             data.images.push(avFile);
           } else {
             data.images.push(picture);
           }
         }
         // 字段信息
-        data.name = this.input.name;
+        data.name = this.autoTitle;
+        data.feat = this.input.feat;
         data.isSamePrice = this.isSamePrice;
         data.isOnePrice = this.isOnePrice;
         data.pid = Number(this.input.pid);
@@ -478,12 +479,12 @@
           message: '商品编码必须要7位数字'
         },
         {
-          value: this.input.name,
+          value: this.autoTitle,
           method: 'required',
           message: '请输入商品标题'
         },
         {
-          value: this.input.name,
+          value: this.autoTitle,
           method: 'minlength',
           param: '2',
           message: '商品标题太短'
@@ -568,7 +569,7 @@
         return size > 0 ? `已保存${size}条详情` : '请点击编辑详情';
       },
       autoTitle() {
-        return `${this.input.brand} ${this.input.feat}${this.input.cate}`
+        return `<${this.input.pid}> ${this.input.brand} ${this.input.feat}${this.input.cate}`
       }
     };
 

@@ -227,6 +227,7 @@ export default class goods extends base {
   static async create(data) {
     let prod = new AV.Object('Prod');
     prod.set('name', data.name);
+    prod.set('feat', data.feat);
     prod.set('pid', data.pid);
     prod.set('isSamePrice', data.isSamePrice);
     prod.set('isOnePrice', data.isOnePrice);
