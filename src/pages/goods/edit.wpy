@@ -321,6 +321,7 @@
         // 处理输入框和选择框。
         this.input.pid = Number(prod.pid);
         this.input.name = prod.name;
+        this.input.feat = prod.feat;
         this.input.cate = prod.cate.name;
         this.input.brand = prod.brand.name;
         this.input.supplier = prod.supplier.name;
@@ -341,7 +342,8 @@
         if (!this.validate()) {
           return;
         }
-        await Tips.confirm(this.autoTitle, {}, '是否确认新建商品？')
+        let text = `${this.input.pid} - ${this.autoTitle}`
+        await Tips.confirm(text, {}, '是否确认新建商品？')
         const data = {
           goodsDetails: [],
           goodsSkuInfo: {},
@@ -569,7 +571,7 @@
         return size > 0 ? `已保存${size}条详情` : '请点击编辑详情';
       },
       autoTitle() {
-        return `<${this.input.pid}> ${this.input.brand} ${this.input.feat}${this.input.cate}`
+        return `${this.input.brand} ${this.input.feat}${this.input.cate}`
       }
     };
 
