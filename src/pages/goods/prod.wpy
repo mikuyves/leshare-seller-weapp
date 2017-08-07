@@ -20,14 +20,22 @@
 
     <!-- SKU 列表 -->
     <view class="zan-panel">
-      <view wx:for="{{skuList}}" wx:for-item="sku" wx:key="color.name" class="zan-cell zan-cell--last-child">
+      <view wx:for="{{skuList}}" wx:for-item="sku" wx:key="name" class="zan-cell zan-cell--last-child">
         <!-- 有赞 label 遇上 wx:for 需要放在 block 里面？否则会换行。 -->
         <block>
-          <!-- <view class="zan-label" :class="{zan-label--primary: sku.color.name == '白色'}">{{sku.color.name}}</view> -->
           <view class="zan-label" style="background-color: {{sku.color.nameEn}};"></view>
           <view class="zan-label">{{sku.name}}</view>
-          <view class="zan-label">现货库存： {{sku.stock}} 件</view>
-          <view class="zan-label zan-label--primary small" wx:if="{{sku.soldOut}}">已断货</view>
+          <view class="zan-label">现货： {{sku.stock}} 件</view>
+
+
+          <view class="zan-label" 
+          :class="{zan-label--primary: showPriceId === 'price1',zan-label--hb: showPriceId === 'price2'}" @tap="seeDiffPrice({{showPriceId}})">
+          ￥{{sku[showPriceId]}} 元
+          </view>
+
+          <view class="zan-label" @tap="addMarker({{sku}})">+</view>
+
+          <view class="zan-label zan-label--primary zan-label--small" wx:if="{{sku.soldOut}}">已断货</view>
 
         </block>
       </view>
@@ -35,29 +43,114 @@
 
     <view class="zan-c-gray-darker zan-pull-right">现货总库存：{{totalStock}} 件</view>
 
+    <view class="item-box" wx:if="{{markList.length > 0}}">
+
+      <view class="doc-title">
+        选购清单
+        <view class="zan-pull-right">
+          <view @tap="clearMarkList" class="zan-label zan-label--small">清空</view>
+        </view>
+      </view>
+
+      <view class="desc-box row-between" style="margin: 20px">
+        <text class="muted">规格</text>
+        <text class="muted ml20">价格</text>
+        <text class="muted ml20">数量</text>
+      </view>
+
+      <view class="desc-box row-between" style="margin-left: 20px; margin-right: 20px" wx:for="{{markList}}" wx:key="name">
+        <text class="muted">{{item.sku.name}}</text>
+        <text class="muted ml20">￥ {{item.sku[showPriceId]}}元</text>
+        <text class="muted ml20">{{item.qtt}} 件</text>
+      </view>
+
+      <view class="desc-box row-between" style="margin: 20px">
+        <text class="muted">总计</text>
+        <text class="muted ml20">￥ {{totalPrice}} 元</text>
+        <text class="muted ml20">{{totalQtt}} 件</text>
+      </view>
+
+      <view class="weui-cell"  id="isCustomerDisplay" @tap="showInner">
+        <view class="weui-cell__hd">
+          <view class="weui-label">选择客户</view>
+        </view>
+        <view class="weui-cell__hd" style="margin-right: 15rpx;">
+          <image style="width: 50rpx; height: 50rpx" class="weui-cell__hd" src="{{customer.avatarUrl ? customer.avatarUrl : ''}}" />
+        </view>
+        <view class="weui-cell__bd" style="color: {{customer ? 'default' : 'grey'}};" >
+          {{customer ? (customer.nickName ? customer.nickName : '未注册') : '未选择'}}
+        </view>
+        <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+      </view>
+      <!--操作栏-->
+      <ActionBar @tap.user="saveMarkList" okText="写入清单" cancelText="返回" />
+      
+    </view>
+
   </view>
+
+  <!-- 客户列表 -->
+  <SliderPanelCustomer :display.sync="isCustomerDisplay" btn='false'>
+    <view slot="title">客户列表</view>
+    <view slot="content" class="weui-cells-form">
+      <!-- 注意这里 selectInner 是否需要修改 -->
+      <radio-group id="customerId" key="" @change="radio" @tap="selectInner">
+        <label class="weui-cell weui-check__label" wx:for="{{customers}}" wx:key="value">
+          <radio class="weui-check" value="{{item.objectId}}" checked="{{input.customerId == item.objectId}}"/>
+
+          <!-- 勾选符号 -->
+          <view class="weui-cell__hd weui-cell__hd_in-radio" wx:if="{{input.customerId == item.objectId}}">
+            <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
+          </view>
+
+          <!-- 用户信息 -->
+          <view class="weui-cell__hd" style="margin-right: 15rpx;">
+            <image style="width: 60rpx; height: 60rpx" class="weui-cell__hd" src="{{item.avatarUrl ? item.avatarUrl : '/images/icons/empty.png'}}" />
+          </view>
+          <view class="weui-cell__bd">{{item.nickName ? item.nickName : '未授权'}}</view>
+          <view class="weui-cell__bd">{{item.username.length === 25 ? '未注册' : item.username}}</view>
+          <view class="weui-cell__ft">{{item.mobilePhoneNumber ? item.mobilePhoneNumber : "未注册手机"  }}</view>
+
+        </label>
+      </radio-group>
+    </view>
+  </SliderPanelCustomer>
 </template>
 
 <script>
   import wepy from 'wepy';
   import base from '../../mixins/base';
+  import input from '../../mixins/input';
   import goods from '../../api/goods';
+  import auth from '../../api/auth';
   import Event from '../../utils/Event';
   import zanQuantity from '../../components/zanui/zan-quantity'
+  import SliderPanel from '../../components/common/slider_panel';
+  import ActionBar from '../../components/common/action_bar';
 
   export default class GoodsList extends wepy.page {
     def = {
         goodsId: '',
         prod: {},
         skuList: [],
+        markList: [],
         showUrl: '',
         picUrls: [],
+        input: {
+          customerId: ''
+        },
         inputColor: '',
         inputSize1: '',
         showStock: 10,
         minStock: 0,
         maxStock: 100,
         totalStock: 0,
+        showPriceId: 'price2',
+        isCustomerDisplay: false,
+        customers: [],
+        customer: null,
+        totalPrice: 0,
+        totalQtt: 0
     }
     data = {...this.def};
     async onLoad ({goodsId}) {
@@ -91,16 +184,65 @@
         } else {
           this.inputSize1 = sizeName;
         }
+      },
+      seeDiffPrice(showPriceId) {
+        if (showPriceId === 'price2') {
+          this.showPriceId = 'price3';
+        } else if (showPriceId === 'price3'){
+          this.showPriceId = 'price1';
+        } else {
+          this.showPriceId = 'price2';
+        }
+      },
+      // 选择内页选项
+      selectInner() {
+        this.isCustomerDisplay = 'false';
+      },
+      // 展现内页选项
+      async showInner(e) {
+        let innerId = e.currentTarget.id
+        this[innerId] = 'true';
+        let customers = await auth.getUsers();
+        this.customers = customers.map(item => item.toFullJSON());
+        this.$apply()
+      },
+      /**
+       * 下单临时记录清单
+       */
+      addMarker(sku) {
+        let markItem = {sku};
+        markItem.qtt = 1
+        let foundItem = this.markList.find(item => item.sku.name === sku.name)
+        if (foundItem) {
+          // 断货时，最大值是现货存量。
+          if (foundItem.sku.soldOut && foundItem.qtt === foundItem.sku.stock) {
+            console.log('This product is sold out.')
+            return
+          } else {
+            foundItem.qtt ++;
+          }
+        } else {
+          this.markList = [...this.markList, markItem];
+        }
+      },
+      // 清空清单内容
+      clearMarkList() {
+        // TODO: 未能清空已选择的客户。
+        this.markList = [];
+        this.input.customerId = '';
+        this.customer = {};
+      },
+      // 写入清单
+      async saveMarkList() {
+        this.markList = this.markList.map(item => {
+          item.price = item.sku[this.showPriceId]
+          return item
+        })
+        let res = await goods.saveMarkList(this.markList, this.customer)
       }
     }
 
-    events = {
-      zanQuantityChange({ componentId, quantity }, event) {
-        console.log(componentId, quantity, event)
-        this[componentId] = quantity
-        this.$apply()
-      }
-    }
+    events = {}
 
     watch = {
       // inputColor() {
@@ -128,11 +270,42 @@
       //     return ''
       //   }
       // },
+      // 现货总量
       totalStock() {
         let skuStocks = this.skuList.map(item => item.stock);
         if (skuStocks.length > 0) {
           return skuStocks.reduce((total, num) => total + num);
         }
+      },
+      // 选中的客户。
+      customer() {
+        // 用户未能清空问题，出在直接 return find 的结果，如果是 undefined，
+        // 则会把 data 中的 customer 删除，这会造成选择结果中在显示上次的结果。
+        // 按道理，整个 customer 被删除，应该读取不了任何数据，但是模板居然还是
+        // 保留了上次的数据，未知道是什么原因造成的。如果返回一个空对象 {} 也可以，
+        // 但会造成模板条件判断复杂，因为 {} ? true : false 返回 true。
+        // 解决方案是 return 一个空的对象 null。
+        if (!this.customers && this.input.cunstomerId) {
+          return
+        }
+        let customer = this.customers.find(item => item.objectId === this.input.customerId)
+        return customer ? customer : null
+      },
+      // 清单总量
+      totalQtt() {
+        if (this.markList.length < 1) {
+          return
+        }
+        let tq = this.markList.reduce((total, item) => total + item.qtt, 0)
+        return tq
+      },
+      // 清单总价
+      totalPrice() {
+        if (this.markList.length < 1) {
+          return
+        }
+        let tp = this.markList.reduce((total, item) => total + item.sku[this.showPriceId] * item.qtt, 0)
+        return tp
       }
       // showStock() {
       //   if (this.inputColor === '' || this.inputSize1 === '') {
@@ -149,9 +322,11 @@
 
     events = {};
     components = {
-      zanQuantity: zanQuantity
+      zanQuantity: zanQuantity,
+      ActionBar: ActionBar,
+      SliderPanelCustomer: SliderPanel,
     }
-    mixins = [base];
+    mixins = [base, input];
     config = {
       navigationBarTitleText: '商品详情',
       enablePullDownRefresh: true
@@ -160,44 +335,100 @@
 </script>
 
 <style lang="scss">
-@import "../../styles/zanui/index.wxss";
+  @import "../../styles/variable";
+  @import "../../styles/zanui/index.wxss";
 
-.container {
-  background: #F9F9F9;
-  overflow: hidden;
-  min-height: 100vh;
-  box-sizing: border-box;
-}
+  .container {
+    background: #F9F9F9;
+    overflow: hidden;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
 
-.container::before {
-  position: fixed;
-  top: 0;
-  left: 0;
-  content: ' ';
-  width: 100%;
-  height: 1rpx;
-  background-color: #e2e2e2;
-  z-index: 5;
-}
+  .container::before {
+    position: fixed;
+    top: 0;
+    left: 0;
+    content: ' ';
+    width: 100%;
+    height: 1rpx;
+    background-color: #e2e2e2;
+    z-index: 5;
+  }
 
-.doc-title {
-  font-size: 25px;
-  line-height: 25px;
-  color: #666;
-  padding: 15px 0;
-  margin: 20px;
-  border-bottom: 1rpx solid #e5e5e5;
-}
-.prod-title {
-  margin-top: 20rpx;
-  margin-bottom: 20rpx;
-}
-.flex-wrap {
-    display: -webkit-flex;
-}
-.flex-wrap image {
-    width: 80rpx;
-    height: 80rpx;
-    margin: 30rpx;
-}
+  .doc-title {
+    font-size: 25px;
+    line-height: 25px;
+    color: #666;
+    padding: 15px 0;
+    margin: 20px;
+    border-bottom: 1rpx solid #e5e5e5;
+  }
+  .prod-title {
+    margin-top: 20rpx;
+    margin-bottom: 20rpx;
+  }
+  .flex-wrap {
+      display: -webkit-flex;
+  }
+  .flex-wrap image {
+      width: 80rpx;
+      height: 80rpx;
+      margin: 30rpx;
+  }
+  .item-box{
+    background-color: #FFF;
+    margin-top: 60rpx;
+    position: relative;
+
+    .item-action{
+      border-top: $border;
+      height: 90rpx;
+      padding-right: 10rpx;
+    }
+
+    .goods-box{
+      padding: 30rpx 20rpx;
+
+      $image-size: 170rpx;
+
+      .goods-image{
+        height: $image-size;
+        width: $image-size;
+        border: $border;
+        border-radius: 8px;
+      }
+      .icon-recommend{
+        position: absolute;
+        height: 25px;
+        width: 25px;
+        right: 10rpx;
+        top: 0;
+      }
+
+      .price-box{
+        align-items: flex-end;
+      }
+
+      .desc-box{
+        margin-left: 20px;
+        margin-right: 20px;
+        text {
+          font-size: $text-sm;
+        }
+      }
+
+      .info-box{
+        justify-content: space-between;
+        height: $image-size;
+        flex: 1;
+        margin-left: 20rpx;
+
+        .title{
+          line-height: 30rpx;
+        }
+      }
+    }
+  }
+
 </style>

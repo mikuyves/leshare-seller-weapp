@@ -288,6 +288,26 @@ export default class goods extends base {
     const url = `${this.baseUrl}/goods/${goodsId}/off_sale`;
     return this.put(url);
   }
+  /**
+   * 保存员工订购记录清单
+   */
+  static async saveMarkList(markList, customer) {
+    let lines = [];
+    // 记录操作的员工
+    let handler = AV.User.current();
+    // let customerObj = AV.Object.createWithoutData('_User', customer.objectId);
+    for (let m of markList) {
+      let line = new AV.Object('SCart');
+      let sku = AV.Object.createWithoutData('Sku', m.sku.objectId);
+      line.set('sku', sku);
+      line.set('qtt', m.qtt);
+      line.set('price', m.price);
+      line.set('handler', handler);
+      line.set('customer', AV.parseJSON(customer));
+      lines = [...lines, line];
+    }
+    return AV.Object.saveAll(lines)
+  }
 
   /** ********************* 内部数据处理方法 ********************* **/
 

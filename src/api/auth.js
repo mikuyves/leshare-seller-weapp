@@ -75,5 +75,13 @@ export default class auth extends base {
     let shops = await query.find()
     return shops.length = 0 ? false : true
    }
+  /**
+   * 获取用户列表。
+   */
+  static async getUsers() {
+    let query = new AV.Query('_User')
+    query.ascending('nickName')
+    return query.find()
+   }
 
 }
