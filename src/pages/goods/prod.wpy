@@ -127,6 +127,7 @@
   import zanQuantity from '../../components/zanui/zan-quantity'
   import SliderPanel from '../../components/common/slider_panel';
   import ActionBar from '../../components/common/action_bar';
+  import Tips from '../../utils/Tips';
 
   export default class GoodsList extends wepy.page {
     def = {
@@ -234,11 +235,16 @@
       },
       // 写入清单
       async saveMarkList() {
+        let text = `${this.customer.nickName} 选购 ${this.prod.name} ${this.totalQtt} 件`
+        await Tips.confirm(text, {}, '加入购物清单？')
         this.markList = this.markList.map(item => {
           item.price = item.sku[this.showPriceId]
           return item
         })
+        Tips.loading();
         let res = await goods.saveMarkList(this.markList, this.customer)
+        await Tips.success('已经加入客户购物清单！', 800);
+        wepy.navigateBack();
       }
     }
 
@@ -284,7 +290,7 @@
         // 按道理，整个 customer 被删除，应该读取不了任何数据，但是模板居然还是
         // 保留了上次的数据，未知道是什么原因造成的。如果返回一个空对象 {} 也可以，
         // 但会造成模板条件判断复杂，因为 {} ? true : false 返回 true。
-        // 解决方案是 return 一个空的对象 null。
+        // 解决方案是 return null。
         if (!this.customers && this.input.cunstomerId) {
           return
         }
