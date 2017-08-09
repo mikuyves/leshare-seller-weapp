@@ -33,7 +33,7 @@
           ￥{{sku[showPriceId]}} 元
           </view>
 
-          <view class="zan-label" @tap="addMarker({{sku}})">+</view>
+          <view class="zan-label" @tap="addReminder({{sku}})">+</view>
 
           <view class="zan-label zan-label--primary zan-label--small" wx:if="{{sku.soldOut}}">已断货</view>
 
@@ -43,12 +43,12 @@
 
     <view class="zan-c-gray-darker zan-pull-right">现货总库存：{{totalStock}} 件</view>
 
-    <view class="item-box" wx:if="{{markList.length > 0}}">
+    <view class="item-box" wx:if="{{remimders.length > 0}}">
 
       <view class="doc-title">
         选购清单
         <view class="zan-pull-right">
-          <view @tap="clearMarkList" class="zan-label zan-label--small">清空</view>
+          <view @tap="clearReminders" class="zan-label zan-label--small">清空</view>
         </view>
       </view>
 
@@ -58,7 +58,7 @@
         <text class="muted ml20">数量</text>
       </view>
 
-      <view class="desc-box row-between" style="margin-left: 20px; margin-right: 20px" wx:for="{{markList}}" wx:key="name">
+      <view class="desc-box row-between" style="margin-left: 20px; margin-right: 20px" wx:for="{{remimders}}" wx:key="name">
         <text class="muted">{{item.sku.name}}</text>
         <text class="muted ml20">￥ {{item.sku[showPriceId]}}元</text>
         <text class="muted ml20">{{item.qtt}} 件</text>
@@ -83,7 +83,7 @@
         <view class="weui-cell__ft weui-cell__ft_in-access"></view>
       </view>
       <!--操作栏-->
-      <ActionBar @tap.user="saveMarkList" okText="写入清单" cancelText="返回" />
+      <ActionBar @tap.user="saveReminders" okText="写入清单" cancelText="返回" />
       
     </view>
 
@@ -134,7 +134,7 @@
         goodsId: '',
         prod: {},
         skuList: [],
-        markList: [],
+        remimders: [],
         showUrl: '',
         picUrls: [],
         input: {
@@ -210,10 +210,10 @@
       /**
        * 下单临时记录清单
        */
-      addMarker(sku) {
-        let markItem = {sku};
-        markItem.qtt = 1
-        let foundItem = this.markList.find(item => item.sku.name === sku.name)
+      addReminder(sku) {
+        let reminder = {sku};
+        reminder.qtt = 1
+        let foundItem = this.remimders.find(item => item.sku.name === sku.name)
         if (foundItem) {
           // 断货时，最大值是现货存量。
           if (foundItem.sku.soldOut && foundItem.qtt === foundItem.sku.stock) {
@@ -223,26 +223,26 @@
             foundItem.qtt ++;
           }
         } else {
-          this.markList = [...this.markList, markItem];
+          this.remimders = [...this.remimders, reminder];
         }
       },
       // 清空清单内容
-      clearMarkList() {
+      clearReminders() {
         // TODO: 未能清空已选择的客户。
-        this.markList = [];
+        this.remimders = [];
         this.input.customerId = '';
         this.customer = {};
       },
       // 写入清单
-      async saveMarkList() {
+      async saveReminders() {
         let text = `${this.customer.nickName} 选购 ${this.prod.name} ${this.totalQtt} 件`
         await Tips.confirm(text, {}, '加入购物清单？')
-        this.markList = this.markList.map(item => {
+        this.remimders = this.remimders.map(item => {
           item.price = item.sku[this.showPriceId]
           return item
         })
         Tips.loading();
-        let res = await goods.saveMarkList(this.markList, this.customer)
+        let res = await goods.saveReminders(this.remimders, this.customer)
         await Tips.success('已经加入客户购物清单！', 800);
         wepy.navigateBack();
       }
@@ -299,18 +299,18 @@
       },
       // 清单总量
       totalQtt() {
-        if (this.markList.length < 1) {
+        if (this.remimders.length < 1) {
           return
         }
-        let tq = this.markList.reduce((total, item) => total + item.qtt, 0)
+        let tq = this.remimders.reduce((total, item) => total + item.qtt, 0)
         return tq
       },
       // 清单总价
       totalPrice() {
-        if (this.markList.length < 1) {
+        if (this.remimders.length < 1) {
           return
         }
-        let tp = this.markList.reduce((total, item) => total + item.sku[this.showPriceId] * item.qtt, 0)
+        let tp = this.remimders.reduce((total, item) => total + item.sku[this.showPriceId] * item.qtt, 0)
         return tp
       }
       // showStock() {
