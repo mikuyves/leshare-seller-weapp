@@ -158,11 +158,11 @@ export default class goods extends base {
   /**
    *  分页处理。获取商品列表，包括 Pointer 的数据。
    */
-  static async getProdListWithDetail(start, count) {
+  static async getProdListWithDetail({from, limit}) {
     let query = new AV.Query('Prod')
     query.descending('createdAt')
-    query.skip(start)
-    query.limit(count)
+    query.skip(from)
+    query.limit(limit)
     query.include('mainPic')
     query.include('brand')
     query.include('cate')
@@ -204,8 +204,8 @@ export default class goods extends base {
   /**
    * 从云端获取商品列表页面数据。
    */
-  static async _getProdListData(start, count) {
-    let prods = await this.getProdListWithDetail(start, count);
+  static async _getProdListData(param) {
+    let prods = await this.getProdListWithDetail(param);
     let skus = await this.getSkuListWithDetail(prods);
     let data = this.mapPointerRelation(prods, skus);
     return data
@@ -287,43 +287,6 @@ export default class goods extends base {
   static async offSale(goodsId) {
     const url = `${this.baseUrl}/goods/${goodsId}/off_sale`;
     return this.put(url);
-  }
-  /**
-   * 保存员工订购记录清单
-   */
-  static async saveReminders(reminders, customer) {
-    let lines = [];
-    // 记录操作的员工
-    let handler = AV.User.current();
-    // let customerObj = AV.Object.createWithoutData('_User', customer.objectId);
-    for (let r of reminders) {
-      let line = new AV.Object('Reminder');
-      let sku = AV.Object.createWithoutData('Sku', r.sku.objectId);
-      let res = await new AV.Query('Reminder')
-        // 注意，查询 pointer 是否相等时，必须要 createWithoutData。
-        .equalTo('handler', new AV.Object.createWithoutData('_User', handler.toJSON().objectId))
-        .equalTo('customer', new AV.Object.createWithoutData('_User', customer.objectId))
-        .equalTo('sku', sku)
-        .first()
-      if (res) {
-          res.set('price', r.price)
-          res.increment('qtt', r.qtt)
-          res = await res.save(null, {
-          fetchWhenSave: true,
-        });
-        console.log(res)
-      } else {
-        line.set('prod', r.sku.prod)
-        line.set('sku', sku);
-        line.set('qtt', r.qtt);
-        line.set('price', r.price);
-        line.set('handler', handler);
-        line.set('customer', AV.parseJSON(customer));
-        lines = [...lines, line];
-      }
-
-    }
-    return AV.Object.saveAll(lines)
   }
 
   /** ********************* 内部数据处理方法 ********************* **/

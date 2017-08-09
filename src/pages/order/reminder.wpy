@@ -48,8 +48,9 @@
       // 注意，page 是一个 Reminder 类的静态方法。 记得先要引入 api 中 Reminder 类，每一个 api
       // 中的需要分页的类都应该有这个方法。
       this.page = Reminder.page(this);
-      this.scartList = this.page.list;
-      await this.next();
+      this.page.count = 1000;  // 获取1000条备忘，暂时只有这个方法可用。
+      // this.scartList = this.page.list;
+      await this.next({from: 0});
       Event.listen(Event.ORDER_LIST_UPDATE, this.update.bind(this), this);
     };
     // 获取分页参数

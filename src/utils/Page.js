@@ -33,7 +33,7 @@ export default class Pagination {
     Object.assign(param, args);
 
     // 获取数据。
-    const data = await this.getDataFunc(this.start, this.count);
+    const data = await this.getDataFunc(param);
     console.log(data)
 
     // 底部判断
