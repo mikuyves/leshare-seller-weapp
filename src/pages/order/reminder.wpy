@@ -1,0 +1,78 @@
+<!--订单列表页面-->
+<template>
+  <view class="container" wx:if="{{init}}">
+    <!--TAB 页-->
+    <ZanTab :tab="tab" handler="onTabChange" />
+
+    <!--订单列表-->
+    <repeat for="{{page.list}}" key="index" index="index" item="item">
+      <ReminderItem :order="item"></ReminderItem>
+    </repeat>
+    <view class="tab-border" />
+    <!--占位符-->
+    <Placeholder :show.sync="isPageEmpty" message="您还没有相关订单"/>
+  </view>
+</template>
+<style lang="scss">
+</style>
+
+<script>
+  import wepy from 'wepy';
+  import pagination from '../../mixins/pagination';
+  import order from '../../api/order';
+  import Reminder from '../../api/reminder';
+  import Event from '../../utils/Event';
+  import ZanTab from '../../components/zanui/tab';
+  import ReminderItem from '../../components/order/reminder_item';
+  import Placeholder from '../../components/common/placeholder';
+
+  export default class OrderIndex extends wepy.page {
+    // 页面数据
+    data = {
+      init: true,
+      page: {
+        list: [
+          {orderGoodsInfos: []} // 这个有什么用？
+        ]
+      },
+      tab: {
+        list: [
+          {id: '0', title: '未完成'},
+          {id: '1', title: '已完成'},
+        ],
+        selectedId: '0',
+        scroll: false
+      }
+    };
+    async onLoad () {
+      // 注意，page 是一个 Reminder 类的静态方法。 记得先要引入 api 中 Reminder 类，每一个 api
+      // 中的需要分页的类都应该有这个方法。
+      this.page = Reminder.page(this);
+      this.scartList = this.page.list;
+      await this.next();
+      Event.listen(Event.ORDER_LIST_UPDATE, this.update.bind(this), this);
+    };
+    // 获取分页参数
+    params() {
+      return { status: this.tab.selectedId };
+    }
+
+    methods = {
+    };
+    config = {
+      navigationBarTitleText: '备忘管理',
+      enablePullDownRefresh: true
+    };
+    components = {
+      ZanTab: ZanTab,
+      ReminderItem: ReminderItem,
+      Placeholder: Placeholder
+    };
+    mixins = [pagination];
+    watch = {
+      tab() {
+        // this.reload();
+      }
+    }
+  }
+</script>

@@ -55,12 +55,13 @@ export default class extends wepy.app {
 
   config = {
     pages: [
+      'pages/home/index',
+      'pages/order/index',
+      'pages/order/reminder',
       'pages/goods/list',
       'pages/goods/edit',
       'pages/goods/prod',
       'pages/home/login',
-      'pages/home/index',
-      'pages/order/index',
       'pages/goods/detail',
       'pages/order/refund',
       'pages/home/shops',
@@ -94,6 +95,12 @@ export default class extends wepy.app {
           selectedIconPath: 'images/tab/order-active.png',
           pagePath: 'pages/order/index',
           text: '订单'
+        },
+        {
+          iconPath: 'images/icons/font-selection-editor0.png',
+          selectedIconPath: 'images/icons/font-selection-editor.png',
+          pagePath: 'pages/order/reminder',
+          text: ' 备忘'
         },
         {
           iconPath: 'images/tab/user.png',
