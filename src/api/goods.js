@@ -299,12 +299,29 @@ export default class goods extends base {
     for (let m of markList) {
       let line = new AV.Object('SCart');
       let sku = AV.Object.createWithoutData('Sku', m.sku.objectId);
-      line.set('sku', sku);
-      line.set('qtt', m.qtt);
-      line.set('price', m.price);
-      line.set('handler', handler);
-      line.set('customer', AV.parseJSON(customer));
-      lines = [...lines, line];
+      let res = await new AV.Query('SCart')
+        // 注意，查询 pointer 是否相等时，必须要 createWithoutData。
+        .equalTo('handler', new AV.Object.createWithoutData('_User', handler.toJSON().objectId))
+        .equalTo('customer', new AV.Object.createWithoutData('_User', customer.objectId))
+        .equalTo('sku', sku)
+        .first()
+      if (res) {
+          res.set('price', m.price)
+          res.increment('qtt', m.qtt)
+          res = await res.save(null, {
+          fetchWhenSave: true,
+        });
+        console.log(res)
+      } else {
+        line.set('prod', m.sku.prod)
+        line.set('sku', sku);
+        line.set('qtt', m.qtt);
+        line.set('price', m.price);
+        line.set('handler', handler);
+        line.set('customer', AV.parseJSON(customer));
+        lines = [...lines, line];
+      }
+
     }
     return AV.Object.saveAll(lines)
   }
