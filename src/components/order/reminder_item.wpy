@@ -5,8 +5,8 @@
 
       <view class="row-between">
         <view class="user-info-container">
-          <image class="icon" src="/images/icons/idcard.png"/>
-          <text class="sm ml10">{{order.customer.nickName}}</text>
+          <image class="icon" src="{{order.customerKey.avatarUrl}}"/>
+          <text class="sm ml10">{{order.customerKey.nickName}}</text>
         </view>
         <text class="sm primary">{{order.statusText}}</text>
       </view>
@@ -17,23 +17,27 @@
       </view>
     </view>
 
-    <view class="order-goods-list-container" @tap="detail({{order.orderId}})">
-      <view class="" wx:for="{{order.prods}}" wx:key="prod" wx:for-item="prod">
+    <view class="order-goods-list-container">
+      <view class="" wx:for="{{order.prodList}}" wx:key="prod" wx:for-index="index" wx:for-item="prod">
+        <!-- <text>{{prod.prodKey.name}}</text> -->
         <view class="order-goods-container row-between">
           <!--商品图片-->
-          <image class="order-goods-image" mode="aspectFill" src="{{prod.prod.mainPic.url}}"/>
+          <image class="order-goods-image" mode="aspectFit" src="{{prod.prodKey.mainPic.url}}"/>
 
-          <!--商品说明-->
-          <view class="order-goods-title-container column">
-            <text>{{prod.prod.name}}</text>
-            <text class="muted">{{goods.skuText}}</text>
+
+
+          <!--商品的 sku 详情-->
+          <view class="order-goods-title-container column" @tap="detail({{prod.prodKey.objectId}})">
+            <text>{{prod.prodKey.name}}</text>
+
+            <view class="row-between" wx:for="{{prod.skuList}}" wx:key="sku" wx:for-item="sku">
+              <text class="muted">{{sku.sku.name}}</text>
+              <text class="muted">￥ {{sku.price}} 元</text>
+              <text class="muted">x{{sku.qtt}}</text>
+            </view>
+
           </view>
 
-          <!--商品购买信息-->
-          <view class="order-goods-buy-container column">
-            <text>￥{{goods.goodsPrice}}</text>
-            <text class="muted">x{{goods.count}}</text>
-          </view>
         </view>
       </view>
     </view>
@@ -49,12 +53,8 @@
 
     <!--操作栏/可以抽取为组件-->
     <view class="order-action-bar row-end" wx:if="{{action != 0}}">
-      <view class="zan-btn zan-btn--small" @tap="note({{order.orderId}}, {{order.sellerNote}})">订单备注</view>
-      <view class="zan-btn zan-btn--small" @tap="reprice({{order.orderId}})"  wx:if="{{order.status == 1}}">订单改价</view>
-      <view class="zan-btn zan-btn--small zan-btn--primary" @tap="close({{order.orderId}})" wx:if="{{order.status == 1}}">订单关闭</view>
-      <view class="zan-btn zan-btn--small zan-btn--primary" @tap="send({{order.orderId}})" wx:if="{{order.status == 2}}">订单发货</view>
-      <view class="zan-btn zan-btn--small zan-btn--primary" @tap="trace({{order.orderId}})" wx:if="{{order.status == 3}}">物流查询</view>
-      <view class="zan-btn zan-btn--small zan-btn--primary" @tap="refund({{order.orderId}})" wx:if="{{order.status == 5}}">订单退款</view>
+      <view class="zan-btn zan-btn--small" @tap="note({{order.orderId}}, {{order.sellerNote}})">删除</view>
+      <view class="zan-btn zan-btn--small" @tap="note({{order.orderId}}, {{order.sellerNote}})">完成</view>
     </view>
 
   </view>
@@ -88,8 +88,8 @@
       reprice(orderId) {
         this.$root.$navigate('reprice', {orderId});
       },
-      detail(orderId) {
-        this.$root.$navigate('detail', {orderId});
+      detail(goodsId) {
+        this.$root.$navigate('../../pages/goods/prod', {goodsId});
       },
       refund(orderId) {
         this.$root.$navigate('refund', {orderId});
