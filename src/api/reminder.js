@@ -77,10 +77,10 @@ export default class Reminder extends base {
   static async _getRemindersData(param) {
     let lines = await this.getRemindersWithDetail(param);
     lines = lines.map(item => item.toJSON())
-    let data = LC.groupByPointer(lines, 'customer', 'prods')
+    let data = LC.groupByPointer(lines, 'customer', 'prod')
     console.log(data)
     for (let [i, c] of data.entries()) {
-      data[i].prods = LC.groupByPointer(c.prods, 'prod', 'skus')
+      data[i].prodList = LC.groupByPointer(c.prodList, 'prod', 'sku')
     }
     return data
   }

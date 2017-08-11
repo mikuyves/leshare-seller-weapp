@@ -25,8 +25,8 @@ export default class LC {
       let pointer = list.find(item => item[key].objectId == id)[key];
       let subList = list.filter(item => item[key].objectId === id);
       let obj = {};
-      obj[key] = pointer;
-      obj[subListName] = subList;
+      obj[key + 'Key'] = pointer;
+      obj[subListName + 'List'] = subList;
       newList = [...newList, obj];
 
     }
