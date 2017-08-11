@@ -9,7 +9,6 @@ export default class Reminder extends base {
    * 分页方法
    */
   static page() {
-    console.log("I am here.")
     return new Page(
       this._getRemindersData.bind(this),  // 获取数据
     );
@@ -35,6 +34,24 @@ export default class Reminder extends base {
   /**
    * 保存备忘
    */
+  static async getRemindersByCustomer(customerId, prodId) {
+    let query = new AV.Query('Reminder');
+    let handler = new AV.Object.createWithoutData(
+      '_User', AV.User.current().toJSON().objectId
+    )
+    let customer = new AV.Object.createWithoutData('_User', customerId);
+    let prod = new AV.Object.createWithoutData('Prod', prodId);
+    query.equalTo('handler', handler)
+    query.equalTo('customer', customer)
+    query.equalTo('prod', prod)
+    query.include('sku')
+    let res = await query.find()
+    let data = res.map(item => item.toJSON())
+    return data
+  }
+  /**
+   * 保存备忘
+   */
   static async saveReminders(reminders, customer) {
     let lines = [];
     // 记录操作的员工
@@ -49,10 +66,17 @@ export default class Reminder extends base {
         .equalTo('customer', new AV.Object.createWithoutData('_User', customer.objectId))
         .equalTo('sku', sku)
         .first()
+      // 删除
+      if (r.qtt === 0 && res) {
+        res.destroy();
+      // 忽略
+      } else if (r.qtt === 0) {
+        continue
       // 更新
-      if (res) {
+      } else if (res) {
           res.set('price', r.price)
-          res.increment('qtt', r.qtt)
+          res.set('qtt', r.qtt)
+          res.set('showPriceId', r.showPriceId)
           res = await res.save(null, {
           fetchWhenSave: true,
         });
@@ -63,6 +87,7 @@ export default class Reminder extends base {
         line.set('sku', sku);
         line.set('qtt', r.qtt);
         line.set('price', r.price);
+        line.set('showPriceId', r.showPriceId);
         line.set('handler', handler);
         line.set('customer', AV.parseJSON(customer));
         lines = [...lines, line];
@@ -81,7 +106,27 @@ export default class Reminder extends base {
     console.log(data)
     for (let [i, c] of data.entries()) {
       data[i].prodList = LC.groupByPointer(c.prodList, 'prod', 'sku')
+      data[i].totalQtt = this.totalList(
+          data[i].prodList.map(prod => {
+          return prod.skuList.map(sku => sku.qtt)
+        })
+      )
+      data[i].totalPrice = this.totalList(
+          data[i].prodList.map(prod => {
+          return prod.skuList.map(sku => sku.qtt * sku.price)
+        })
+      )
     }
     return data
+  }
+
+  //  拆解数组。将一个含有子数组的数组，变成一个字含有基本元素的数组。
+  static flatten(arr) {
+    return [].concat(...arr)
+  }
+
+  static totalList(arr) {
+    let flatList = this.flatten(arr)
+    return flatList.reduce((total, num) => total + num, 0)
   }
 }

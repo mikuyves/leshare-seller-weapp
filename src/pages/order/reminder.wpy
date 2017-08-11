@@ -51,6 +51,8 @@
       this.page.count = 1000;  // 获取1000条备忘，暂时只有这个方法可用。
       // this.scartList = this.page.list;
       await this.next({from: 0});
+      this.page.list[0].style = 0
+      this.page.list[1].style = 0
       Event.listen(Event.ORDER_LIST_UPDATE, this.update.bind(this), this);
     };
     // 获取分页参数

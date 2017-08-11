@@ -33,9 +33,10 @@
           ￥{{sku[showPriceId]}} 元
           </view>
 
+          <view class="zan-label" @tap="minusReminder({{sku}})">-</view>
           <view class="zan-label" @tap="addReminder({{sku}})">+</view>
 
-          <view class="zan-label zan-label--primary zan-label--small" wx:if="{{sku.soldOut}}">已断货</view>
+          <view class="zan-label zan-label--primary zan-label--small" wx:if="{{sku.soldOut}}">断</view>
 
         </block>
       </view>
@@ -43,33 +44,9 @@
 
     <view class="zan-c-gray-darker zan-pull-right">现货总库存：{{totalStock}} 件</view>
 
-    <view class="item-box" wx:if="{{remimders.length > 0}}">
+    <view class="item-box">
 
-      <view class="doc-title">
-        选购清单
-        <view class="zan-pull-right">
-          <view @tap="clearReminders" class="zan-label zan-label--small">清空</view>
-        </view>
-      </view>
-
-      <view class="desc-box row-between" style="margin: 20px">
-        <text class="muted">规格</text>
-        <text class="muted ml20">价格</text>
-        <text class="muted ml20">数量</text>
-      </view>
-
-      <view class="desc-box row-between" style="margin-left: 20px; margin-right: 20px" wx:for="{{remimders}}" wx:key="name">
-        <text class="muted">{{item.sku.name}}</text>
-        <text class="muted ml20">￥ {{item.sku[showPriceId]}}元</text>
-        <text class="muted ml20">{{item.qtt}} 件</text>
-      </view>
-
-      <view class="desc-box row-between" style="margin: 20px">
-        <text class="muted">总计</text>
-        <text class="muted ml20">￥ {{totalPrice}} 元</text>
-        <text class="muted ml20">{{totalQtt}} 件</text>
-      </view>
-
+      <!-- 选择客户 -->
       <view class="weui-cell"  id="isCustomerDisplay" @tap="showInner">
         <view class="weui-cell__hd">
           <view class="weui-label">选择客户</view>
@@ -82,8 +59,41 @@
         </view>
         <view class="weui-cell__ft weui-cell__ft_in-access"></view>
       </view>
+    </view>
+
+    <view class="item-box" wx:if="{{reminders.length > 0}}">
+
+      <view class="doc-title">
+        订货备忘
+        <view class="zan-pull-right">
+          <view @tap="deleteAllReminders" class="zan-label zan-label--small">清空</view>
+          <view @tap="clearReminders" class="zan-label zan-label--small">重选</view>
+        </view>
+      </view>
+
+      <view class="desc-box row-between" style="margin: 20px">
+        <text class="muted">规格</text>
+        <text class="muted ml20">价格</text>
+        <text class="muted ml20">数量</text>
+      </view>
+
+      <view class="" wx:for="{{reminders}}" wx:key="name">
+        <view wx:if="{{item.qtt !== 0}}" class="desc-box row-between" style="margin-left: 20px; margin-right: 20px" >
+          <text class="muted">{{item.sku.name}}</text>
+          <text class="muted ml20">￥ {{item.sku[showPriceId]}}元</text>
+          <text class="muted ml20">{{item.qtt}} 件</text>
+      </view>
+        
+      </view>
+
+      <view class="desc-box row-between" style="margin: 20px">
+        <text class="muted">总计</text>
+        <text class="muted ml20">￥ {{totalPrice}} 元</text>
+        <text class="muted ml20">{{totalQtt}} 件</text>
+      </view>
+
       <!--操作栏-->
-      <ActionBar @tap.user="saveReminders" okText="写入清单" cancelText="返回" />
+      <ActionBar @tap.user="saveReminders" okText="保存备忘" cancelText="返回" />
       
     </view>
 
@@ -135,7 +145,7 @@
         goodsId: '',
         prod: {},
         skuList: [],
-        remimders: [],
+        reminders: [],
         showUrl: '',
         picUrls: [],
         input: {
@@ -155,8 +165,14 @@
         totalQtt: 0
     }
     data = {...this.def};
-    async onLoad ({goodsId}) {
+    async onLoad ({goodsId, customerId}) {
       this.goodsId = goodsId;
+      if (customerId) {
+        let customers = await auth.getUsers();
+        this.customers = customers.map(item => item.toFullJSON());
+        this.input.customerId = customerId;
+        this.$apply()
+      }
       let prod = await goods.getProdWithDetail(goodsId);
       let skus = await goods.getSkuListFromProd(prod);
       let picUrls = await goods.getProdPics(prod);
@@ -213,8 +229,7 @@
        */
       addReminder(sku) {
         let reminder = {sku};
-        reminder.qtt = 1
-        let foundItem = this.remimders.find(item => item.sku.name === sku.name)
+        let foundItem = this.reminders.find(item => item.sku.name === sku.name)
         if (foundItem) {
           // 断货时，最大值是现货存量。
           if (foundItem.sku.soldOut && foundItem.qtt === foundItem.sku.stock) {
@@ -224,26 +239,61 @@
             foundItem.qtt ++;
           }
         } else {
-          this.remimders = [...this.remimders, reminder];
+          reminder.qtt = 1
+          this.reminders = [...this.reminders, reminder];
         }
       },
-      // 清空清单内容
+      /**
+       * 下单临时记录清单
+       */
+      minusReminder(sku) {
+        let reminder = {sku};
+        let foundItem = this.reminders.find(item => item.sku.name === sku.name)
+        if (foundItem) {
+          // 断货时，最大值是现货存量。
+          if (foundItem.qtt === 0) {
+            console.log('Reminder is empty now.')
+            return
+          } else {
+            foundItem.qtt --;
+          }
+        } else {
+          return
+        }
+      },
+      // 重新选择
       clearReminders() {
         // TODO: 未能清空已选择的客户。
-        this.remimders = [];
+        this.reminders = [];
         this.input.customerId = '';
         this.customer = {};
       },
-      // 写入清单
+      // 删除所有备忘
+      async deleteAllReminders() {
+        let text = ` 注意：${this.customer.nickName} 对此商品的选购备忘将被全部删除！`
+        await Tips.confirm(text, {}, '是否确认删除？')
+        if (this.reminders.length > 0) {
+          this.reminders = this.reminders.map(item => {
+            item.qtt = 0;
+            return item
+          })
+        }
+        this.$apply()
+        await Reminder.saveReminders(this.reminders, this.customer)
+        await Tips().success('备忘已全部删除，可以重新选择。')
+        this.clearReminders()
+      },
+      // 保存清单
       async saveReminders() {
-        let text = `${this.customer.nickName} 选购 ${this.prod.name} ${this.totalQtt} 件`
-        await Tips.confirm(text, {}, '加入购物清单？')
-        this.remimders = this.remimders.map(item => {
-          item.price = item.sku[this.showPriceId]
-          return item
+        let text = `${this.customer.nickName} 选购 ${this.prod.name} ${this.totalQtt} 件`;
+        await Tips.confirm(text, {}, '加入购物清单？');
+        this.reminders = this.reminders.map(item => {
+          item.showPriceId = this.showPriceId;
+          item.price = item.sku[this.showPriceId];
+          return item;
         })
         Tips.loading();
-        let res = await Reminder.saveReminders(this.remimders, this.customer)
+        let res = await Reminder.saveReminders(this.reminders, this.customer)
         await Tips.success('已经加入客户购物清单！', 800);
         wepy.navigateBack();
       }
@@ -252,31 +302,25 @@
     events = {}
 
     watch = {
-      // inputColor() {
-      //   this.skuList = this.skuList.map(item => {
-      //     if (item.color.name === this.inputColor) {
-      //       item.color.cssPrimary = 'zan-label--primary'
-      //     } else {
-      //       item.color.cssPrimary = ''
-      //     }
-      //   })
-      // }
+      async input() {
+        if (this.input.customerId) {
+          let reminders = await Reminder.getRemindersByCustomer(this.input.customerId, this.goodsId);
+          if (reminders.length > 0) {
+            // 设置已保存备忘的值。
+            this.reminders = reminders;
+            this.showPriceId = reminders[0].showPriceId
+          } else {
+            // 恢复默认值。
+            this.reminders = [];
+            this.showPriceId = 'price2';
+          }
+        }
+        this.$apply()
+      }
     }
 
     computed = {
       // // 注意顺序问题，很重要！
-      // skuName() {
-      //   if (this.inputColor === '' && this.inputSize1 === '') {
-      //     return ''
-      //   };
-      //   let skuName = this.inputColor + '-' + this.inputSize1;
-      //   let res = this.skuList.find(item => item.name === skuName);
-      //   if (res) {
-      //     return skuName;
-      //   } else {
-      //     return ''
-      //   }
-      // },
       // 现货总量
       totalStock() {
         let skuStocks = this.skuList.map(item => item.stock);
@@ -292,26 +336,27 @@
         // 保留了上次的数据，未知道是什么原因造成的。如果返回一个空对象 {} 也可以，
         // 但会造成模板条件判断复杂，因为 {} ? true : false 返回 true。
         // 解决方案是 return null。
-        if (!this.customers && this.input.cunstomerId) {
-          return
+        if (this.customers.length < 1 && !this.input.customerId) {
+          return null
+        } else {
+          let customer = this.customers.find(item => item.objectId === this.input.customerId)
+          return customer ? customer : null
         }
-        let customer = this.customers.find(item => item.objectId === this.input.customerId)
-        return customer ? customer : null
       },
       // 清单总量
       totalQtt() {
-        if (this.remimders.length < 1) {
+        if (this.reminders.length < 1) {
           return
         }
-        let tq = this.remimders.reduce((total, item) => total + item.qtt, 0)
+        let tq = this.reminders.reduce((total, item) => total + item.qtt, 0)
         return tq
       },
       // 清单总价
       totalPrice() {
-        if (this.remimders.length < 1) {
+        if (this.reminders.length < 1) {
           return
         }
-        let tp = this.remimders.reduce((total, item) => total + item.sku[this.showPriceId] * item.qtt, 0)
+        let tp = this.reminders.reduce((total, item) => total + item.sku[this.showPriceId] * item.qtt, 0)
         return tp
       }
       // showStock() {

@@ -18,24 +18,30 @@
     </view>
 
     <view class="order-goods-list-container">
-      <view class="" wx:for="{{order.prodList}}" wx:key="prod" wx:for-index="index" wx:for-item="prod">
-        <!-- <text>{{prod.prodKey.name}}</text> -->
-        <view class="order-goods-container row-between">
+      <view class="" wx:for="{{order.prodList}}" wx:key="prod" wx:for-index="idx" wx:for-item="prod">
+        <view class="order-goods-container row-between" @tap="detail({{prod.prodKey.objectId}}, {{order.customerKey.objectId}})">
+
           <!--商品图片-->
-          <image class="order-goods-image" mode="aspectFit" src="{{prod.prodKey.mainPic.url}}"/>
+          <view class="">
+            <image class="order-goods-image" mode="aspectFit" src="{{prod.prodKey.mainPic.url}}"/>
+          </view>
 
+          <!--商品名称-->
+          <view class="order-goods-title-container column">
+            <view class="order-goods-title-container column">
 
+              <view class="row-between">
+                <text>{{prod.prodKey.name}}</text>
+              </view>
 
-          <!--商品的 sku 详情-->
-          <view class="order-goods-title-container column" @tap="detail({{prod.prodKey.objectId}})">
-            <text>{{prod.prodKey.name}}</text>
+              <!--商品的 sku 详情-->
+              <view class="row-between" wx:for="{{prod.skuList}}" wx:key="sku" wx:for-item="sku">
+                <text class="muted">{{sku.sku.name}}</text>
+                <text class="muted">￥ {{sku.price}} 元</text>
+                <text class="muted">x{{sku.qtt}}</text>
+              </view>
 
-            <view class="row-between" wx:for="{{prod.skuList}}" wx:key="sku" wx:for-item="sku">
-              <text class="muted">{{sku.sku.name}}</text>
-              <text class="muted">￥ {{sku.price}} 元</text>
-              <text class="muted">x{{sku.qtt}}</text>
             </view>
-
           </view>
 
         </view>
@@ -45,15 +51,14 @@
 
     <!--汇总信息-->
     <view class="order-footer-container row-end">
-      <text class="mr20">共{{order.orderGoodsInfos.length}}件商品</text>
+      <text class="mr20">共{{order.totalQtt}}件商品</text>
       <text>合计:</text>
-      <text class="major xl mr20">￥{{order.finalPrice}}</text>
-      <text>(含运费￥{{order.postFee}})</text>
+      <text class="major xl mr20">￥{{order.totalPrice}}</text>
     </view>
 
     <!--操作栏/可以抽取为组件-->
     <view class="order-action-bar row-end" wx:if="{{action != 0}}">
-      <view class="zan-btn zan-btn--small" @tap="note({{order.orderId}}, {{order.sellerNote}})">删除</view>
+      <view class="zan-btn zan-btn--small" @tap="edit">edit</view>
       <view class="zan-btn zan-btn--small" @tap="note({{order.orderId}}, {{order.sellerNote}})">完成</view>
     </view>
 
@@ -63,6 +68,7 @@
 <script>
   import wepy from 'wepy'
   import OrderGoods from './goods'
+
   export default class ReminderItem extends wepy.component {
     props = {
       order: {
@@ -88,8 +94,8 @@
       reprice(orderId) {
         this.$root.$navigate('reprice', {orderId});
       },
-      detail(goodsId) {
-        this.$root.$navigate('../../pages/goods/prod', {goodsId});
+      detail(goodsId, customerId) {
+        this.$root.$navigate('../../pages/goods/prod', {goodsId, customerId});
       },
       refund(orderId) {
         this.$root.$navigate('refund', {orderId});
