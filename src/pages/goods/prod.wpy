@@ -25,7 +25,7 @@
         <block>
           <view class="zan-label" style="background-color: {{sku.color.nameEn}};"></view>
           <view class="zan-label">{{sku.name}}</view>
-          <view class="zan-label">现货： {{sku.stock}} 件</view>
+          <view class="zan-label">{{sku.stock}} 件</view>
 
 
           <view class="zan-label" 
@@ -33,18 +33,24 @@
           ￥{{sku[showPriceId]}} 元
           </view>
 
-          <view class="zan-label" @tap="minusReminder({{sku}})">-</view>
-          <view class="zan-label" @tap="addReminder({{sku}})">+</view>
+          <view wx:if="{{mode === 'remind'}}" class="zan-label" @tap="minusReminder({{sku}})">-</view>
+          <view wx:if="{{mode === 'remind'}}" class="zan-label" @tap="addReminder({{sku}})">+</view>
+
+          <view wx:if="{{mode === 'adjust'}}" class="zan-label" @tap="minusAdjustment({{sku}})">-</view>
+          <view wx:if="{{mode === 'adjust'}}" class="zan-label" @tap="addAdjustment({{sku}})">+</view>
 
           <view class="zan-label zan-label--primary zan-label--small" wx:if="{{sku.soldOut}}">断</view>
 
         </block>
       </view>
+      <view class="desc-box row-between" style="margin: 10px">
+        <text class="muted ml20">Total：{{totalStock}} 件</text>
+      </view>
     </view>
 
-    <view class="zan-c-gray-darker zan-pull-right">现货总库存：{{totalStock}} 件</view>
 
-    <view class="item-box">
+    <!-- 订货备忘区域 -->
+    <view wx:if="{{mode === 'remind'}}" class="item-box">
 
       <!-- 选择客户 -->
       <view class="weui-cell"  id="isCustomerDisplay" @tap="showInner">
@@ -61,7 +67,7 @@
       </view>
     </view>
 
-    <view class="item-box" wx:if="{{reminders.length > 0}}">
+    <view class="item-box" wx:if="{{reminders.length > 0 && mode === 'remind'}}">
 
       <view class="doc-title">
         订货备忘
@@ -93,9 +99,49 @@
       </view>
 
       <!--操作栏-->
-      <ActionBar @tap.user="saveReminders" okText="保存备忘" cancelText="返回" />
+      <RemindActionBar @tap.user="saveReminders" okText="保存备忘" cancelText="返回" />
       
     </view>
+
+
+    <!-- 增减库存区域 -->
+    <view class="item-box" wx:if="{{adjustments.length > 0 && mode === 'adjust'}}">
+
+      <view class="doc-title">
+         库存调整
+        <view class="zan-pull-right">
+          <view @tap="clearAdjustments" class="zan-label zan-label--small">重选</view>
+        </view>
+      </view>
+
+      <view class="desc-box row-between" style="margin: 20px">
+        <text class="muted">规格</text>
+        <text class="muted ml20">原库存</text>
+        <text class="muted ml20">调整量</text>
+        <text class="muted ml20">现库存</text>
+      </view>
+
+      <view class="" wx:for="{{adjustments}}" wx:key="name">
+        <view class="desc-box row-between" style="margin-left: 20px; margin-right: 20px;" >
+          <text class="muted">{{item.sku.name}}</text>
+          <text class="muted ml20">{{item.orgQtt}} 件</text>
+          <text class="muted ml20">{{item.increment}}</text>
+          <text class="muted ml20">{{item.qtt}} 件</text>
+      </view>
+        
+      </view>
+
+      <view class="desc-box row-between" style="margin: 20px">
+        <text class="muted">总计</text>
+        <text class="muted ml20">{{adjustTotalQtt}} 件</text>
+      </view>
+
+      <!--操作栏-->
+      <AdjustActionBar @tap.user="saveAdjustments" okText="调整库存" cancelText="返回" />
+      
+    </view>
+
+
 
   </view>
 
@@ -143,9 +189,11 @@
   export default class GoodsList extends wepy.page {
     def = {
         goodsId: '',
+        mode: '',
         prod: {},
         skuList: [],
         reminders: [],
+        adjustments: [],
         showUrl: '',
         picUrls: [],
         input: {
@@ -165,7 +213,8 @@
         totalQtt: 0
     }
     data = {...this.def};
-    async onLoad ({goodsId, customerId}) {
+    async onLoad ({goodsId, mode, customerId}) {
+      this.mode = mode ? mode : 'remind'
       this.goodsId = goodsId;
       if (customerId) {
         let customers = await auth.getUsers();
@@ -296,6 +345,71 @@
         let res = await Reminder.saveReminders(this.reminders, this.customer)
         await Tips.success('已经加入客户购物清单！', 800);
         wepy.navigateBack();
+      },
+      /**
+       * 增加库存
+       */
+      addAdjustment(sku) {
+        let adjustment = {sku};
+        adjustment.orgQtt = sku.stock;
+        let foundItem = this.adjustments.find(item => item.sku.name === sku.name)
+        if (foundItem) {
+          // 断货时，最大值是现货存量。
+          if (foundItem.sku.soldOut && foundItem.qtt === foundItem.sku.stock) {
+            console.log('This product is sold out.')
+            return
+          } else {
+            foundItem.increment ++;
+            foundItem.qtt ++;
+          }
+        } else {
+          adjustment.increment = 1;
+          adjustment.qtt = sku.stock + 1;
+          this.adjustments = [...this.adjustments, adjustment];
+        }
+      },
+      /**
+       * 减少库存
+       */
+      minusAdjustment(sku) {
+        let adjustment = {sku};
+        adjustment.orgQtt = sku.stock;
+        let foundItem = this.adjustments.find(item => item.sku.name === sku.name)
+        if (foundItem) {
+          // 断货时，最大值是现货存量。
+          if (foundItem.qtt === 0) {
+            console.log('Quantity is 0 now.')
+            return
+          } else {
+            foundItem.increment --;
+            foundItem.qtt --;
+          }
+        } else {
+          adjustment.increment = -1;
+          adjustment.qtt = sku.stock - 1;
+          this.adjustments = [...this.adjustments, adjustment];
+        }
+      },
+      /**
+       * 保存调整后的库存，暂时写在 Reminder 模块中。
+       */
+      async saveAdjustments() {
+        // 排除没有增量的 adjustment。
+        let adjustments = [];
+        let texts = [];
+        for (let adj of this.adjustments) {
+          if (adj.increment != 0) {
+            let text = `${adj.sku.name}: 变更 ${adj.increment} 件，现 ${adj.qtt} 件`;
+            texts = [...texts, text]
+            adjustments = [...adjustments, adj]
+          };
+        };
+        texts = texts.join('\r\n')
+        await Tips.confirm(texts, {}, '确认库存更改？');
+        Tips.loading();
+        let res = await Reminder.saveAdjustments(adjustments);
+        await Tips.success('库存已更改！', 800);
+        wepy.navigateBack();
       }
     }
 
@@ -351,6 +465,13 @@
         let tq = this.reminders.reduce((total, item) => total + item.qtt, 0)
         return tq
       },
+      adjustTotalQtt() {
+        if (this.adjustments.length < 1) {
+          return
+        }
+        let totalIncrement = this.adjustments.reduce((total, item) => total + item.increment, 0);
+        return totalIncrement + this.totalStock
+      },
       // 清单总价
       totalPrice() {
         if (this.reminders.length < 1) {
@@ -375,7 +496,8 @@
     events = {};
     components = {
       zanQuantity: zanQuantity,
-      ActionBar: ActionBar,
+      AdjustActionBar: ActionBar,
+      RemindActionBar: ActionBar,
       SliderPanelCustomer: SliderPanel,
     }
     mixins = [base, input];

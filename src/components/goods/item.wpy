@@ -26,7 +26,8 @@
         <text class="muted xs ml10">{{goods.supplier.name}}</text>
       </view>
       <view>
-        <view class="zan-btn zan-btn--small" @tap="delete({{goods.id}})" >删除</view>
+        <view class="zan-btn zan-btn--small" @tap="delete({{goods.objectId}})" >删除</view>
+        <view class="zan-btn zan-btn--small" @tap="adjust({{goods.objectId}})" >库存</view>
         <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="offSale({{goods.id}})">下架</view>
         <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="onSale({{goods.id}})">上架</view>
         <view class="zan-btn zan-btn--small zan-btn--primary" @tap="edit({{goods.objectId}})">编辑</view>
@@ -54,6 +55,9 @@
       },
       async edit(goodsId) {
         this.$root.$navigate('edit', {goodsId, mode: 'edit'});
+      },
+      async adjust(goodsId) {
+        this.$root.$navigate('prod', {goodsId, mode: 'adjust'});
       },
       async goToItem(goodsId) {
         console.log(goodsId)

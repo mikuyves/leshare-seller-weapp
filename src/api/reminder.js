@@ -79,7 +79,7 @@ export default class Reminder extends base {
           res.set('showPriceId', r.showPriceId)
           res = await res.save(null, {
           fetchWhenSave: true,
-        });
+          });
         console.log(res)
       } else {
       // 创建
@@ -96,6 +96,35 @@ export default class Reminder extends base {
     }
     return AV.Object.saveAll(lines)
   }
+  /**
+   * 保存调整库存, 用于日志。
+   */
+  static async saveAdjustments(adjustments) {
+    // 记录调整日志。
+    let adjs = adjustments.map(item => {
+      let adj = new AV.Object('Adjustment');
+      let sku = AV.Object.createWithoutData('Sku', item.sku.objectId);
+      let prod = item.sku.prod;
+      let handler = AV.User.current();
+      adj.set('sku', sku);
+      adj.set('prod', prod);
+      adj.set('handler', handler);
+      adj.set('orgQtt', item.orgQtt);
+      adj.set('increment', item.increment);
+      adj.set('qtt', item.qtt);
+      return adj
+    })
+    // 更新 sku 库存。
+    for (let item of adjustments) {
+      let sku = AV.Object.createWithoutData('Sku', item.sku.objectId);
+      sku.increment('stock', item.increment);
+      await sku.save(null, {
+        fetchWhenSave: true,
+      });
+    }
+    return AV.Object.saveAll(adjs)
+  }
+
 
   /** ********************* 内部数据处理方法 ********************* **/
 
