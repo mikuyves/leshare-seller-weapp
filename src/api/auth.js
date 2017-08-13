@@ -6,29 +6,29 @@ export default class auth extends base {
   /**
    * 登录
    */
-  static async login(phone, code) {
-    const url = `${this.baseUrl}/auth/login?phone=${phone}&sms_code=${code}`;
-    const dara = await this.get(url);
-    return dara.login_code;
+  static async login() {
+    let user = await AV.User.loginWithWeapp() // 一键登录，返回最新的资料。
+    let userInfo = await wepy.getUserInfo()  // 获取微信头像及用户名。
+    user = await user.set(userInfo).save()  // 把头像及用户名 nickName 同步到服务端。
+    wepy.$instance.globalData.user = user.toJSON()  // 保存到全局数据中。
+    return user.toJSON()
   }
   /**
    * 短信验证码
    */
   static async sms (phone) {
-    // const url = `${this.baseUrl}/auth/sms_code?phone=${phone}`
-    // const data = await this.get(url);
-    // return data.message;
-    let user = this.user.setMobilePhoneNumber(phone)
-    user = await user.save()
-    let res = await AV.User.requestMobilePhoneVerify(user.getMobilePhoneNumber())
-    console.log(res)
+    let user = await AV.User.loginWithWeapp(); // 一键登录，返回最新的资料。
+    user.setMobilePhoneNumber(phone); // 登记电话号码。
+    await user.save()
+    AV.User.requestMobilePhoneVerify(phone);  // 发送验证码
   }
 
-  static async smsVerify (code) {
-    let res = await AV.User.verifyMobilePhone(code)
-    return res
+  static smsVerify (code) {
+    return AV.User.verifyMobilePhone(code)
   }
 
+  static async loginWithMobile(phone) {
+  }
   /**
    * 检查登录情况
    */
@@ -83,5 +83,31 @@ export default class auth extends base {
     query.ascending('nickName')
     return query.find()
    }
+
+  /**
+   * 跳转设置页面授权
+   */
+  static openSetting() {
+    return new Promise((resolve, reject) => {
+      if (wx.openSetting) {
+        wx.openSetting({
+          success: res => {
+            //尝试再次登录
+            let isAuth = res.authSetting['scope.userInfo'];
+            if (isAuth) {
+              resolve(isAuth)
+            } else {
+              reject(isAuth)
+            }
+          }
+        })
+      } else {
+        wx.showModal({
+          title: '授权提示',
+          content: '小程序需要您的微信授权才能使用哦~ 错过授权页面的处理方法：删除小程序->重新搜索进入->点击授权按钮'
+        })
+      }
+    })
+  }
 
 }

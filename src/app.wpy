@@ -24,17 +24,16 @@ export default class extends wepy.app {
     this.use('promisify');
   }
 
-  async login() {
-    let user = await AV.User.loginWithWeapp() // 一键登录，返回最新的资料。
-    let userInfo = await wepy.getUserInfo()  // 获取微信头像及用户名。
-    user = await user.set(userInfo).save()  // 把头像及用户名 nickName 同步到服务端。
-    wepy.$instance.globalData.user = user.toJSON()  // 保存到全局数据中。
-  }
+  // async login() {
+  //   let user = await AV.User.loginWithWeapp() // 一键登录，返回最新的资料。
+  //   let userInfo = await wepy.getUserInfo()  // 获取微信头像及用户名。
+  //   user = await user.set(userInfo).save()  // 把头像及用户名 nickName 同步到服务端。
+  //   wepy.$instance.globalData.user = user.toJSON()  // 保存到全局数据中。
+  // }
 
-  async onLaunch() {
+  onLaunch() {
     // await this.syncStoreConfig('login_code');
     // await this.syncStoreConfig('shop_id');
-    await this.login()
     console.log(wepy.$instance.globalData.user)
   }
 
@@ -55,13 +54,13 @@ export default class extends wepy.app {
 
   config = {
     pages: [
+      'pages/home/login',
       'pages/home/index',
       'pages/order/index',
       'pages/order/reminder',
       'pages/goods/list',
       'pages/goods/edit',
       'pages/goods/prod',
-      'pages/home/login',
       'pages/goods/detail',
       'pages/order/refund',
       'pages/home/shops',
