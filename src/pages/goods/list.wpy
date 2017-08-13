@@ -36,9 +36,9 @@
       },
       tab: {
         list: [
-          {id: 'onSale', title: '出售中'},
-          {id: 'sellOut', title: '售罄的'},
-          {id: 'offSale', title: '仓库中'}
+          {id: 'onSale', title: '全部'},
+          {id: 'sellOut', title: '已断货'},
+          {id: 'offSale', title: '一口价'}
         ],
         selectedId: 'onSale',
         categoryId: '0',

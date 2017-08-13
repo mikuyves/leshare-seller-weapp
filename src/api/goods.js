@@ -262,9 +262,10 @@ export default class goods extends base {
   /**
    * 删除商品
    */
-  static async remove(goodsId) {
-    const url = `${this.baseUrl}/goods/${goodsId}`;
-    return await this.delete(url);
+  static remove(goodsId) {
+    console.log(goodsId)
+    let prod = new AV.Object.createWithoutData('Prod', goodsId)
+    return prod.destroy()
   }
   /**
    * 商品详情

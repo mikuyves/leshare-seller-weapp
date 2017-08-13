@@ -95,7 +95,7 @@
         this.$root.$navigate('reprice', {orderId});
       },
       detail(goodsId, customerId) {
-        this.$root.$navigate('../../pages/goods/prod', {goodsId, customerId});
+        this.$root.$navigate('../../pages/goods/prod', {goodsId, mode: 'remind', customerId});
       },
       refund(orderId) {
         this.$root.$navigate('refund', {orderId});
