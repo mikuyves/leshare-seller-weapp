@@ -58,42 +58,17 @@
       init: false,
       avatarUrl: '',
       avUser: {},
-      userInfo: {}
     };
     data = {...this.def}
     onLoad () {
       this.loginThenSwitch()
       this.loaded();
-      // try {
-      //   const loginCode = auth.getConfig('login_code');
-      //   if (loginCode != null) {
-      //     const result = await auth.check(loginCode);
-      //     if (result == 'SUCCESS') {
-      //       const shopId = auth.getConfig('shop_id');
-      //       if (shopId != null) {
-      //         this.$switch('index');
-      //       } else {
-      //         this.$redirect('shops');
-      //       }
-      //     }
-      //   }
-      // } catch (e) {
-      //   await auth.removeConfig('login_code');
-      // } finally {
-      //   this.loaded();
-      // }
     }
 
     onReady() {}
 
     switchWithCache() {
-      let avUser = AV.User.current();
-      if (avUser) {
-        this.avUser = AV.User.current().toJSON();
-      } else {
-        console.log('No cache user data.')
-      };
-      if (this.avUser.mobilePhoneVerified) {
+      if (this.avUser.nickName && this.avUser.mobilePhoneVerified) {
         this.$switch('index')
       } else {
         console.log('Mobile phone is NOT verified.')
@@ -108,23 +83,10 @@
     }
 
     methods = {
-      async confirm() {
-        // if (!this.isValid()) {
-        //   return;
-        // }
-        try {
-          this.$redirect('shops');
-        } catch (e) {
-          this.tips(e.message);
-        } finally {
-          this.loaded();
-        }
-      },
       // 获取用户授权
       async authorize() {
         try {
-          this.userInfo = await wepy.getUserInfo();
-          await this.loginThenSwitch();
+          await wepy.getUserInfo();
         } catch(err) {
           let text = `
 您之前拒绝了授权，
@@ -135,12 +97,10 @@
 即可授权，谢谢！
 `;
           await Tips.confirm(text);
-          // 跳转设置页面授权
-          let isAuth = await auth.openSetting();
-          if (isAuth) {
-            await this.loginThenSwitch();
-          };
-        };
+          await auth.openSetting()
+        } finally {
+          await this.loginThenSwitch();
+        }
         this.$apply();
       },
       // 发送验证码
@@ -176,7 +136,7 @@
     };
     mixins = [input, base];
     config = {
-      navigationBarTitleText: '商家登录'
+      navigationBarTitleText: '登录'
     };
     components = {
       Tips: FormTips,

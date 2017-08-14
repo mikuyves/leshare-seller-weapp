@@ -7,9 +7,16 @@ export default class auth extends base {
    * 登录
    */
   static async login() {
-    let user = await AV.User.loginWithWeapp() // 一键登录，返回最新的资料。
-    let userInfo = await wepy.getUserInfo()  // 获取微信头像及用户名。
-    user = await user.set(userInfo).save()  // 把头像及用户名 nickName 同步到服务端。
+    let user = await AV.User.loginWithWeapp() // 一键登录leancloud，返回用户在服务器上的资料。
+    let data = await wepy.getUserInfo()  // 获取微信头像及用户名。
+    // 把头像及 nickName 同步到服务端。
+    // 然后再取回本地，原子更新，使用 fetchWhenSave 选项。
+    user = await user.save({
+      'nickName': data.userInfo.nickName,
+      'avatarUrl': data.userInfo.avatarUrl
+    }, {
+      fetchWhenSave: true
+    })
     wepy.$instance.globalData.user = user.toJSON()  // 保存到全局数据中。
     return user.toJSON()
   }
