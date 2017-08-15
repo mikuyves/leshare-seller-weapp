@@ -164,7 +164,7 @@
             <image style="width: 60rpx; height: 60rpx" class="weui-cell__hd" src="{{item.avatarUrl ? item.avatarUrl : '/images/icons/empty.png'}}" />
           </view>
           <view class="weui-cell__bd">{{item.nickName ? item.nickName : '未授权'}}</view>
-          <view class="weui-cell__bd">{{item.username.length === 25 ? '未注册' : item.username}}</view>
+          <!-- <view class="weui-cell__bd">{{item.username.length === 25 ? '未注册' : item.username}}</view> -->
           <view class="weui-cell__ft">{{item.mobilePhoneNumber ? item.mobilePhoneNumber : "未注册手机"  }}</view>
 
         </label>
