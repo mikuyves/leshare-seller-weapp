@@ -62,14 +62,17 @@
     };
     data = {...this.def}
     onLoad () {
-      this.loginThenSwitch()
+      this.switchWithCache()
+      // this.loginThenSwitch()
       this.loaded();
     }
 
     onReady() {}
 
     switchWithCache() {
-      if (this.avUser.nickName && this.avUser.mobilePhoneVerified) {
+      let currentUser = AV.User.current()
+      currentUser = currentUser ? currentUser.toJSON() : {};
+      if (currentUser.nickName && currentUser.mobilePhoneVerified) {
         this.$switch('index')
       } else {
         console.log('Mobile phone is NOT verified.')
