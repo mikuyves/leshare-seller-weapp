@@ -67,11 +67,25 @@ export default class auth extends base {
     wepy.$instance.globalData.auth[key] = null;
     await wepy.removeStorage({key: key});
   }
-
   /**
    * 验证用户位置，用于考勤，未完成。
    */
-  static async isNearby() {
+  static async saveCheckIn(shop) {
+    let checkIn = new AV.Object('CheckIn');
+    shop = new AV.Object.createWithoutData(
+      'Shop', shop.toJSON().objectId
+    );
+    let user = new AV.Object.createWithoutData(
+      '_User', AV.User.current().toJSON().objectId
+    );
+    checkIn.set('user', user)
+    checkIn.set('shop', shop)
+    return checkIn.save()
+   }
+  /**
+   * 验证用户位置，用于考勤，未完成。
+   */
+  static async getNearbyShop() {
     let location = await wepy.getLocation();
     let lati = location.latitude
     let longi = location.longitude
@@ -80,7 +94,7 @@ export default class auth extends base {
     let query = new AV.Query('Shop')
     query.withinKilometers('location', point, 0.1)
     let shops = await query.find()
-    return shops.length = 0 ? false : true
+    return shops.length === 0 ? null : shops[0]
    }
   /**
    * 获取用户列表。

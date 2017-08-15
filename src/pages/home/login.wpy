@@ -39,9 +39,10 @@
       <view wx:if="{{avUser.nickName && !avUser.mobilePhoneVerified}}" class="weui-btn-area">
         <button class="weui-btn" type="primary" @tap="register">注册</button>
       </view>
+
     </view>
+    <view class="weui-cells__tips">提示：如有疑问，请向工作人员了解更多。</view>
   </view>
-  <view class="weui-cells__tips">提示：如有疑问，请向工作人员了解更多。</view>
 </template>
 
 <script>
@@ -61,7 +62,7 @@
     };
     data = {...this.def}
     onLoad () {
-      this.loginThenSwitch()
+      // this.loginThenSwitch()
       this.loaded();
     }
 
@@ -133,6 +134,11 @@
           this.tips('验证码无效，请核对后重新输入。');
         }
       },
+      async test() {
+        let roles = await AV.User.current().getRoles()
+        roles = roles.map(item => item.toJSON())
+        console.log(roles);
+      }
     };
     mixins = [input, base];
     config = {
