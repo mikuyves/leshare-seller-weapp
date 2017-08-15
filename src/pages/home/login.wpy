@@ -62,7 +62,7 @@
     };
     data = {...this.def}
     onLoad () {
-      // this.loginThenSwitch()
+      this.loginThenSwitch()
       this.loaded();
     }
 

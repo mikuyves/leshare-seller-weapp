@@ -76,7 +76,7 @@
 
         <view class="weui-cell weui-cell_input" >
           <view class="weui-cell__hd" >
-            <view class="weui-label sku-label">零售价</view>
+            <view class="weui-label sku-label">贵宾价</view>
           </view>
           <view class="weui-cell__bd">
             <input class="weui-input" id="price3" type="digit" @input="input({{index}})" value="{{info.price3}}"  placeholder="￥"/>

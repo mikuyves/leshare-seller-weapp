@@ -87,12 +87,13 @@ export default class auth extends base {
    */
   static async getNearbyShop() {
     let location = await wepy.getLocation();
+    console.log(location)
     let lati = location.latitude
     let longi = location.longitude
     let point = new AV.GeoPoint(lati, longi)
     // 查询 100 米附件有没有店铺。未完成，还需要验证这个店员是否在这个店铺工作。
     let query = new AV.Query('Shop')
-    query.withinKilometers('location', point, 0.1)
+    query.withinKilometers('location', point, 2)
     let shops = await query.find()
     return shops.length === 0 ? null : shops[0]
    }

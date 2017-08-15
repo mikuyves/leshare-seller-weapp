@@ -23,7 +23,7 @@
 
           <!--商品图片-->
           <view class="">
-            <image class="order-goods-image" mode="aspectFit" src="{{prod.prodKey.mainPic.url}}"/>
+            <image class="order-goods-image" mode="aspectFit" src="{{prod.prodKey.mainPicUrl}}"/>
           </view>
 
           <!--商品名称-->

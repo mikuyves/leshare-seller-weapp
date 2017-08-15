@@ -30,8 +30,7 @@ export default class goods extends base {
       prod = await this.getProdWithDetail(goodsId)
     }
     let skus = await goods.getSkuListFromProd(prod);
-    let picUrls = await goods.getProdPics(prod);
-    return {prod, skus, picUrls}
+    return {prod, skus}
   }
   /**
    * 商品分类。
@@ -113,7 +112,6 @@ export default class goods extends base {
   static async getProdByPid(pid) {
     let query = new AV.Query('Prod')
     query.equalTo('pid', Number(pid))
-    query.include('mainPic')
     query.include('brand')
     query.include('cate')
     query.include('supplier')
@@ -126,7 +124,6 @@ export default class goods extends base {
     let prod = AV.Object.createWithoutData('Prod', goodsId)
     return prod.fetch({
       include: [
-        'mainPic',
         'brand',
         'cate',
         'supplier'
@@ -163,7 +160,6 @@ export default class goods extends base {
     query.descending('createdAt')
     query.skip(from)
     query.limit(limit)
-    query.include('mainPic')
     query.include('brand')
     query.include('cate')
     query.include('supplier')
@@ -224,40 +220,56 @@ export default class goods extends base {
   /**
    * 创建商品
    */
-  static async create(data) {
-    let prod = new AV.Object('Prod');
+  static async create(data, goodsId) {
+    let prod;
+    if (goodsId) {
+      prod = new AV.Object.createWithoutData('Prod', goodsId);
+    } else {
+      prod = new AV.Object('Prod');
+    }
     prod.set('name', data.name);
     prod.set('feat', data.feat);
     prod.set('pid', data.pid);
+    prod.set('retailPrice', data.retailPrice);
     prod.set('isSamePrice', data.isSamePrice);
     prod.set('isOnePrice', data.isOnePrice);
     prod.set('cate', data.cate)
     prod.set('brand', data.brand)
     prod.set('supplier', data.supplier)
-    prod.set('mainPic', data.images[0])
+    prod.set('mainPicUrl', data.images[0])
+    prod.set('picUrls', data.images)
     prod = await prod.save();
     console.log(prod)
-    for (let pic of data.images) {
-      // 中间表，为每张票对应一个商品，创建一行数据。
-      let ppm = new AV.Object('ProdPicMap');
-      ppm.set('prod', prod);
-      ppm.set('pic', pic);
-      let res = await ppm.save();
-      console.log(res)
-    }
+    // for (let pic of data.images) {
+    //   // 中间表，为每张票对应一个商品，创建一行数据。
+    //   let ppm = new AV.Object('ProdPicMap');
+    //   ppm.set('prod', prod);
+    //   ppm.set('pic', pic);
+    //   let res = await ppm.save();
+    //   console.log(res)
+    // }
+    let avSku;
     for (let sku of data.skuList) {
-      let avSku = new AV.Object('Sku', sku);
+      if (sku.objectId) {
+        avSku = new AV.Object.createWithoutData('Sku', sku.objectId);
+        avSku.set('size1', sku.size1);
+        avSku.set('size2', sku.size2);
+        avSku.set('color', sku.color);
+        avSku.set('price1', sku.price1);
+        avSku.set('price2', sku.price2);
+        avSku.set('price3', sku.price3);
+        avSku.set('price4', sku.price4);
+        avSku.set('stock', sku.stock);
+        avSku.set('soldOut', sku.soldOut);
+        avSku.set('name', sku.name);
+        avSku.set('fullName', sku.fullName);
+      } else {
+        avSku = new AV.Object('Sku', sku);
+      }
       avSku.set('prod', prod)
       avSku = await avSku.save()
       console.log(avSku)
     }
-  }
-  /**
-   * 更新商品
-   */
-  static async update(goodsId, goods) {
-    const url = `${this.baseUrl}/goods/${goodsId}`;
-    return await this.put(url, goods);
   }
   /**
    * 删除商品

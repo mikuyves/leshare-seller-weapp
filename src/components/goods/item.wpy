@@ -1,7 +1,7 @@
 <template>
   <view class="item-box">
     <view class="goods-box row">
-      <image mode="aspectFit" class="goods-image" @tap="goToItem({{goods.objectId}})" src="{{goods.mainPic.url ? goods.mainPic.url : '/images/icons/empty.png'}}" />
+      <image mode="aspectFit" class="goods-image" @tap="goToItem({{goods.objectId}})" src="{{goods.mainPicUrl ? goods.mainPicUrl : '/images/icons/empty.png'}}" />
       <view class="info-box column">
         <view class="title-box">
           <text class="title" @tap="goToItem({{goods.objectId}})">{{goods.name}}</text>
@@ -27,6 +27,7 @@
       </view>
       <view>
         <view class="zan-btn zan-btn--small" @tap="delete({{goods.objectId}})" >删除</view>
+        <view class="zan-btn zan-btn--small" @tap="goToItem({{goods.objectId}})" >备忘</view>
         <view class="zan-btn zan-btn--small" @tap="adjust({{goods.objectId}})" >库存</view>
         <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="offSale({{goods.id}})">下架</view>
         <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="onSale({{goods.id}})">上架</view>

@@ -44,8 +44,21 @@
       </view>
     </view>
 
+    <!-- 建议零售价 -->
+    <view class="weui-cells-form">
+      <view class="weui-cell weui-cell__input weui-cell__vcode">
+        <view class="weui-cell__hd">
+            <view class="weui-label">建议零售价</view>
+        </view>
+        <view class="weui-cell__bd">
+          <input class="weui-input" id="retailPrice" value="{{retailPrice}}" type="number" maxlength="5" @input="inputRetailPrice" />
+        </view>
+      </view>
+    </view>
+
+
     <!-- SKU 列表 -->
-    <SkuList :skuList.sync="skuList" :isSamePrice.sync="isSamePrice" :isOnePrice.sync="isOnePrice" />
+    <SkuList :skuList.sync="skuList" :retailPrice.sync="retailPrice" :isSamePrice.sync="isSamePrice" :isOnePrice.sync="isOnePrice" />
 
     <!-- 其他详细信息 -->
      <view class="detail-box">
@@ -254,10 +267,11 @@
         name: '',
         cate: '',
         brand: '',
-        supplier: ''
+        supplier: '',
       },
       details: [],
       pictures: [],
+      deletedPics: [],
       skuList: [{
         size1: '',
         size2: '',
@@ -265,12 +279,15 @@
         price1: null,
         price2: null,
         price3: null,
+        price4: null,
         stock: null,
         soldOut: false
       }],
       mode: 'create',
+      prod: {},
       isSamePrice: true,
       isOnePrice: false,
+      retailPrice: '',
       cates: [],
       brands: [],
       suppliers: [],
@@ -313,11 +330,6 @@
           item.size1 = item.size1.name;
           return item
         })
-        // pictures 的格式为 [{url: 'xxx'}, {url: 'xxxx'}]
-        // TODO: pictures 未做调整顺序处理。
-        this.pictures = detail.picUrls.map(item => {
-          return {url: item}
-        });
         // 处理输入框和选择框。
         this.input.pid = Number(prod.pid);
         this.input.name = prod.name;
@@ -325,8 +337,10 @@
         this.input.cate = prod.cate.name;
         this.input.brand = prod.brand.name;
         this.input.supplier = prod.supplier.name;
+        this.retailPrice = prod.retailPrice;
         this.isSamePrice = prod.isSamePrice;
         this.isOnePrice = prod.isOnePrice;
+        this.pictures = prod.picUrls;
         this.prod = prod
       }
       Event.listen(Event.GOODS_DETAILS_UPDATE, this.detailsUpdate.bind(this), this);
@@ -352,17 +366,19 @@
         }
         Tips.loading();
         // 处理图片信息
-        for (let picture of this.pictures) {
-          if (picture.url.startsWith('wxfile')) {
-            const avFile = await goods.uploadImage(picture.url, this.autoTitle);
-            data.images.push(avFile);
+        for (let picUrl of this.pictures) {
+          if (picUrl.startsWith('wxfile')) {
+            const avFile = await goods.uploadImage(picUrl, this.autoTitle);
+            console.log(avFile)
+            data.images = [...data.images, avFile.toJSON().url]
           } else {
-            data.images.push(picture);
+            data.images = [...data.images, picUrl]
           }
         }
         // 字段信息
         data.name = this.autoTitle;
         data.feat = this.input.feat;
+        data.retailPrice = this.retailPrice;
         data.isSamePrice = this.isSamePrice;
         data.isOnePrice = this.isOnePrice;
         data.pid = Number(this.input.pid);
@@ -380,18 +396,20 @@
           sku.price1 = Number(skuItem.price1);
           sku.price2 = Number(skuItem.price2);
           sku.price3 = Number(skuItem.price3);
+          sku.price4 = Number(skuItem.price4);
           sku.stock = Number(skuItem.stock);
           sku.soldOut = skuItem.soldOut;
-          sku.name = [skuItem.color, skuItem.size1].join('-')
-          sku.fullName = data.name + ' ' + sku.name
+          sku.name = [skuItem.color, skuItem.size1].join('-');
+          sku.fullName = data.name + ' ' + sku.name;
+          sku.objectId = skuItem.objectId;
           return sku
         })
         if (this.mode == 'create') {
           await goods.create(data);
           await Tips.success('商品新增成功！', 800);
         } else {
-          // await goods.update(this.input.goodsId, data);
-          await Tips.success('更新功能未完善！请稍后再试...', 800);
+          await goods.create(data, this.prod.objectId);
+          await Tips.success('商品资料更新成功！', 800);
         }
         Event.emit(Event.GOODS_LIST_UPDATE);
         wepy.navigateBack();
@@ -442,6 +460,9 @@
       // 一口价。
       onePrice(e) {
         this.isOnePrice = e.detail.value
+      },
+      inputRetailPrice(e) {
+        this.retailPrice = e.detail.value
       },
       // 扫码功能。
       async scanCode() {
@@ -571,17 +592,22 @@
         return size > 0 ? `已保存${size}条详情` : '请点击编辑详情';
       },
       autoTitle() {
-        return `${this.input.brand} ${this.input.feat}${this.input.cate}`
+        if (!this.input.brand && !this.input.feat && !this.input.cate) {
+          return ''
+        } else {
+          return `${this.input.brand} ${this.input.feat}${this.input.cate}`
+        }
       }
     };
 
     watch = {
-      input() {
-        // 新建模式及未完成初始化时，不需要观察。
-        if (!this.init || this.mode === 'create') {
-          return
-        } else {
-          console.log('Data changed.')
+      pictures(newPics, oldPics) {
+        let dps = oldPics.filter(item => !newPics.includes(item))
+        if (dps.length > 0) {
+          let dp = dps[0];
+          if (dp.startsWith('http')) {
+            this.deletedPics = [...this.deletedPics, dp];
+          }
         }
       }
     }

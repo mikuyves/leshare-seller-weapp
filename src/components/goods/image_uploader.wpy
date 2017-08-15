@@ -9,7 +9,7 @@
   <view class="swiper-box" wx:if="{{pictures.length > 0}}" @tap="manage">
     <swiper class="picture-swiper" indicator-dots="true" indicator-active-color="#EEE" >
       <swiper-item wx:for="{{pictures}}" wx:key="index" wx:index="index">
-        <image mode="aspectFit" src="{{item.url}}"></image>
+        <image mode="aspectFit" src="{{item}}"></image>
       </swiper-item>
     </swiper>
     <image class="photo-btn icon-xl"  @tap.stop="photo" src="/images/icons/camera.png"></image>
@@ -24,7 +24,7 @@
         <!--展现区域-->
         <view class="item-header-box">
           <text class="lg mr20">{{index + 1}}</text>
-          <image class="icon-xl" src="{{item.url}}"></image>
+          <image class="icon-xl" src="{{item}}"></image>
           <text class="ml20" wx:if="{{index == 0}}">(商品封面)</text>
           <text class="muted ml20" wx:else>(细节图片)</text>
         </view>
@@ -72,11 +72,7 @@
         try {
           Tips.loading();
           const {tempFilePaths} = await wepy.chooseImage(param);
-          const pictures = tempFilePaths.map(item => {
-            return {
-              url: item
-            }
-          });
+          const pictures = tempFilePaths
           this.pictures = this.pictures.concat(pictures);
           this.$apply();
         } finally {

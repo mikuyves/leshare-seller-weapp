@@ -11,7 +11,7 @@
     </view>
 
     <view class="flex-wrap">
-      <view wx:for="{{picUrls}}" wx:key="item">
+      <view wx:for="{{prod.picUrls}}" wx:key="item">
         <view @tap="changePic({{item}})">
           <image mode="aspectFit" src="{{item}}"/>
         </view>
@@ -224,11 +224,9 @@
       }
       let prod = await goods.getProdWithDetail(goodsId);
       let skus = await goods.getSkuListFromProd(prod);
-      let picUrls = await goods.getProdPics(prod);
       this.prod = prod.toJSON();
       this.skuList = skus.map(item => item.toJSON());
-      this.picUrls = picUrls;
-      this.showUrl = this.prod.mainPic.url;
+      this.showUrl = this.prod.mainPicUrl;
       // Event.listen(Event.GOODS_LIST_UPDATE, this.update.bind(this), this);
       this.$apply();
     }
