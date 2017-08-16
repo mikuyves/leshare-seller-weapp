@@ -110,12 +110,21 @@
             <switch checked="{{isSamePrice}}" id="isSamePrice" @change="samePrice" />
           </view>
         </view>
+
         <view class="weui-cell weui-cell_switch">
           <view class="weui-cell__bd">一口价</view>
           <view class="weui-cell__ft">
             <switch checked="{{isOnePrice}}" id="isOnePrice" @change="onePrice" />
           </view>
         </view>
+
+        <view class="weui-cell weui-cell_switch">
+          <view class="weui-cell__bd">全部断货</view>
+          <view class="weui-cell__ft">
+            <switch checked="{{isAllSoldOut}}" id="isAllSoldOut" @change="allSoldOut" />
+          </view>
+        </view>
+
       </view>
     </view>
 
@@ -287,6 +296,7 @@
       prod: {},
       isSamePrice: true,
       isOnePrice: false,
+      isAllSoldOut: false,
       retailPrice: '',
       cates: [],
       brands: [],
@@ -341,6 +351,7 @@
         this.retailPrice = prod.retailPrice;
         this.isSamePrice = prod.isSamePrice;
         this.isOnePrice = prod.isOnePrice;
+        this.isAllSoldOut = prod.isAllSoldOut;
         this.pictures = prod.picUrls;
         this.prod = prod
       }
@@ -384,6 +395,7 @@
         data.retailPrice = this.retailPrice;
         data.isSamePrice = this.isSamePrice;
         data.isOnePrice = this.isOnePrice;
+        data.isAllSoldOut = this.isAllSoldOut;
         data.pid = Number(this.input.pid);
         data.cate = this.cates.find(item => item.toJSON().name == this.input.cate);
         data.supplier = this.suppliers.find(item => item.toJSON().name == this.input.supplier)
@@ -463,6 +475,10 @@
       // 一口价。
       onePrice(e) {
         this.isOnePrice = e.detail.value
+      },
+      // 全部断货。
+      allSoldOut(e) {
+        this.isAllSoldOut = e.detail.value
       },
       inputRetailPrice(e) {
         this.retailPrice = e.detail.value
@@ -597,6 +613,9 @@
         let feat = this.input.feat ? this.input.feat : ''
         let cate = this.input.cate ? this.input.cate : ''
         return `${brand} ${feat}${cate}`.trim()
+      },
+      isAllSoldOut() {
+        return this.skuList.map(item => item.soldOut).every((v) => v)
       }
     };
 

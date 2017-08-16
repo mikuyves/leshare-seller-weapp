@@ -222,7 +222,7 @@ export default class goods extends base {
    * 创建或修更新商品
    */
   static async createOrUpdate(data, goodsId) {
-    // 新建或修改商品。
+    // 处理商品。
     let prod;
     if (goodsId) {
       prod = new AV.Object.createWithoutData('Prod', goodsId);
@@ -235,12 +235,13 @@ export default class goods extends base {
     prod.set('retailPrice', data.retailPrice);
     prod.set('isSamePrice', data.isSamePrice);
     prod.set('isOnePrice', data.isOnePrice);
+    prod.set('isAllSoldOut', data.isAllSoldOut);
     prod.set('cate', data.cate)
     prod.set('brand', data.brand)
     prod.set('supplier', data.supplier)
+    // 处理图片。
     prod.set('mainPicUrl', data.images[0])
     prod.set('picUrls', data.images)  // 用 url 数组代替中间表
-    // 删除图片。
     if (data.deletedPics.length > 0) {
       let query = new AV.Query('_File');
       query.containedIn('url', data.deletedPics);
@@ -248,8 +249,10 @@ export default class goods extends base {
       await AV.Object.destroyAll(pics)
     }
     prod = await prod.save();
+    // 处理 sku。
     let skus = []
     for (let sku of data.skuList) {
+      let avSku;
       if (sku.objectId) {
         avSku = new AV.Object.createWithoutData('Sku', sku.objectId);
       } else {
