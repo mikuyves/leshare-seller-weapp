@@ -39,7 +39,7 @@
           <view wx:if="{{mode === 'adjust'}}" class="zan-label" @tap="minusAdjustment({{sku}})">-</view>
           <view wx:if="{{mode === 'adjust'}}" class="zan-label" @tap="addAdjustment({{sku}})">+</view>
 
-          <view class="zan-label zan-label--primary zan-label--small" wx:if="{{sku.soldOut}}">断</view>
+          <view class="zan-label zan-label--primary zan-label--small" wx:if="{{sku.isSoldOut}}">断</view>
 
         </block>
       </view>
@@ -275,7 +275,7 @@
         let foundItem = this.reminders.find(item => item.sku.name === sku.name)
         if (foundItem) {
           // 断货时，最大值是现货存量。
-          if (foundItem.sku.soldOut && foundItem.qtt === foundItem.sku.stock) {
+          if (foundItem.sku.isSoldOut && foundItem.qtt === foundItem.sku.stock) {
             console.log('This product is sold out.')
             return
           } else {
@@ -348,7 +348,7 @@
         let foundItem = this.adjustments.find(item => item.sku.name === sku.name)
         if (foundItem) {
           // 断货时，最大值是现货存量。
-          if (foundItem.sku.soldOut && foundItem.qtt === foundItem.sku.stock) {
+          if (foundItem.sku.isSoldOut && foundItem.qtt === foundItem.sku.stock) {
             console.log('This product is sold out.')
             return
           } else {

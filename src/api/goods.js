@@ -267,7 +267,7 @@ export default class goods extends base {
       avSku.set('price3', sku.price3);
       avSku.set('price4', sku.price4);
       avSku.set('stock', sku.stock);
-      avSku.set('soldOut', sku.soldOut);
+      avSku.set('isSoldOut', sku.isSoldOut);
       avSku.set('name', sku.name);
       avSku.set('fullName', sku.fullName);
       skus = [...skus, avSku]

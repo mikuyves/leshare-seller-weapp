@@ -290,7 +290,7 @@
         price3: null,
         price4: null,
         stock: null,
-        soldOut: false
+        isSoldOut: false
       }],
       mode: 'create',
       prod: {},
@@ -413,7 +413,7 @@
           sku.price3 = Number(skuItem.price3);
           sku.price4 = Number(skuItem.price4);
           sku.stock = Number(skuItem.stock);
-          sku.soldOut = skuItem.soldOut;
+          sku.isSoldOut = skuItem.isSoldOut;
           sku.name = [skuItem.color, skuItem.size1].join('-');
           sku.fullName = data.name + ' ' + sku.name;
           sku.objectId = skuItem.objectId;
@@ -615,7 +615,7 @@
         return `${brand} ${feat}${cate}`.trim()
       },
       isAllSoldOut() {
-        return this.skuList.map(item => item.soldOut).every((v) => v)
+        return this.skuList.map(item => item.isSoldOut).every((v) => v)
       }
     };
 

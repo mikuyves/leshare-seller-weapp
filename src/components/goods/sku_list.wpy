@@ -37,7 +37,7 @@
           size1: this.skuList[this.skuList.length - 1].size1,
           color: this.skuList[this.skuList.length - 1].color,
           stock: null,
-          soldOut: false,
+          isSoldOut: false,
         });
       },
       remove(index) {
@@ -103,7 +103,7 @@
         price2: null,
         price3: null,
         stock: null,
-        soldOut: false
+        isSoldOut: false
       }];
       this.$apply();
     }

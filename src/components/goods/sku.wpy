@@ -90,7 +90,7 @@
             <view class="weui-label sku-label">断货</view>
           </view>
           <view class="weui-cell__bd">
-              <switch checked="{{info.soldOut}}" id="soldOut" @change="input({{index}})" />
+              <switch checked="{{info.isSoldOut}}" id="isSoldOut" @change="input({{index}})" />
           </view>
           <view class="weui-cell__ft">
           </view>
