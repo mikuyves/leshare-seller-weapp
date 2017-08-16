@@ -27,6 +27,7 @@ export default class goods extends base {
         return null
       }
     } else {
+      // 通过 objectId 获取资料
       prod = await this.getProdWithDetail(goodsId)
     }
     let skus = await goods.getSkuListFromProd(prod);
@@ -218,9 +219,10 @@ export default class goods extends base {
     return await picture.save()
   }
   /**
-   * 创建商品
+   * 创建或修更新商品
    */
-  static async create(data, goodsId) {
+  static async createOrUpdate(data, goodsId) {
+    // 新建或修改商品。
     let prod;
     if (goodsId) {
       prod = new AV.Object.createWithoutData('Prod', goodsId);
@@ -238,8 +240,14 @@ export default class goods extends base {
     prod.set('supplier', data.supplier)
     prod.set('mainPicUrl', data.images[0])
     prod.set('picUrls', data.images)  // 用 url 数组代替中间表
+    // 删除图片。
+    if (data.deletedPics.length > 0) {
+      let query = new AV.Query('_File');
+      query.containedIn('url', data.deletedPics);
+      let pics = await query.find();
+      await AV.Object.destroyAll(pics)
+    }
     prod = await prod.save();
-    let avSku;
     let skus = []
     for (let sku of data.skuList) {
       if (sku.objectId) {

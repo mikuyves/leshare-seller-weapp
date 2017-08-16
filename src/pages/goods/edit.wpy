@@ -316,6 +316,7 @@
 
       // 编辑模式。
       if (this.mode == 'edit') {
+        // 此处 goodsId 可以是 objectId 或 pid。
         let detail = await goods.edit(goodsId);
         // 如果没有结果，跳转至新建商品。
         if (!detail) {
@@ -375,6 +376,8 @@
             data.images = [...data.images, picUrl]
           }
         }
+        // 本地删除的云端图片。
+        data.deletedPics = this.deletedPics;
         // 字段信息
         data.name = this.autoTitle;
         data.feat = this.input.feat;
@@ -405,10 +408,10 @@
           return sku
         })
         if (this.mode == 'create') {
-          await goods.create(data);
+          await goods.createOrUpdate(data);
           await Tips.success('商品新增成功！', 800);
         } else {
-          await goods.create(data, this.prod.objectId);
+          await goods.createOrUpdate(data, this.prod.objectId);
           await Tips.success('商品资料更新成功！', 800);
         }
         Event.emit(Event.GOODS_LIST_UPDATE);
