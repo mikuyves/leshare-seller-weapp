@@ -49,10 +49,12 @@
     data = {};
     methods = {
       async delete() {
-        let goodsId = this.goods.toJSON().objectId;
-        let skuIdList = this.goods.toJSON().skuList.map(item => item.objectId)
+        let prod = this.goods.toJSON();
+        let goodsId = prod.objectId;
+        let picUrls = prod.picUrls;
+        let skuIdList = prod.skuList.map(item => item.objectId);
         await Tips.confirm('是否确认删除该商品？');
-        await goods.remove(goodsId, skuIdList);
+        await goods.remove(goodsId, skuIdList, picUrls);
         await Tips.success('删除成功');
         Event.emit(Event.GOODS_LIST_UPDATE);
       },

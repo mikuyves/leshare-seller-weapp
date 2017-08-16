@@ -467,9 +467,7 @@
       // 扫码功能。
       async scanCode() {
         let res = await wepy.scanCode();
-        let goodsId = res.result;
-        this.init = false;
-        this.$root.$navigate('edit', {goodsId, mode: 'edit'});
+        this.input.pid = res.result;
       }
     };
     // 商品详情更新
@@ -592,7 +590,10 @@
         return size > 0 ? `已保存${size}条详情` : '请点击编辑详情';
       },
       autoTitle() {
-        return `${this.input.brand} ${this.input.feat}${this.input.cate}`.trim()
+        let brand = this.input.brand ? this.input.brand : ''
+        let feat = this.input.feat ? this.input.feat : ''
+        let cate = this.input.cate ? this.input.cate : ''
+        return `${brand} ${feat}${cate}`.trim()
       }
     };
 

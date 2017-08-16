@@ -267,11 +267,17 @@ export default class goods extends base {
   /**
    * 删除商品
    */
-  static async remove(goodsId, skuIdList) {
+  static async remove(goodsId, skuIdList, picUrls) {
     let prod = new AV.Object.createWithoutData('Prod', goodsId)
     let skus = skuIdList.map(item => new AV.Object.createWithoutData('Sku', item))
-    await AV.Object.destroyAll(skus)
-    await prod.destroy()
+    let query = new AV.Query('_File')
+    query.containedIn('url', picUrls)
+    let pics = await query.find()
+    return AV.Promise.all([
+      AV.Object.destroyAll(pics),
+      prod.destroy(),
+      AV.Object.destroyAll(skus)
+    ])
   }
   /**
    * 商品详情
