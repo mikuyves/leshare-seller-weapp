@@ -237,47 +237,41 @@ export default class goods extends base {
     prod.set('brand', data.brand)
     prod.set('supplier', data.supplier)
     prod.set('mainPicUrl', data.images[0])
-    prod.set('picUrls', data.images)
+    prod.set('picUrls', data.images)  // 用 url 数组代替中间表
     prod = await prod.save();
-    console.log(prod)
-    // for (let pic of data.images) {
-    //   // 中间表，为每张票对应一个商品，创建一行数据。
-    //   let ppm = new AV.Object('ProdPicMap');
-    //   ppm.set('prod', prod);
-    //   ppm.set('pic', pic);
-    //   let res = await ppm.save();
-    //   console.log(res)
-    // }
     let avSku;
+    let skus = []
     for (let sku of data.skuList) {
       if (sku.objectId) {
         avSku = new AV.Object.createWithoutData('Sku', sku.objectId);
-        avSku.set('size1', sku.size1);
-        avSku.set('size2', sku.size2);
-        avSku.set('color', sku.color);
-        avSku.set('price1', sku.price1);
-        avSku.set('price2', sku.price2);
-        avSku.set('price3', sku.price3);
-        avSku.set('price4', sku.price4);
-        avSku.set('stock', sku.stock);
-        avSku.set('soldOut', sku.soldOut);
-        avSku.set('name', sku.name);
-        avSku.set('fullName', sku.fullName);
       } else {
-        avSku = new AV.Object('Sku', sku);
+        avSku = new AV.Object('Sku');
       }
       avSku.set('prod', prod)
-      avSku = await avSku.save()
-      console.log(avSku)
+      avSku.set('size1', sku.size1);
+      avSku.set('size2', sku.size2);
+      avSku.set('color', sku.color);
+      avSku.set('price1', sku.price1);
+      avSku.set('price2', sku.price2);
+      avSku.set('price3', sku.price3);
+      avSku.set('price4', sku.price4);
+      avSku.set('stock', sku.stock);
+      avSku.set('soldOut', sku.soldOut);
+      avSku.set('name', sku.name);
+      avSku.set('fullName', sku.fullName);
+      skus = [...skus, avSku]
     }
+    skus = await AV.Object.saveAll(skus)
+    return [prod, skus]
   }
   /**
    * 删除商品
    */
-  static remove(goodsId) {
-    console.log(goodsId)
+  static async remove(goodsId, skuIdList) {
     let prod = new AV.Object.createWithoutData('Prod', goodsId)
-    return prod.destroy()
+    let skus = skuIdList.map(item => new AV.Object.createWithoutData('Sku', item))
+    await AV.Object.destroyAll(skus)
+    await prod.destroy()
   }
   /**
    * 商品详情

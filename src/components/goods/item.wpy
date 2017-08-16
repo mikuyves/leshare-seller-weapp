@@ -26,7 +26,7 @@
         <text class="muted xs ml10">{{goods.supplier.name}}</text>
       </view>
       <view>
-        <view class="zan-btn zan-btn--small" @tap="delete({{goods.objectId}})" >删除</view>
+        <view class="zan-btn zan-btn--small" @tap="delete" >删除</view>
         <view class="zan-btn zan-btn--small" @tap="goToItem({{goods.objectId}})" >备忘</view>
         <view class="zan-btn zan-btn--small" @tap="adjust({{goods.objectId}})" >库存</view>
         <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="offSale({{goods.id}})">下架</view>
@@ -48,9 +48,11 @@
     };
     data = {};
     methods = {
-      async delete(goodsId) {
+      async delete() {
+        let goodsId = this.goods.toJSON().objectId;
+        let skuIdList = this.goods.toJSON().skuList.map(item => item.objectId)
         await Tips.confirm('是否确认删除该商品？');
-        await goods.remove(goodsId);
+        await goods.remove(goodsId, skuIdList);
         await Tips.success('删除成功');
         Event.emit(Event.GOODS_LIST_UPDATE);
       },

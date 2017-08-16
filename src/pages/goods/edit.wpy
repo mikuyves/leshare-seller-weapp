@@ -483,7 +483,7 @@
       let price1s = this.skuList.map(sku => sku.price1)
       let price2s = this.skuList.map(sku => sku.price2)
       let price3s = this.skuList.map(sku => sku.price3)
-      const prices = [...price1s, ...price2s, ...price3s]
+      const prices = [...price1s, ...price2s, ...price3s, this.retailPrice]
       let size1s = this.skuList.map(sku => sku.size1)
       let size2s = this.skuList.map(sku => sku.size2)
       let colors = this.skuList.map(sku => sku.color)
@@ -592,11 +592,7 @@
         return size > 0 ? `已保存${size}条详情` : '请点击编辑详情';
       },
       autoTitle() {
-        if (!this.input.brand && !this.input.feat && !this.input.cate) {
-          return ''
-        } else {
-          return `${this.input.brand} ${this.input.feat}${this.input.cate}`
-        }
+        return `${this.input.brand} ${this.input.feat}${this.input.cate}`.trim()
       }
     };
 

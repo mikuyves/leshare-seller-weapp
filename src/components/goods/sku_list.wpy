@@ -75,9 +75,9 @@
       let retailPrice = Number(this.retailPrice)
       if (this.skuList.length >= 1 && this.isSamePrice) {
         for (let sku of this.skuList) {
-          sku.price1 = retailPrice ? Math.round(retailPrice * 0.35) : '';
-          sku.price2 = retailPrice ? Math.round(retailPrice * 0.5) : '';
-          sku.price3 = retailPrice ? Math.round(retailPrice * 0.6) : '';
+          sku.price1 = retailPrice ? Math.round(retailPrice * 0.035) * 10 : '';
+          sku.price2 = retailPrice ? Math.round(retailPrice * 0.05) * 10 : '';
+          sku.price3 = retailPrice ? Math.round(retailPrice * 0.06) * 10 : '';
           sku.price4 = retailPrice ? retailPrice : '';
         };
       };
