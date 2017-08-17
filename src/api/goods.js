@@ -17,9 +17,9 @@ export default class goods extends base {
     );
   }
   /**
-   * 修改商品详情。
+   * 获取商品及 sku 详情。
    */
-  static async edit(goodsId) {
+  static async getProdAndSkuWithDetail(goodsId) {
     let prod = {}
     // 扫码入口，未完善。TODO
     if (goodsId.length === 7 && Number(goodsId)) {
