@@ -99,7 +99,7 @@
       </view>
     </view>
 
-    <view class="op-box column-center" wx:if="{{skuEditable}}" @tap="remove({{index}})">
+    <view class="op-box column-center" wx:if="{{skuEditable}}" @tap="remove({{index}}, {{info.objectId}})">
       <image class="icon" src="/images/icons/minus.png" wx:if="{{index != 0}}"></image>
     </view>
   </view>
@@ -123,8 +123,8 @@
         const fieldValue = e.detail.value;
         this.$emit('change', {index, fieldName, fieldValue});
       },
-      remove(index) {
-        this.$emit('remove', index);
+      remove(index, skuId) {
+        this.$emit('remove', index, skuId);
       },
       getInner(index, innerId, e) {
         const fieldName = e.currentTarget.id;

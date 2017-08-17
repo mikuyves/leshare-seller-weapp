@@ -281,6 +281,7 @@
       details: [],
       pictures: [],
       deletedPics: [],
+      deletedSkuIds: [],
       skuList: [{
         size1: '',
         size2: '',
@@ -387,8 +388,9 @@
             data.images = [...data.images, picUrl]
           }
         }
-        // 本地删除的云端图片。
+        // 删除项目。
         data.deletedPics = this.deletedPics;
+        data.deletedSkuIds = this.deletedSkuIds;
         // 字段信息
         data.name = this.autoTitle;
         data.feat = this.input.feat;
@@ -634,8 +636,11 @@
     events = {
       // 打开 SKU 的内页选择框，尺码和颜色。
       getInner(innerId, info, e) {
-        this.editingInfo = info
+        this.editingInfo = info;
         this[innerId] = 'true';
+      },
+      deleteSku(skuId) {
+        this.deletedSkuIds = [...this.deletedSkuIds, skuId];
       }
     };
     components = {

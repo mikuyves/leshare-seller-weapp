@@ -222,6 +222,18 @@ export default class goods extends base {
    * 创建或修更新商品
    */
   static async createOrUpdate(data, goodsId) {
+    // 删除项目
+    if (data.deletedPics.length > 0) {
+      let query = new AV.Query('_File');
+      query.containedIn('url', data.deletedPics);
+      let pics = await query.find();
+      await AV.Object.destroyAll(pics)
+    }
+    if (data.deletedSkuIds.length > 0) {
+      await AV.Object.destroyAll(
+        data.deletedSkuIds.map(id => new AV.Object.createWithoutData('Sku', id))
+      )
+    }
     // 处理商品。
     let prod;
     if (goodsId) {
@@ -242,12 +254,6 @@ export default class goods extends base {
     // 处理图片。
     prod.set('mainPicUrl', data.images[0])
     prod.set('picUrls', data.images)  // 用 url 数组代替中间表
-    if (data.deletedPics.length > 0) {
-      let query = new AV.Query('_File');
-      query.containedIn('url', data.deletedPics);
-      let pics = await query.find();
-      await AV.Object.destroyAll(pics)
-    }
     prod = await prod.save();
     // 处理 sku。
     let skus = []

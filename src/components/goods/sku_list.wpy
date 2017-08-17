@@ -40,8 +40,9 @@
           isSoldOut: false,
         });
       },
-      remove(index) {
+      remove(index, skuId) {
         this.skuList.splice(index, 1);
+        this.$emit('deleteSku', skuId)
       },
       change(info) {
         this.skuList[info.index][info.fieldName] = info.fieldValue;
@@ -83,7 +84,6 @@
       };
     }
     keepOnePrice() {
-      console.log('this')
       let retailPrice = Number(this.retailPrice)
       if (this.isOnePrice) {
         for (let sku of this.skuList) {
