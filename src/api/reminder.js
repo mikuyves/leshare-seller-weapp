@@ -27,7 +27,6 @@ export default class Reminder extends base {
     query.limit(limit)
     query.include('sku')
     query.include('prod')
-    query.include('prod.mainPic')
     query.include('customer')
     return query.find();
   }

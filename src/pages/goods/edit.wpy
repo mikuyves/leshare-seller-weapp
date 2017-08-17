@@ -44,8 +44,21 @@
       </view>
     </view>
 
+    <!-- 建议零售价 -->
+    <view class="weui-cells-form">
+      <view class="weui-cell weui-cell__input weui-cell__vcode">
+        <view class="weui-cell__hd">
+            <view class="weui-label">建议零售价</view>
+        </view>
+        <view class="weui-cell__bd">
+          <input class="weui-input" id="retailPrice" value="{{retailPrice}}" type="number" maxlength="5" @input="inputRetailPrice" />
+        </view>
+      </view>
+    </view>
+
+
     <!-- SKU 列表 -->
-    <SkuList :skuList.sync="skuList" :isSamePrice.sync="isSamePrice" :isOnePrice.sync="isOnePrice" />
+    <SkuList :skuList.sync="skuList" :retailPrice.sync="retailPrice" :isSamePrice.sync="isSamePrice" :isOnePrice.sync="isOnePrice" />
 
     <!-- 其他详细信息 -->
      <view class="detail-box">
@@ -97,12 +110,21 @@
             <switch checked="{{isSamePrice}}" id="isSamePrice" @change="samePrice" />
           </view>
         </view>
+
         <view class="weui-cell weui-cell_switch">
           <view class="weui-cell__bd">一口价</view>
           <view class="weui-cell__ft">
             <switch checked="{{isOnePrice}}" id="isOnePrice" @change="onePrice" />
           </view>
         </view>
+
+        <view class="weui-cell weui-cell_switch">
+          <view class="weui-cell__bd">全部断货</view>
+          <view class="weui-cell__ft">
+            <switch checked="{{isAllSoldOut}}" id="isAllSoldOut" @change="allSoldOut" />
+          </view>
+        </view>
+
       </view>
     </view>
 
@@ -254,10 +276,12 @@
         name: '',
         cate: '',
         brand: '',
-        supplier: ''
+        supplier: '',
       },
       details: [],
       pictures: [],
+      deletedPics: [],
+      deletedSkuIds: [],
       skuList: [{
         size1: '',
         size2: '',
@@ -265,12 +289,16 @@
         price1: null,
         price2: null,
         price3: null,
+        price4: null,
         stock: null,
-        soldOut: false
+        isSoldOut: false
       }],
       mode: 'create',
+      prod: {},
       isSamePrice: true,
       isOnePrice: false,
+      isAllSoldOut: false,
+      retailPrice: '',
       cates: [],
       brands: [],
       suppliers: [],
@@ -299,6 +327,7 @@
 
       // 编辑模式。
       if (this.mode == 'edit') {
+        // 此处 goodsId 可以是 objectId 或 pid。
         let detail = await goods.edit(goodsId);
         // 如果没有结果，跳转至新建商品。
         if (!detail) {
@@ -313,11 +342,6 @@
           item.size1 = item.size1.name;
           return item
         })
-        // pictures 的格式为 [{url: 'xxx'}, {url: 'xxxx'}]
-        // TODO: pictures 未做调整顺序处理。
-        this.pictures = detail.picUrls.map(item => {
-          return {url: item}
-        });
         // 处理输入框和选择框。
         this.input.pid = Number(prod.pid);
         this.input.name = prod.name;
@@ -325,8 +349,11 @@
         this.input.cate = prod.cate.name;
         this.input.brand = prod.brand.name;
         this.input.supplier = prod.supplier.name;
+        this.retailPrice = prod.retailPrice;
         this.isSamePrice = prod.isSamePrice;
         this.isOnePrice = prod.isOnePrice;
+        this.isAllSoldOut = prod.isAllSoldOut;
+        this.pictures = prod.picUrls;
         this.prod = prod
       }
       Event.listen(Event.GOODS_DETAILS_UPDATE, this.detailsUpdate.bind(this), this);
@@ -352,19 +379,25 @@
         }
         Tips.loading();
         // 处理图片信息
-        for (let picture of this.pictures) {
-          if (picture.url.startsWith('wxfile')) {
-            const avFile = await goods.uploadImage(picture.url, this.autoTitle);
-            data.images.push(avFile);
+        for (let picUrl of this.pictures) {
+          if (picUrl.startsWith('wxfile')) {
+            const avFile = await goods.uploadImage(picUrl, this.autoTitle);
+            console.log(avFile)
+            data.images = [...data.images, avFile.toJSON().url]
           } else {
-            data.images.push(picture);
+            data.images = [...data.images, picUrl]
           }
         }
+        // 删除项目。
+        data.deletedPics = this.deletedPics;
+        data.deletedSkuIds = this.deletedSkuIds;
         // 字段信息
         data.name = this.autoTitle;
         data.feat = this.input.feat;
+        data.retailPrice = this.retailPrice;
         data.isSamePrice = this.isSamePrice;
         data.isOnePrice = this.isOnePrice;
+        data.isAllSoldOut = this.isAllSoldOut;
         data.pid = Number(this.input.pid);
         data.cate = this.cates.find(item => item.toJSON().name == this.input.cate);
         data.supplier = this.suppliers.find(item => item.toJSON().name == this.input.supplier)
@@ -380,18 +413,20 @@
           sku.price1 = Number(skuItem.price1);
           sku.price2 = Number(skuItem.price2);
           sku.price3 = Number(skuItem.price3);
+          sku.price4 = Number(skuItem.price4);
           sku.stock = Number(skuItem.stock);
-          sku.soldOut = skuItem.soldOut;
-          sku.name = [skuItem.color, skuItem.size1].join('-')
-          sku.fullName = data.name + ' ' + sku.name
+          sku.isSoldOut = skuItem.isSoldOut;
+          sku.name = [skuItem.color, skuItem.size1].join('-');
+          sku.fullName = data.name + ' ' + sku.name;
+          sku.objectId = skuItem.objectId;
           return sku
         })
         if (this.mode == 'create') {
-          await goods.create(data);
+          await goods.createOrUpdate(data);
           await Tips.success('商品新增成功！', 800);
         } else {
-          // await goods.update(this.input.goodsId, data);
-          await Tips.success('更新功能未完善！请稍后再试...', 800);
+          await goods.createOrUpdate(data, this.prod.objectId);
+          await Tips.success('商品资料更新成功！', 800);
         }
         Event.emit(Event.GOODS_LIST_UPDATE);
         wepy.navigateBack();
@@ -443,12 +478,17 @@
       onePrice(e) {
         this.isOnePrice = e.detail.value
       },
+      // 全部断货。
+      allSoldOut(e) {
+        this.isAllSoldOut = e.detail.value
+      },
+      inputRetailPrice(e) {
+        this.retailPrice = e.detail.value
+      },
       // 扫码功能。
       async scanCode() {
         let res = await wepy.scanCode();
-        let goodsId = res.result;
-        this.init = false;
-        this.$root.$navigate('edit', {goodsId, mode: 'edit'});
+        this.input.pid = res.result;
       }
     };
     // 商品详情更新
@@ -462,7 +502,7 @@
       let price1s = this.skuList.map(sku => sku.price1)
       let price2s = this.skuList.map(sku => sku.price2)
       let price3s = this.skuList.map(sku => sku.price3)
-      const prices = [...price1s, ...price2s, ...price3s]
+      const prices = [...price1s, ...price2s, ...price3s, this.retailPrice]
       let size1s = this.skuList.map(sku => sku.size1)
       let size2s = this.skuList.map(sku => sku.size2)
       let colors = this.skuList.map(sku => sku.color)
@@ -571,17 +611,24 @@
         return size > 0 ? `已保存${size}条详情` : '请点击编辑详情';
       },
       autoTitle() {
-        return `${this.input.brand} ${this.input.feat}${this.input.cate}`
+        let brand = this.input.brand ? this.input.brand : ''
+        let feat = this.input.feat ? this.input.feat : ''
+        let cate = this.input.cate ? this.input.cate : ''
+        return `${brand} ${feat}${cate}`.trim()
+      },
+      isAllSoldOut() {
+        return this.skuList.map(item => item.isSoldOut).every((v) => v)
       }
     };
 
     watch = {
-      input() {
-        // 新建模式及未完成初始化时，不需要观察。
-        if (!this.init || this.mode === 'create') {
-          return
-        } else {
-          console.log('Data changed.')
+      pictures(newPics, oldPics) {
+        let dps = oldPics.filter(item => !newPics.includes(item))
+        if (dps.length > 0) {
+          let dp = dps[0];
+          if (dp.startsWith('http')) {
+            this.deletedPics = [...this.deletedPics, dp];
+          }
         }
       }
     }
@@ -589,8 +636,11 @@
     events = {
       // 打开 SKU 的内页选择框，尺码和颜色。
       getInner(innerId, info, e) {
-        this.editingInfo = info
+        this.editingInfo = info;
         this[innerId] = 'true';
+      },
+      deleteSku(skuId) {
+        this.deletedSkuIds = [...this.deletedSkuIds, skuId];
       }
     };
     components = {

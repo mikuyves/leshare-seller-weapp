@@ -3,6 +3,7 @@ import wepy from 'wepy';
 import Page from '../utils/Page';
 import Lang from '../utils/Lang';
 import AV from '../utils/av-weapp-min';
+import LC from '../api/leancloud';
 
 export default class goods extends base {
 
@@ -27,11 +28,11 @@ export default class goods extends base {
         return null
       }
     } else {
+      // 通过 objectId 获取资料
       prod = await this.getProdWithDetail(goodsId)
     }
     let skus = await goods.getSkuListFromProd(prod);
-    let picUrls = await goods.getProdPics(prod);
-    return {prod, skus, picUrls}
+    return {prod, skus}
   }
   /**
    * 商品分类。
@@ -113,7 +114,6 @@ export default class goods extends base {
   static async getProdByPid(pid) {
     let query = new AV.Query('Prod')
     query.equalTo('pid', Number(pid))
-    query.include('mainPic')
     query.include('brand')
     query.include('cate')
     query.include('supplier')
@@ -126,7 +126,6 @@ export default class goods extends base {
     let prod = AV.Object.createWithoutData('Prod', goodsId)
     return prod.fetch({
       include: [
-        'mainPic',
         'brand',
         'cate',
         'supplier'
@@ -163,7 +162,6 @@ export default class goods extends base {
     query.descending('createdAt')
     query.skip(from)
     query.limit(limit)
-    query.include('mainPic')
     query.include('brand')
     query.include('cate')
     query.include('supplier')
@@ -222,50 +220,82 @@ export default class goods extends base {
     return await picture.save()
   }
   /**
-   * 创建商品
+   * 创建或修更新商品
    */
-  static async create(data) {
-    let prod = new AV.Object('Prod');
+  static async createOrUpdate(data, goodsId) {
+    // 删除项目
+    if (data.deletedPics.length > 0) {
+      let query = new AV.Query('_File');
+      query.containedIn('url', data.deletedPics);
+      let pics = await query.find();
+      await AV.Object.destroyAll(pics)
+    }
+    if (data.deletedSkuIds.length > 0) {
+      await AV.Object.destroyAll(
+        data.deletedSkuIds.map(id => new AV.Object.createWithoutData('Sku', id))
+      )
+    }
+    // 处理商品。
+    let prod;
+    if (goodsId) {
+      prod = new AV.Object.createWithoutData('Prod', goodsId);
+    } else {
+      prod = new AV.Object('Prod');
+    }
     prod.set('name', data.name);
     prod.set('feat', data.feat);
     prod.set('pid', data.pid);
+    prod.set('retailPrice', data.retailPrice);
     prod.set('isSamePrice', data.isSamePrice);
     prod.set('isOnePrice', data.isOnePrice);
+    prod.set('isAllSoldOut', data.isAllSoldOut);
     prod.set('cate', data.cate)
     prod.set('brand', data.brand)
     prod.set('supplier', data.supplier)
-    prod.set('mainPic', data.images[0])
+    // 处理图片。
+    prod.set('mainPicUrl', data.images[0])
+    prod.set('picUrls', data.images)  // 用 url 数组代替中间表
     prod = await prod.save();
-    console.log(prod)
-    for (let pic of data.images) {
-      // 中间表，为每张票对应一个商品，创建一行数据。
-      let ppm = new AV.Object('ProdPicMap');
-      ppm.set('prod', prod);
-      ppm.set('pic', pic);
-      let res = await ppm.save();
-      console.log(res)
-    }
+    // 处理 sku。
+    let skus = []
     for (let sku of data.skuList) {
-      let avSku = new AV.Object('Sku', sku);
+      let avSku;
+      if (sku.objectId) {
+        avSku = new AV.Object.createWithoutData('Sku', sku.objectId);
+      } else {
+        avSku = new AV.Object('Sku');
+      }
       avSku.set('prod', prod)
-      avSku = await avSku.save()
-      console.log(avSku)
+      avSku.set('size1', sku.size1);
+      avSku.set('size2', sku.size2);
+      avSku.set('color', sku.color);
+      avSku.set('price1', sku.price1);
+      avSku.set('price2', sku.price2);
+      avSku.set('price3', sku.price3);
+      avSku.set('price4', sku.price4);
+      avSku.set('stock', sku.stock);
+      avSku.set('isSoldOut', sku.isSoldOut);
+      avSku.set('name', sku.name);
+      avSku.set('fullName', sku.fullName);
+      skus = [...skus, avSku]
     }
-  }
-  /**
-   * 更新商品
-   */
-  static async update(goodsId, goods) {
-    const url = `${this.baseUrl}/goods/${goodsId}`;
-    return await this.put(url, goods);
+    skus = await AV.Object.saveAll(skus)
+    return [prod, skus]
   }
   /**
    * 删除商品
    */
-  static remove(goodsId) {
-    console.log(goodsId)
+  static async remove(goodsId, skuIdList, picUrls) {
     let prod = new AV.Object.createWithoutData('Prod', goodsId)
-    return prod.destroy()
+    let skus = skuIdList.map(item => new AV.Object.createWithoutData('Sku', item))
+    let query = new AV.Query('_File')
+    query.containedIn('url', picUrls)
+    let pics = await query.find()
+    return AV.Promise.all([
+      AV.Object.destroyAll(pics),
+      prod.destroy(),
+      AV.Object.destroyAll(skus)
+    ])
   }
   /**
    * 商品详情

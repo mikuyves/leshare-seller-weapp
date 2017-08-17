@@ -4,6 +4,12 @@
       <image class="icon-xxl" src="{{user.avatarUrl}}"/>
       <text>{{user.nickName}}</text>
     </view>
+
+    <view class="weui-btn-area">
+      <button class="weui-btn" type="primary" @tap="checkIn">签到</button>
+    </view>
+    <view class="weui-cells__tips">{{checkInTxt}}</view>
+
     </view>
   </view>
 </template>
@@ -11,17 +17,35 @@
 <script>
   import wepy from 'wepy'
   import AV from '../../utils/av-weapp-min'
+  import Tips from '../../utils/Tips'
+  import auth from '../../api/auth'
 
   export default class UserIndex extends wepy.page {
     def = {
-      user: {}
+      user: {},
+      shop: {},
+      checkIn: {},
+      checkInTxt: ''
     }
     data = {...this.def};
     config = {
       navigationBarTitleText: '我的信息'
     };
     components = {};
-    methods = {};
+    methods = {
+      async checkIn() {
+        let shop = await auth.getNearbyShop()
+        if (shop) {
+          let checkIn = await auth.saveCheckIn(shop)
+          this.shop = shop.toJSON()
+          this.checkIn = checkIn.toJSON()
+          this.checkInTxt = `${this.checkIn.createdAt} @ ${this.shop.name}`
+          this.$apply()
+        } else {
+          Tips.alert('你不在店铺附近，不能签到哦。', 1000)
+        }
+      }
+    };
     events = {};
     onLoad () {
       this.user = AV.User.current();

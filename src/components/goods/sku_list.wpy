@@ -18,6 +18,7 @@
       skuList: {
         twoWay: true
       },
+      retailPrice: Number,
       isSamePrice: Boolean,
       isOnePrice: Boolean
     };
@@ -35,10 +36,13 @@
           // 有待改善。
           size1: this.skuList[this.skuList.length - 1].size1,
           color: this.skuList[this.skuList.length - 1].color,
+          stock: null,
+          isSoldOut: false,
         });
       },
-      remove(index) {
+      remove(index, skuId) {
         this.skuList.splice(index, 1);
+        this.$emit('deleteSku', skuId)
       },
       change(info) {
         this.skuList[info.index][info.fieldName] = info.fieldValue;
@@ -47,8 +51,13 @@
     watch = {
       skuList() {
         this.resetSkuEditable();
-        this.keepOnePrice();
         this.keepSamePrice();
+        this.keepOnePrice();
+        this.$apply();
+      },
+      retailPrice() {
+        this.keepSamePrice();
+        this.keepOnePrice();
         this.$apply();
       },
       isSamePrice() {
@@ -57,7 +66,6 @@
       },
       isOnePrice() {
         this.keepOnePrice();
-        this.keepSamePrice();
         this.$apply();
       }
     }
@@ -65,20 +73,24 @@
       this.skuEditable = this.skuList.length > 1;
     }
     keepSamePrice() {
-      if (this.skuList.length > 1 && this.isSamePrice) {
-        let sku1 = this.skuList[0];
-        for (let sku of this.skuList.slice(1)) {
-          sku.price1 = sku1.price1;
-          sku.price2 = sku1.price2;
-          sku.price3 = sku1.price3;
+      let retailPrice = Number(this.retailPrice)
+      if (this.skuList.length >= 1 && this.isSamePrice) {
+        for (let sku of this.skuList) {
+          sku.price1 = retailPrice ? Math.round(retailPrice * 0.035) * 10 : '';
+          sku.price2 = retailPrice ? Math.round(retailPrice * 0.05) * 10 : '';
+          sku.price3 = retailPrice ? Math.round(retailPrice * 0.06) * 10 : '';
+          sku.price4 = retailPrice ? retailPrice : '';
         };
       };
     }
     keepOnePrice() {
+      let retailPrice = Number(this.retailPrice)
       if (this.isOnePrice) {
         for (let sku of this.skuList) {
-          sku.price2 = sku.price1;
-          sku.price3 = sku.price1;
+          sku.price1 = retailPrice ? retailPrice : '';
+          sku.price2 = retailPrice ? retailPrice : '';
+          sku.price3 = retailPrice ? retailPrice : '';
+          sku.price4 = retailPrice ? retailPrice : '';
         }
       }
     }
@@ -91,7 +103,7 @@
         price2: null,
         price3: null,
         stock: null,
-        soldOut: false
+        isSoldOut: false
       }];
       this.$apply();
     }

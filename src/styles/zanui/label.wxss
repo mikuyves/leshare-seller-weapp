@@ -17,10 +17,15 @@
   background: #f44;
   border: 1rpx solid #f44;
 }
-.zan-label--hb {
+.zan-label--skyblue {
   color: #fff;
   background: skyblue;
   border: 1rpx solid skyblue;
+}
+.zan-label--green {
+  color: #fff;
+  background: #39C732;
+  border: 1rpx solid #39C732;
 }
 .zan-label--disabled {
   color: #cacaca;

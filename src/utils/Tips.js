@@ -66,12 +66,12 @@ export default class Tips {
   /**
    * 警告框
    */
-  static alert (title) {
+  static alert (title, duration = 500) {
     wx.showToast({
       title: title,
       image: '/images/icons/alert.png',
       mask: true,
-      duration: 500
+      duration: duration
     })
   }
 
