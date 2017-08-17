@@ -15,6 +15,9 @@ export default class auth extends base {
     user = await user.save({
       'nickName': data.userInfo.nickName,
       'avatarUrl': data.userInfo.avatarUrl,
+      'gender': data.userInfo.gender,
+      'city': data.userInfo.city,
+      'province': data.userInfo.province,
       'rawData': data,
       'userInfo': data.userInfo
     }, {

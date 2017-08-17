@@ -28,8 +28,7 @@
           <view class="zan-label">{{sku.stock}} 件</view>
 
 
-          <view class="zan-label" 
-          :class="{zan-label--primary: showPriceId === 'price1',zan-label--hb: showPriceId === 'price2'}" @tap="seeDiffPrice({{showPriceId}})">
+          <view class="zan-label {{priceTagSytle}}" @tap="seeDiffPrice({{showPriceId}})">
           ￥{{sku[showPriceId]}} 元
           </view>
 
@@ -164,7 +163,6 @@
             <image style="width: 60rpx; height: 60rpx" class="weui-cell__hd" src="{{item.avatarUrl ? item.avatarUrl : '/images/icons/empty.png'}}" />
           </view>
           <view class="weui-cell__bd">{{item.nickName ? item.nickName : '未授权'}}</view>
-          <!-- <view class="weui-cell__bd">{{item.username.length === 25 ? '未注册' : item.username}}</view> -->
           <view class="weui-cell__ft">{{item.mobilePhoneNumber ? item.mobilePhoneNumber : "未注册手机"  }}</view>
 
         </label>
@@ -472,6 +470,15 @@
         }
         let tp = this.reminders.reduce((total, item) => total + item.sku[this.showPriceId] * item.qtt, 0)
         return tp
+      },
+      priceTagSytle() {
+        let styles = {
+          'price1': 'zan-label--primary',
+          'price2': 'zan-label--green',
+          'price3': 'zan-label--skyblue',
+          'price4': '',
+        }
+        return styles[this.showPriceId]
       }
       // showStock() {
       //   if (this.inputColor === '' || this.inputSize1 === '') {

@@ -3,6 +3,7 @@ import wepy from 'wepy';
 import Page from '../utils/Page';
 import Lang from '../utils/Lang';
 import AV from '../utils/av-weapp-min';
+import LC from '../api/leancloud';
 
 export default class goods extends base {
 
