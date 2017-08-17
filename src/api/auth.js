@@ -51,6 +51,12 @@ export default class auth extends base {
     return data.result;
   }
 
+  static async getRoles() {
+    let user = AV.User.current();
+    let roles = await user.getRoles();
+    return roles.map(role => role.toJSON().name)
+  }
+
   /**
    * 设置权限值
    */

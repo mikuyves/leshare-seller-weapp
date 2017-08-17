@@ -328,15 +328,15 @@
       // 编辑模式。
       if (this.mode == 'edit') {
         // 此处 goodsId 可以是 objectId 或 pid。
-        let detail = await goods.edit(goodsId);
+        let {prod, skus} = await goods.getProdAndSkuWithDetail(goodsId);
         // 如果没有结果，跳转至新建商品。
-        if (!detail) {
+        if (!prod) {
           this.$root.$navigate('edit', {goodsId, mode: 'create'});
         };
         // 处理原始数据。
-        let prod = detail.prod.toJSON()
+        prod = prod.toJSON()
         // 转换 skuList 的值，与原来模板匹配。
-        this.skuList = detail.skus.map(item => {
+        this.skuList = skus.map(item => {
           item = item.toJSON();
           item.color = item.color.name;
           item.size1 = item.size1.name;

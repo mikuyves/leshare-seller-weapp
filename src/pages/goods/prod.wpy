@@ -179,7 +179,7 @@
   import Reminder from '../../api/reminder';
   import auth from '../../api/auth';
   import Event from '../../utils/Event';
-  import zanQuantity from '../../components/zanui/zan-quantity'
+  import AV from '../../utils/av-weapp-min';
   import SliderPanel from '../../components/common/slider_panel';
   import ActionBar from '../../components/common/action_bar';
   import Tips from '../../utils/Tips';
@@ -220,8 +220,9 @@
         this.input.customerId = customerId;
         this.$apply()
       }
-      let prod = await goods.getProdWithDetail(goodsId);
-      let skus = await goods.getSkuListFromProd(prod);
+      let {prod, skus} = await goods.getProdAndSkuWithDetail(goodsId)
+      console.log(prod)
+      console.log(skus)
       this.prod = prod.toJSON();
       this.skuList = skus.map(item => item.toJSON());
       this.showUrl = this.prod.mainPicUrl;
@@ -256,13 +257,21 @@
       // 选择内页选项
       selectInner() {
         this.isCustomerDisplay = 'false';
+        if (this.customer.priceLv) {
+          this.showPriceId = `price${this.customer.priceLv}`;
+        } else {
+          this.showPriceId = 'price4';
+        }
       },
       // 展现内页选项
       async showInner(e) {
         let innerId = e.currentTarget.id
         this[innerId] = 'true';
-        let customers = await auth.getUsers();
-        this.customers = customers.map(item => item.toFullJSON());
+        let customers;
+        if (this.customers.length === 0) {
+          customers = await auth.getUsers();
+          this.customers = customers.map(item => item.toFullJSON());
+        }
         this.$apply()
       },
       /**
@@ -413,15 +422,13 @@
           if (reminders.length > 0) {
             // 设置已保存备忘的值。
             this.reminders = reminders;
-            this.showPriceId = reminders[0].showPriceId
           } else {
             // 恢复默认值。
             this.reminders = [];
-            this.showPriceId = 'price2';
           }
         }
         this.$apply()
-      }
+      },
     }
 
     computed = {
@@ -480,22 +487,10 @@
         }
         return styles[this.showPriceId]
       }
-      // showStock() {
-      //   if (this.inputColor === '' || this.inputSize1 === '') {
-      //     return 0
-      //   }
-      //   let sku = this.skuList.find(item => item.name === this.skuName)
-      //   if (sku) {
-      //     return sku.stock
-      //   } else {
-      //     return 0
-      //   }
-      // }
     }
 
     events = {};
     components = {
-      zanQuantity: zanQuantity,
       AdjustActionBar: ActionBar,
       RemindActionBar: ActionBar,
       SliderPanelCustomer: SliderPanel,

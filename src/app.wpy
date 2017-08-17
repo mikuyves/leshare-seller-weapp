@@ -55,6 +55,7 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/home/login',
+      'pages/home/scan',
       'pages/goods/list',
       'pages/goods/edit',
       'pages/user/index',
@@ -94,6 +95,12 @@ export default class extends wepy.app {
           selectedIconPath: 'images/tab/order-active.png',
           pagePath: 'pages/order/index',
           text: '订单'
+        },
+        {
+          iconPath: 'images/icons/photo-camera0.png',
+          selectedIconPath: 'images/icons/photo-camera.png',
+          pagePath: 'pages/home/scan',
+          text: '扫码'
         },
         {
           iconPath: 'images/icons/font-selection-editor0.png',
