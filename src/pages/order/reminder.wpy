@@ -6,11 +6,11 @@
 
     <!--订单列表-->
     <repeat for="{{page.list}}" key="index" index="index" item="item">
-      <ReminderItem :order="item"></ReminderItem>
+      <ReminderItem :order="item" :index="index" @tap.user="displayDetail"></ReminderItem>
     </repeat>
     <view class="tab-border" />
     <!--占位符-->
-    <Placeholder :show.sync="isPageEmpty" message="您还没有相关订单"/>
+    <Placeholder :show.sync="isPageEmpty" message="您还没有相关备忘"/>
   </view>
 </template>
 <style lang="scss">
@@ -61,6 +61,9 @@
     }
 
     methods = {
+      displayDetail(index) {
+        this.page.list[index].isDisplayDetail = this.page.list[index].isDisplayDetail ? false : true;
+      }
     };
     config = {
       navigationBarTitleText: '备忘管理',
