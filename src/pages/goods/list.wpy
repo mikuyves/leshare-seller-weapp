@@ -12,7 +12,7 @@
     <ActionBar @tap.user="add" okText="新增商品" cancelText="返回" />
 
     <!--占位符-->
-    <Placeholder :show.sync="isPageEmpty" message="您还没有相关商品"/>
+    <Placeholder :show.sync="isPageEmpty" message="没有相关商品"/>
   </view>
 </template>
 
