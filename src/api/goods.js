@@ -38,9 +38,15 @@ export default class goods extends base {
    * 商品分类。
    */
   static async getCates() {
-    let query = new AV.Query('Cate')
-    return await query.find()
+    let query = new AV.Query('Cate');
+    return query.find()
   }
+
+  static async getCatesJSON() {
+    let cates = await this.getCates();
+    return cates.map(item => item.toJSON())
+  }
+
   /**
    *  新增商品分类。
    */
@@ -157,8 +163,12 @@ export default class goods extends base {
   /**
    *  分页处理。获取商品列表，包括 Pointer 的数据。
    */
-  static async getProdListWithDetail({from, limit}) {
+  static async getProdListWithDetail(param) {
+    let {from, limit, goods_status} = param;
     let query = new AV.Query('Prod')
+    if (goods_status) {
+      query.equalTo(goods_status, true)
+    }
     query.descending('createdAt')
     query.skip(from)
     query.limit(limit)

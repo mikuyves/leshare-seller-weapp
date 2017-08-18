@@ -14,7 +14,7 @@
         </label>
 
         <label class="weui-cell weui-check__label" wx:for="{{list}}" wx:key="value">
-          <radio class="weui-check" value="{{item.id}}" checked="{{selectedId == item.id}}"/>
+          <radio class="weui-check" value="{{item.objectId}}" checked="{{selectedId == item.id}}"/>
           <view class="weui-cell__bd">{{item.name}}</view>
           <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{selectedId == item.id}}">
             <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
@@ -57,7 +57,7 @@
     methods = {
       change(e) {
         const selectedId = e.detail.value;
-        const selectedName = selectedId == '' ? '全部' : this.list.find(item => item.id == selectedId).name;
+        const selectedName = selectedId == '' ? '全部' : this.list.find(item => item.objectId == selectedId).name;
         this.selectedId = selectedId;
         this.selectedName = selectedName;
         this.$emit('change', {selectedId, selectedName})
