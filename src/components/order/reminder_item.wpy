@@ -5,8 +5,8 @@
 
       <view class="row-between">
         <view class="user-info-container">
-          <image class="icon" src="{{order.customerKey.avatarUrl}}"/>
-          <text class="sm ml10">{{order.customerKey.nickName}}</text>
+          <image class="icon" src="{{order.customerKey.user.avatarUrl}}"/>
+          <text class="sm ml10">{{order.customerKey.user.nickName}}</text>
         </view>
         <text class="sm primary">{{order.statusText}}</text>
       </view>

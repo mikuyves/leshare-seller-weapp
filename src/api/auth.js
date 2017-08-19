@@ -117,7 +117,14 @@ export default class auth extends base {
     query.ascending('nickName')
     return query.find()
    }
-
+  /**
+   * 获取用户列表。
+   */
+  static async getCustomers() {
+    let query = new AV.Query('Customer')
+    query.include('user')
+    return query.find()
+   }
   /**
    * 跳转设置页面授权
    */
