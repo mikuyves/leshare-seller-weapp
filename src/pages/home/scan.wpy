@@ -2,9 +2,9 @@
   <view class="container" wx:if="{{init}}">
     <!--今日统计区域-->
     <view class="today-box">
-      <view class="column-center">
-        <image style="width: 300px; height: 300px;" mode="aspectFit" src="http://ac-od4w7fpp.clouddn.com/706c3be4a542bfcd04c1.jpg"/>
-        <text class="xl"> 小程序二维码（体验版）</text>
+      <view @tap="changeQrcode" class="column-center">
+        <image style="width: 300px; height: 300px;" mode="aspectFit" src="{{qrcode[showIndex].url}}"/>
+        <text class="xl">{{qrcode[showIndex].title}}</text>
       </view>
     </view>
 
@@ -30,7 +30,12 @@
 
   export default class HomeScan extends wepy.page {
     def = {
-      init: false
+      init: false,
+      qrcode: [
+        {title: '小程序二维码（体验版）', url: 'http://ac-od4w7fpp.clouddn.com/706c3be4a542bfcd04c1.jpg'},
+        {title: ' 小程序二维码（正式版）', url: 'http://ac-od4w7fpp.clouddn.com/ee4216ed1de417d60f1d.jpg'}
+      ],
+      showIndex: 0
     }
     data = {...this.def};
     onLoad () {
@@ -58,6 +63,9 @@
         if (pid) {
           this.$root.$navigate('../goods/prod', {goodsId: pid, mode: 'remind'});
         }
+      },
+      changeQrcode() {
+        this.showIndex = this.showIndex === 0 ? 1 : 0;
       }
     };
 
