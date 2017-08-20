@@ -99,7 +99,7 @@
     // 注册并跳转至 index 页面
     async loginThenSwitch() {
       this.avUser = await auth.login();
-      let isStaff = await auth.checkIfStaff();
+      let isStaff = auth.getConfig('isStaff');
       if (isStaff) {
         this.switchWithCache();
       } else {

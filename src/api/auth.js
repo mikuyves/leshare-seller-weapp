@@ -24,10 +24,14 @@ export default class auth extends base {
       fetchWhenSave: true
     })
     let userJSON = user.toJSON();
-    console.log(userJSON)
-    await this.createOrUpdateCustomer(userJSON)
-    wepy.$instance.globalData.user = userJSON  // 保存到全局数据中。
-    let roles = await this.getRoles()
+    let customer = await this.createOrUpdateCustomer(userJSON);
+    let isStaff = await this.checkIfStaff();
+
+    // 保存到全局数据中。
+    await this.setConfig('user', userJSON);
+    await this.setConfig('customer', customer.toJSON());
+    await this.setConfig('isStaff', isStaff);
+
     return user.toJSON()
   }
   /**
@@ -90,7 +94,7 @@ export default class auth extends base {
    */
   static async checkIfStaff() {
     let roles = await this.getRoles()
-    let validRoles = ['admin', 'staff'];
+    let validRoles = ['superadmin', 'admin', 'staff'];
     return roles.some((element) => validRoles.includes(element));
   }
 
@@ -158,9 +162,17 @@ export default class auth extends base {
    * 获取用户列表。
    */
   static async getCustomers() {
-    let query = new AV.Query('Customer')
-    query.include('user')
-    return query.find()
+    let query = new AV.Query('Customer');
+    query.include('user');
+    let customers = await query.find();
+    console.log(customers)
+    customers = customers.map(item => {
+      item = item.toFullJSON();
+      item.mobilePhoneNumber = item.mobilePhoneNumber.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
+      return item
+    });
+    console.log(customers)
+    return customers
    }
   /**
    * 跳转设置页面授权

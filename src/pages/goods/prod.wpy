@@ -57,10 +57,10 @@
           <view class="weui-label">选择客户</view>
         </view>
         <view class="weui-cell__hd" style="margin-right: 15rpx;">
-          <image style="width: 50rpx; height: 50rpx" class="weui-cell__hd" src="{{customer.user.avatarUrl ? customer.user.avatarUrl : ''}}" />
+          <image style="width: 50rpx; height: 50rpx" class="weui-cell__hd" src="{{customer.avatarUrl ? customer.avatarUrl : ''}}" />
         </view>
         <view class="weui-cell__bd" style="color: {{customer ? 'default' : 'grey'}};" >
-          {{customer ? (customer.user.nickName ? customer.user.nickName : '未注册') : '未选择'}}
+          {{customer ? (customer.nickName ? customer.nickName : '未注册') : '未选择'}}
         </view>
         <view class="weui-cell__ft weui-cell__ft_in-access"></view>
       </view>
@@ -160,10 +160,10 @@
 
           <!-- 用户信息 -->
           <view class="weui-cell__hd" style="margin-right: 15rpx;">
-            <image style="width: 60rpx; height: 60rpx" class="weui-cell__hd" src="{{item.user.avatarUrl ? item.user.avatarUrl : '/images/icons/empty.png'}}" />
+            <image style="width: 60rpx; height: 60rpx" class="weui-cell__hd" src="{{item.avatarUrl ? item.avatarUrl : '/images/icons/empty.png'}}" />
           </view>
-          <view class="weui-cell__bd">{{item.user.nickName ? item.user.nickName : '未授权'}}</view>
-          <view class="weui-cell__ft">{{item.user.mobilePhoneNumber ? item.mobilePhoneNumber : "未注册手机"  }}</view>
+          <view class="weui-cell__bd">{{item.nickName ? item.nickName : '未授权'}}</view>
+          <view class="weui-cell__ft">{{item.mobilePhoneNumber ? item.mobilePhoneNumber : "未注册手机"  }}</view>
 
         </label>
       </radio-group>
@@ -269,16 +269,7 @@
       async showInner(e) {
         let innerId = e.currentTarget.id
         this[innerId] = 'true';
-        let customers;
-        if (this.customers.length === 0) {
-          // customers = await auth.getUsers();
-          customers = await auth.getCustomers();
-          this.customers = customers.map(item => {
-            item = item.toFullJSON()
-            item.mobilePhoneNumber = item.user.mobilePhoneNumber.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
-            return item
-          });
-        }
+        this.customers = await auth.getCustomers();
         this.$apply()
       },
       /**
