@@ -220,6 +220,7 @@
         this.customers = customers.map(item => item.toFullJSON());
         this.input.customerId = customerId;
         this.$apply()
+        this.showPriceId = `price${this.customer.priceLv}`
       }
       let {prod, skus} = await goods.getProdAndSkuWithDetail(goodsId)
       console.log(prod)
@@ -227,7 +228,6 @@
       this.prod = prod.toJSON();
       this.skuList = skus.map(item => item.toJSON());
       this.showUrl = this.prod.mainPicUrl;
-      this.showPriceId = `price${this.customer.priceLv}`
       // Event.listen(Event.GOODS_LIST_UPDATE, this.update.bind(this), this);
       this.$apply();
     }

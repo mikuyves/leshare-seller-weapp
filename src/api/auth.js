@@ -23,8 +23,37 @@ export default class auth extends base {
     }, {
       fetchWhenSave: true
     })
-    wepy.$instance.globalData.user = user.toJSON()  // 保存到全局数据中。
+    let userJSON = user.toJSON();
+    console.log(userJSON)
+    await this.createOrUpdateCustomer(userJSON)
+    wepy.$instance.globalData.user = userJSON  // 保存到全局数据中。
+    let roles = await this.getRoles()
     return user.toJSON()
+  }
+  /**
+   * 创建或更新客户资料
+   */
+  static async createOrUpdateCustomer (user) {
+    let rawUser = new AV.Object.createWithoutData('_User', user.objectId)
+    let query = new AV.Query('Customer')
+    query.equalTo('user', rawUser)
+    let res = await query.first()
+    if (!res) {
+      // 创建
+      let customer = new AV.Object('Customer');
+      customer.set('mobilePhoneNumber', user.mobilePhoneNumber);
+      customer.set('user', rawUser);
+      customer.set('priceLv', '4');
+      return customer.save()
+    } else {
+      // 更新
+      // res.set('mobilePhoneNumber', user.mobilePhoneNumber);
+      return res.save({
+        'nickName': user.nickName,
+        'avatarUrl': user.avatarUrl,
+        'mobilePhoneNumber': user.mobilePhoneNumber
+      })
+    }
   }
   /**
    * 短信验证码
@@ -55,6 +84,14 @@ export default class auth extends base {
     let user = AV.User.current();
     let roles = await user.getRoles();
     return roles.map(role => role.toJSON().name)
+  }
+  /**
+   *  重要：鉴定是否员工。
+   */
+  static async checkIfStaff() {
+    let roles = await this.getRoles()
+    let validRoles = ['admin', 'staff'];
+    return roles.some((element) => validRoles.includes(element));
   }
 
   /**

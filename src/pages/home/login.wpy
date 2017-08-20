@@ -7,6 +7,20 @@
       <text>欢迎进入结算中心！</text>
       <text wx:if="{{!avUser.nickName}}">授权并注册成为会员，即可享用。</text>
     </view>
+
+    <view class="zan-cell" wx:if="{{isStayHere}}">
+      <view class="zan-cell__bd">
+        <view class="column-center">
+          <view class="zan-font-16 zan-c-gray-darker">
+            感谢您的注册并成为我们的会员。
+          </view>
+          <view class="zan-font-16 zan-c-gray-darker">
+            我们竭诚将为您提供更优质的服务。
+          </view>
+        </view>
+      </view>
+    </view>
+
     <view class="page__bd form">
       <view wx:if="{{avUser.nickName && !avUser.mobilePhoneVerified}}" class="weui-cells weui-cells_after-title">
 
@@ -41,7 +55,7 @@
       </view>
 
     </view>
-    <view class="weui-cells__tips">提示：如有疑问，请向工作人员了解更多。</view>
+    <view wx:if="{{!isStayHere}}" class="weui-cells__tips">提示：如有疑问，请向工作人员了解更多。</view>
   </view>
 </template>
 
@@ -59,6 +73,7 @@
       init: false,
       avatarUrl: '',
       avUser: {},
+      isStayHere: false
     };
     data = {...this.def}
     onLoad () {
@@ -67,7 +82,9 @@
       this.loaded();
     }
 
-    onReady() {}
+    onReady() {
+      console.log(wepy.$instance.__prevPage__.config.navigationBarTitleText)
+    }
 
     switchWithCache() {
       let currentUser = AV.User.current()
@@ -82,7 +99,13 @@
     // 注册并跳转至 index 页面
     async loginThenSwitch() {
       this.avUser = await auth.login();
-      this.switchWithCache();
+      let isStaff = await auth.checkIfStaff();
+      if (isStaff) {
+        this.switchWithCache();
+      } else {
+        await wepy.setNavigationBarTitle({title: "完成注册"})
+        this.isStayHere = true;
+      }
       this.$apply();
     }
 
@@ -188,6 +211,7 @@
 
 <style lang="scss">
   @import "../../styles/variable";
+  @import "../../styles/zanui/index.wxss";
   .brand{
     padding-top: 60rpx;
     padding-bottom: 60rpx;
