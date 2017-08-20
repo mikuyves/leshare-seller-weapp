@@ -93,8 +93,8 @@ export default class extends wepy.app {
         {
           iconPath: 'images/tab/order.png',
           selectedIconPath: 'images/tab/order-active.png',
-          pagePath: 'pages/order/index',
-          text: '订单'
+          pagePath: 'pages/goods/list',
+          text: '商品'
         },
         {
           iconPath: 'images/icons/photo-camera0.png',

@@ -1,7 +1,8 @@
 <template>
   <view class="item-box row">
-    <image class="shop-icon icon-xl" src="{{shop.avatar}}"/>
+    <image class="shop-icon icon-xl" mode="aspectFit" src="{{shop.avatarUrl}}"/>
     <text class="shop-title xxl">{{shop.name}}</text>
+    <text class="xxl">（{{shop.city}}）</text>
   </view>
 </template>
 

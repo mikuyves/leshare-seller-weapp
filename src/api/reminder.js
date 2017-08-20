@@ -28,6 +28,7 @@ export default class Reminder extends base {
     query.include('sku')
     query.include('prod')
     query.include('customer')
+    query.include('customer.user')
     return query.find();
   }
   /**
@@ -55,14 +56,16 @@ export default class Reminder extends base {
     let lines = [];
     // 记录操作的员工
     let handler = AV.User.current();
+    handler = new AV.Object.createWithoutData('_User', handler.toJSON().objectId)
+    customer = new AV.Object.createWithoutData('Customer', customer.objectId)
     for (let r of reminders) {
       let line = new AV.Object('Reminder');
       let sku = AV.Object.createWithoutData('Sku', r.sku.objectId);
       // 检查是否存在此 sku 的记录。
       let res = await new AV.Query('Reminder')
         // 注意，查询 pointer 是否相等时，必须要 createWithoutData。
-        .equalTo('handler', new AV.Object.createWithoutData('_User', handler.toJSON().objectId))
-        .equalTo('customer', new AV.Object.createWithoutData('_User', customer.objectId))
+        .equalTo('handler', handler)
+        .equalTo('customer', customer)
         .equalTo('sku', sku)
         .first()
       // 删除
@@ -88,11 +91,13 @@ export default class Reminder extends base {
         line.set('price', r.price);
         line.set('showPriceId', r.showPriceId);
         line.set('handler', handler);
-        line.set('customer', AV.parseJSON(customer));
+        line.set('customer', customer);
         lines = [...lines, line];
       }
-
     }
+    // 记录客户价格等级。
+    customer.set('priceLv', reminders[0].showPriceId.slice(-1))
+    customer.save()
     return AV.Object.saveAll(lines)
   }
   /**

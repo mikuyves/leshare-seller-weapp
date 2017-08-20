@@ -215,10 +215,12 @@
       this.mode = mode ? mode : 'remind'
       this.goodsId = goodsId;
       if (customerId) {
-        let customers = await auth.getUsers();
+        // let customers = await auth.getUsers();
+        let customers = await auth.getCustomers();
         this.customers = customers.map(item => item.toFullJSON());
         this.input.customerId = customerId;
         this.$apply()
+        this.showPriceId = `price${this.customer.priceLv}`
       }
       let {prod, skus} = await goods.getProdAndSkuWithDetail(goodsId)
       console.log(prod)
@@ -267,11 +269,7 @@
       async showInner(e) {
         let innerId = e.currentTarget.id
         this[innerId] = 'true';
-        let customers;
-        if (this.customers.length === 0) {
-          customers = await auth.getUsers();
-          this.customers = customers.map(item => item.toFullJSON());
-        }
+        this.customers = await auth.getCustomers();
         this.$apply()
       },
       /**

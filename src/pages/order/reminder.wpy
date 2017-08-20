@@ -37,8 +37,8 @@
       },
       tab: {
         list: [
-          {id: '0', title: '未完成'},
-          {id: '1', title: '已完成'},
+          {id: '0', title: '我的备忘'},
+          {id: '1', title: '店铺备忘'},
         ],
         selectedId: '0',
         scroll: false

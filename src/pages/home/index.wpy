@@ -71,7 +71,7 @@
           <image src="/images/home/shop.png"/>
           <text>店铺管理</text>
         </navigator>
-        <navigator class="column-center" url="../goods/list">
+        <navigator class="column-center" open-type="switchTab" url="../goods/list">
           <image src="/images/home/cart.png"/>
           <text>商品管理</text>
         </navigator>

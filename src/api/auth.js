@@ -23,8 +23,41 @@ export default class auth extends base {
     }, {
       fetchWhenSave: true
     })
-    wepy.$instance.globalData.user = user.toJSON()  // 保存到全局数据中。
+    let userJSON = user.toJSON();
+    let customer = await this.createOrUpdateCustomer(userJSON);
+    let isStaff = await this.checkIfStaff();
+
+    // 保存到全局数据中。
+    await this.setConfig('user', userJSON);
+    await this.setConfig('customer', customer.toJSON());
+    await this.setConfig('isStaff', isStaff);
+
     return user.toJSON()
+  }
+  /**
+   * 创建或更新客户资料
+   */
+  static async createOrUpdateCustomer (user) {
+    let rawUser = new AV.Object.createWithoutData('_User', user.objectId)
+    let query = new AV.Query('Customer')
+    query.equalTo('user', rawUser)
+    let res = await query.first()
+    if (!res) {
+      // 创建
+      let customer = new AV.Object('Customer');
+      customer.set('mobilePhoneNumber', user.mobilePhoneNumber);
+      customer.set('user', rawUser);
+      customer.set('priceLv', '4');
+      return customer.save()
+    } else {
+      // 更新
+      // res.set('mobilePhoneNumber', user.mobilePhoneNumber);
+      return res.save({
+        'nickName': user.nickName,
+        'avatarUrl': user.avatarUrl,
+        'mobilePhoneNumber': user.mobilePhoneNumber
+      })
+    }
   }
   /**
    * 短信验证码
@@ -55,6 +88,14 @@ export default class auth extends base {
     let user = AV.User.current();
     let roles = await user.getRoles();
     return roles.map(role => role.toJSON().name)
+  }
+  /**
+   *  重要：鉴定是否员工。
+   */
+  static async checkIfStaff() {
+    let roles = await this.getRoles()
+    let validRoles = ['superadmin', 'admin', 'staff'];
+    return roles.some((element) => validRoles.includes(element));
   }
 
   /**
@@ -117,7 +158,22 @@ export default class auth extends base {
     query.ascending('nickName')
     return query.find()
    }
-
+  /**
+   * 获取用户列表。
+   */
+  static async getCustomers() {
+    let query = new AV.Query('Customer');
+    query.include('user');
+    let customers = await query.find();
+    console.log(customers)
+    customers = customers.map(item => {
+      item = item.toFullJSON();
+      item.mobilePhoneNumber = item.mobilePhoneNumber.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
+      return item
+    });
+    console.log(customers)
+    return customers
+   }
   /**
    * 跳转设置页面授权
    */
