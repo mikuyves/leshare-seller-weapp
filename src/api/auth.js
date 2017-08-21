@@ -94,7 +94,10 @@ export default class auth extends base {
    */
   static async checkIfStaff() {
     let roles = await this.getRoles()
-    let validRoles = ['superadmin', 'admin', 'staff'];
+    let data = await new AV.Query('Auth').equalTo('name', 'validRoles').first()
+    data = data.toJSON()
+    let validRoles = data.array
+    console.log(validRoles)
     return roles.some((element) => validRoles.includes(element));
   }
 
