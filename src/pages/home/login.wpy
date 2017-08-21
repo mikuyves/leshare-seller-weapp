@@ -8,7 +8,7 @@
       <text wx:if="{{!avUser.nickName}}">授权并注册成为会员，即可享用。</text>
     </view>
 
-    <view class="zan-cell" wx:if="{{isStayHere}}">
+    <view class="zan-cell" wx:if="{{isStayHere && avUser.mobilePhoneVerified}}">
       <view class="zan-cell__bd">
         <view class="column-center">
           <view class="zan-font-16 zan-c-gray-darker">
