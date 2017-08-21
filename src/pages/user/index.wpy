@@ -8,7 +8,7 @@
     <view class="weui-btn-area">
       <button class="weui-btn" type="primary" @tap="checkIn">签到</button>
     </view>
-    <view class="weui-cells__tips zan-center">Weapp Test Version: v0.3.3</view>
+    <view class="weui-cells__tips zan-center">Weapp Version: v0.3.4</view>
     <view class="weui-cells__tips">{{checkInTxt}}</view>
 
     </view>
