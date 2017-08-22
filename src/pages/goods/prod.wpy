@@ -216,8 +216,7 @@
       this.goodsId = goodsId;
       if (customerId) {
         // let customers = await auth.getUsers();
-        let customers = await auth.getCustomers();
-        this.customers = customers.map(item => item.toFullJSON());
+        this.customers = await auth.getCustomers();
         this.input.customerId = customerId;
         this.$apply()
         this.showPriceId = `price${this.customer.priceLv}`
