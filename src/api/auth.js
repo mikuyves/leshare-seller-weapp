@@ -25,6 +25,7 @@ export default class auth extends base {
     })
     let userJSON = user.toJSON();
     let customer = await this.createOrUpdateCustomer(userJSON);
+    await this.addCustomerRole();
     let isStaff = await this.checkIfStaff();
 
     // 保存到全局数据中。
@@ -44,10 +45,13 @@ export default class auth extends base {
     let res = await query.first()
     if (!res) {
       // 创建
-      let customer = new AV.Object('Customer');
-      customer.set('mobilePhoneNumber', user.mobilePhoneNumber);
-      customer.set('user', rawUser);
-      customer.set('priceLv', '4');
+      return new AV.Object('Customer').save({
+        'mobilePhoneNumber': user.mobilePhoneNumber,
+        'nickName': user.nickName,
+        'avatarUrl': user.avatarUrl,
+        'user': rawUser,
+        'priceLv': '4'
+      })
       return customer.save()
     } else {
       // 更新
@@ -88,6 +92,23 @@ export default class auth extends base {
     let user = AV.User.current();
     let roles = await user.getRoles();
     return roles.map(role => role.toJSON().name)
+  }
+
+  static async addCustomerRole() {
+    let customerRole = await new AV.Query(AV.Role).get('599ac0cd1b69e600585e3acc');
+    let roleQuery = new AV.Query(AV.Role);
+    roleQuery.equalTo('name', 'customer');
+    roleQuery.equalTo('users', AV.User.current());
+    let res = await roleQuery.find()
+    if (res.length > 0) {
+      customerRole = res[0];
+      return customerRole;
+    } else {
+      // 当前用户不具备 customerRole Role 的 Users 中
+      let relation = customerRole.getUsers();
+      relation.add(AV.User.current());
+      return customerRole.save();
+    }
   }
   /**
    *  重要：鉴定是否员工。
@@ -171,7 +192,9 @@ export default class auth extends base {
     console.log(customers)
     customers = customers.map(item => {
       item = item.toFullJSON();
-      item.mobilePhoneNumber = item.mobilePhoneNumber.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
+      if (item.mobilePhoneNumber) {
+        item.mobilePhoneNumber = item.mobilePhoneNumber.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
+      }
       return item
     });
     console.log(customers)

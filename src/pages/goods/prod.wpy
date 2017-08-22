@@ -216,8 +216,7 @@
       this.goodsId = goodsId;
       if (customerId) {
         // let customers = await auth.getUsers();
-        let customers = await auth.getCustomers();
-        this.customers = customers.map(item => item.toFullJSON());
+        this.customers = await auth.getCustomers();
         this.input.customerId = customerId;
         this.$apply()
         this.showPriceId = `price${this.customer.priceLv}`
@@ -405,8 +404,14 @@
         texts = texts.join('\r\n')
         await Tips.confirm(texts, {}, '确认库存更改？');
         Tips.loading();
-        let res = await Reminder.saveAdjustments(adjustments);
-        await Tips.success('库存已更改！', 800);
+        try {
+          let res = await Reminder.saveAdjustments(adjustments);
+          await Tips.success('库存已更改！', 800);
+        } catch(err) {
+          if (err.code === 403) {
+            await Tips.success('您没有权限操作库存', 1800)
+          }
+        }
         wepy.navigateBack();
       }
     }
