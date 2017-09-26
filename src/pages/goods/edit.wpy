@@ -346,9 +346,9 @@
         this.input.pid = Number(prod.pid);
         this.input.name = prod.name;
         this.input.feat = prod.feat;
-        this.input.cate = prod.cate.name;
-        this.input.brand = prod.brand.name;
-        this.input.supplier = prod.supplier.name;
+        this.input.cate = prod.cate ? prod.cate.name : '';
+        this.input.brand = prod.brand ? prod.brand.name : '';
+        this.input.supplier = prod.supplier ? prod.supplier.name : '';
         this.retailPrice = prod.retailPrice;
         this.isSamePrice = prod.isSamePrice;
         this.isOnePrice = prod.isOnePrice;
