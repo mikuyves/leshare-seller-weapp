@@ -76,9 +76,9 @@
       isStayHere: false
     };
     data = {...this.def}
-    onLoad () {
+    async onLoad () {
       // this.switchWithCache()
-      this.loginThenSwitch()
+      await this.loginThenSwitch()
       this.loaded();
     }
 
