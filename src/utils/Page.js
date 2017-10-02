@@ -5,7 +5,7 @@ export default class Pagination {
     // 起始数据
     this.start = 0;
     // 加载数据条数
-    this.count = 10;
+    this.count = 20;
     // 获取数据函数
     this.getDataFunc = getDataFunc;
     // 数据处理函数

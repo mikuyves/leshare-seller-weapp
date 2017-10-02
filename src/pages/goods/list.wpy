@@ -3,6 +3,11 @@
     <!--TAB 页-->
     <CategoryTab :tab="tab" :categories.sync="categories" categoriesTitle="商品分类" @change.user="change"  />
 
+    <!-- 搜索框 -->
+    <view wx:if="{{ tab.selectedId == 'search'}}" class="zan-cell zan-form__item">
+      <input class="zan-form__input zan-cell__bd" placeholder="请输入关键字..." @input="inputKeyword" />
+    </view>
+
     <!-- 商品列表 -->
     <repeat for="{{page.list}}" key="index" index="index" item="item">
       <GoodsItem :goods="item"></GoodsItem>
@@ -38,14 +43,16 @@
         list: [
           {id: '', title: '全部'},
           {id: 'isAllSoldOut', title: '已断货'},
-          {id: 'isOnePrice', title: '一口价'}
+          {id: 'isOnePrice', title: '一口价'},
+          {id: 'search', title: '搜索'}
         ],
         selectedId: '',
         categoryId: '',
         scroll: false
       },
       categories: [],
-      cateTxt: ''
+      cateTxt: '',
+      search_keywords: ''
     }
     data = {...this.def};
     async onLoad () {
@@ -60,7 +67,8 @@
     params() {
       return {
         goods_status: this.tab.selectedId,
-        category_id: this.tab.categoryId
+        category_id: this.tab.categoryId,
+        search_keywords: this.search_keywords
       };
     }
     methods = {
@@ -69,6 +77,9 @@
       },
       change() {
         this.reload();
+      },
+      inputKeyword(e) {
+        this.search_keywords = e.detail.value
       },
       async test() {
         let query = new AV.Query('Prod');

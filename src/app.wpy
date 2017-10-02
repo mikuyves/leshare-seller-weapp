@@ -71,7 +71,7 @@ export default class extends wepy.app {
       'pages/order/reprice',
       'pages/order/detail',
       'pages/order/close',
-      'pages/order/remark',
+      'pages/order/remark'
     ],
     window: {
       backgroundTextStyle: 'light',

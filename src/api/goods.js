@@ -164,11 +164,15 @@ export default class goods extends base {
    *  分页处理。获取商品列表，包括 Pointer 的数据。
    */
   static async getProdListWithDetail(param) {
-    let {from, limit, goods_status, category_id} = param;
+    let {from, limit, goods_status, category_id, search_keywords} = param;
     let query = new AV.Query('Prod')
     // 状态：断货、一口价。
     if (goods_status) {
-      query.equalTo(goods_status, true)
+      if (goods_status === 'search') {
+        query.contains('name', search_keywords.toUpperCase())
+      } else {
+        query.equalTo(goods_status, true)
+      }
     }
     // 选择分类
     if (category_id) {
