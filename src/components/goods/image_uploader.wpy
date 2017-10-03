@@ -46,6 +46,7 @@
   import wepy from 'wepy';
   import Tips from '../../utils/Tips';
   import SliderPanel from '../../components/common/slider_panel';
+
   export default class GoodsImageUploader extends wepy.component {
     props = {
       pictures: {
@@ -60,19 +61,19 @@
       // 上传照片
       async photo() {
         const size = this.pictures.length;
-        if (size >= 5) {
-          Tips.alert('最多选择五张图片');
+        if (size >= 9) {
+          Tips.alert('最多选择9张图片');
           return;
         }
 
         const param = {
-          count: 5 - size,
+//          count: 5 - size,
           sizeType: ['compressed']
-        }
+        };
         try {
           Tips.loading();
           const {tempFilePaths} = await wepy.chooseImage(param);
-          const pictures = tempFilePaths
+          const pictures = tempFilePaths;
           this.pictures = this.pictures.concat(pictures);
           this.$apply();
         } finally {
@@ -85,7 +86,7 @@
       },
       // 向上移动
       up(index) {
-        if (index == 0) {
+        if (index === 0) {
           return;
         }
         const target = index - 1;
@@ -93,7 +94,7 @@
       },
       // 向下移动
       down(index) {
-        if (index == this.pictures.length - 1) {
+        if (index === this.pictures.length - 1) {
           return;
         }
         const target = index + 1;

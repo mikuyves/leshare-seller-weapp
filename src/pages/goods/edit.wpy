@@ -497,7 +497,7 @@
     }
     // 检验
     validate() {
-      const picturesNum = this.pictures.length;
+//      const picturesNum = this.pictures.length;
       const pidNum = this.input.pid.length;
       let price1s = this.skuList.map(sku => sku.price1);
       let price2s = this.skuList.map(sku => sku.price2);
@@ -508,12 +508,12 @@
       let colors = this.skuList.map(sku => sku.color);
       const stocks = this.skuList.map(sku => sku.stock);
       let rules = [
-        {
-          value: picturesNum,
-          method: 'min',
-          param: 1,
-          message: '请上传商品图片'
-        },
+//        {
+//          value: picturesNum,
+//          method: 'min',
+//          param: 1,
+//          message: '请上传商品图片'
+//        },
         {
           value: pidNum,
           method: 'min',

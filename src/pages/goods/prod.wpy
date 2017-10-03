@@ -7,7 +7,7 @@
     </view>
 
     <view class="prod-image">
-      <image style="width: 100%; background-color: #eeeeee;" mode="aspectFit" src="{{showUrl}}" />
+      <image style="width: 100%; background-color: #eeeeee;" mode="aspectFit" src="{{ showUrl ? showUrl : '../../images/icons/empty.png'}}" />
     </view>
 
     <view class="flex-wrap">
