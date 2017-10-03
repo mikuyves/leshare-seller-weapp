@@ -165,7 +165,9 @@ export default class goods extends base {
     // 状态：断货、一口价。
     if (goods_status) {
       if (goods_status === 'search') {
-        query.contains('name', search_keywords.toUpperCase())
+        for (let keyword of search_keywords) {
+          query.contains('name', keyword.toUpperCase())
+        }
       } else {
         query.equalTo(goods_status, true)
       }
