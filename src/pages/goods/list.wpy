@@ -5,7 +5,15 @@
 
     <!-- 搜索框 -->
     <view wx:if="{{ tab.selectedId == 'search'}}" class="zan-cell zan-form__item">
-      <input class="zan-form__input zan-cell__bd" placeholder="请输入关键字..." @input="inputKeyword" />
+      <input class="zan-form__input zan-cell__bd" value="{{inputSearchKeyword}}" placeholder="请输入关键字..." @input="inputKeyword" />
+    </view>
+    <view>
+      <block wx:for="{{search_keywords}}">
+        <view @tap="deleteKeyword({{item}})" class="zan-label zan-label--small zan-label--plain">{{item}} <span style="color: grey;">  x</span></view>
+      </block>
+      <block wx:if="{{search_keywords.length > 0}}">
+        <view @tap="clearKeyword" class="zan-label zan-label--small zan-label--plain"><span style="color: grey;">清空</span></view>
+      </block>
     </view>
 
     <!-- 商品列表 -->
@@ -52,7 +60,8 @@
       },
       categories: [],
       cateTxt: '',
-      search_keywords: ''
+      inputSearchKeyword: '',
+      search_keywords: []
     };
     data = {...this.def};
     async onLoad () {
@@ -79,7 +88,10 @@
         this.reload();
       },
       inputKeyword(e) {
-        this.search_keywords = e.detail.value
+        let input = e.detail.value;
+        let keywords = [...new Set(input.trim().split(/\s+/))];
+        this.inputSearchKeyword = input;
+        this.search_keywords = keywords.filter(kw => kw !== '');
       },
       async test() {
         let query = new AV.Query('Prod');
@@ -92,6 +104,16 @@
           q.equalTo('prod', prod);
           q.find().then(skus => console.log(skus))
         }
+      },
+      deleteKeyword(item) {
+        let keywords = this.search_keywords.filter(kw => kw !== item);
+        let input = keywords.join(' ').trim();
+        this.search_keywords = keywords;
+        this.inputSearchKeyword = input;
+      },
+      clearKeyword() {
+        this.search_keywords = [];
+        this.inputSearchKeyword = ''
       }
     };
     events = {};
