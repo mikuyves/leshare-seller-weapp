@@ -67,7 +67,8 @@
   import FormTips from '../../components/weui/tips';
   import VCode from '../../components/weui/vcode';
   import Tips from '../../utils/Tips';
-  import AV from '../../utils/av-weapp-min'
+  import AV from '../../utils/av-weapp-min';
+
   export default class Login extends wepy.page {
     def = {
       init: false,
@@ -75,10 +76,10 @@
       avUser: {},
       isStayHere: false
     };
-    data = {...this.def}
+    data = {...this.def};
     async onLoad () {
       // this.switchWithCache()
-      await this.loginThenSwitch()
+      await this.loginThenSwitch();
       this.loaded();
     }
 
@@ -87,13 +88,13 @@
     }
 
     switchWithCache() {
-      let currentUser = AV.User.current()
+      let currentUser = AV.User.current();
       currentUser = currentUser ? currentUser.toJSON() : {};
       if (currentUser.nickName && currentUser.mobilePhoneVerified) {
         this.$switch('index')
       } else {
         console.log('Mobile phone is NOT verified.')
-      };
+      }
     }
 
     // 注册并跳转至 index 页面
@@ -103,7 +104,7 @@
       if (isStaff) {
         this.switchWithCache();
       } else {
-        await wepy.setNavigationBarTitle({title: "完成注册"})
+        await wepy.setNavigationBarTitle({title: '完成注册'});
         this.isStayHere = true;
       }
       this.$apply();
@@ -114,7 +115,7 @@
       async authorize() {
         try {
           await wepy.getUserInfo();
-        } catch(err) {
+        } catch (err) {
           let text = `
 您之前拒绝了授权，
 因此无法正常使用
@@ -155,14 +156,14 @@
         try {
           await auth.smsVerify(this.input.code);
           await this.loginThenSwitch();
-        } catch(err) {
+        } catch (err) {
           console.log(err);
           this.tips('验证码无效，请核对后重新输入。');
         }
       },
       async test() {
-        let roles = await AV.User.current().getRoles()
-        roles = roles.map(item => item.toJSON())
+        let roles = await AV.User.current().getRoles();
+        roles = roles.map(item => item.toJSON());
         console.log(roles);
       }
     };

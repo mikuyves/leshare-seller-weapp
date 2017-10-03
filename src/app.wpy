@@ -14,11 +14,11 @@ import {APPID, APPKEY} from './config/secret'
 AV.init({
   appId: APPID,
   appKey: APPKEY
-})
+});
 
 export default class extends wepy.app {
   constructor () {
-    super()
+    super();
     // // 注册中间件
     this.use('requestfix');
     this.use('promisify');
@@ -34,8 +34,8 @@ export default class extends wepy.app {
   onLaunch() {
     // await this.syncStoreConfig('login_code');
     // await this.syncStoreConfig('shop_id');
-    console.log(wepy.$instance.globalData.user)
-  }
+    console.log(wepy.$instance.globalData.user);
+  };
 
   // async syncStoreConfig(key) {
   //   const result = await wepy.getStorage({key: key});
@@ -50,7 +50,7 @@ export default class extends wepy.app {
     shop: {},
     user: {},
     avUser: {}
-  }
+  };
 
   config = {
     pages: [

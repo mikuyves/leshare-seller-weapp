@@ -1,6 +1,5 @@
 import wepy from 'wepy';
 import http from '../utils/Http'
-import AV from '../utils/av-weapp-min'
 
 export default class base {
   // static baseUrl = wepy.$instance.globalData.baseUrl;

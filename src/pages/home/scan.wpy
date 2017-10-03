@@ -23,8 +23,6 @@
 
 <script>
   import wepy from 'wepy';
-  import count from '../../api/count';
-  import shop from '../../api/shop';
   import Tips from '../../utils/Tips';
   import base from '../../mixins/base';
 
@@ -36,7 +34,7 @@
         {title: ' 小程序二维码（正式版）', url: 'http://ac-od4w7fpp.clouddn.com/ee4216ed1de417d60f1d.jpg'}
       ],
       showIndex: 0
-    }
+    };
     data = {...this.def};
     onLoad () {
       this.loaded();
@@ -75,7 +73,7 @@
       if (pid.length === 7 && Number(pid)) {
         return Number(pid)
       } else {
-        await Tips.alert('商品条形码有误！', 800)
+        await Tips.alert('商品条形码有误！', 800);
         return null
       }
     }

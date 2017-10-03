@@ -53,12 +53,12 @@
       categories: [],
       cateTxt: '',
       search_keywords: ''
-    }
+    };
     data = {...this.def};
     async onLoad () {
       this.page = goods.page(this);
       this.goods = this.page.list;
-      this.categories = await goods.getCatesJSON()
+      this.categories = await goods.getCatesJSON();
       await this.next();
       Event.listen(Event.GOODS_LIST_UPDATE, this.update.bind(this), this);
       this.$apply();
@@ -84,16 +84,16 @@
       async test() {
         let query = new AV.Query('Prod');
         query.descending('createdAt');
-        query.limit(10)
+        query.limit(10);
         let prods = await query.find();
-        console.log(prods)
+        console.log(prods);
         for (let prod of prods) {
-          let q = new AV.Query('Sku')
-          q.equalTo('prod', prod)
+          let q = new AV.Query('Sku');
+          q.equalTo('prod', prod);
           q.find().then(skus => console.log(skus))
         }
       }
-    }
+    };
     events = {};
     components = {
       CategoryTab: CategoryTab,

@@ -1,4 +1,4 @@
-const prod = process.env.NODE_ENV === 'production'
+const prod = process.env.NODE_ENV === 'production';
 
 module.exports = {
   wpyExt: '.wpy',
@@ -29,7 +29,7 @@ module.exports = {
   },
   plugins: {
   }
-}
+};
 
 if (prod) {
   delete module.exports.compilers.babel.sourcesMap;

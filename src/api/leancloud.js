@@ -1,5 +1,5 @@
+/* eslint-disable new-cap */
 import AV from '../utils/av-weapp-min';
-
 
 export default class LC {
   /**
@@ -26,12 +26,12 @@ export default class LC {
     let ids = list.map(item => {
       if (item[key].objectId) {
         return item[key].objectId;
-      };
+      }
     });
     ids = [...new Set(ids)];
     let newList = [];
     for (let id of ids) {
-      let pointer = list.find(item => item[key].objectId == id)[key];
+      let pointer = list.find(item => item[key].objectId === id)[key];
       let subList = list.filter(item => item[key].objectId === id);
       let obj = {};
       obj[key + 'Key'] = pointer;
@@ -63,7 +63,6 @@ export default class LC {
       return AV.Object.destroyAll(
         list.map(id => new AV.Object.createWithoutData(fullClassName, id))
       );
-    };
+    }
   }
-
 }

@@ -172,58 +172,58 @@
 </template>
 
 <script>
+  /* eslint-disable no-unneeded-ternary,no-useless-return */
+
   import wepy from 'wepy';
   import base from '../../mixins/base';
   import input from '../../mixins/input';
   import goods from '../../api/goods';
   import Reminder from '../../api/reminder';
   import auth from '../../api/auth';
-  import Event from '../../utils/Event';
-  import AV from '../../utils/av-weapp-min';
   import SliderPanel from '../../components/common/slider_panel';
   import ActionBar from '../../components/common/action_bar';
   import Tips from '../../utils/Tips';
 
   export default class GoodsList extends wepy.page {
     def = {
-        goodsId: '',
-        mode: '',
-        prod: {},
-        skuList: [],
-        reminders: [],
-        adjustments: [],
-        showUrl: '',
-        picUrls: [],
-        input: {
-          customerId: ''
-        },
-        inputColor: '',
-        inputSize1: '',
-        showStock: 10,
-        minStock: 0,
-        maxStock: 100,
-        totalStock: 0,
-        showPriceId: 'price4',
-        isCustomerDisplay: false,
-        customers: [],
-        customer: null,
-        totalPrice: 0,
-        totalQtt: 0
-    }
+      goodsId: '',
+      mode: '',
+      prod: {},
+      skuList: [],
+      reminders: [],
+      adjustments: [],
+      showUrl: '',
+      picUrls: [],
+      input: {
+        customerId: ''
+      },
+      inputColor: '',
+      inputSize1: '',
+      showStock: 10,
+      minStock: 0,
+      maxStock: 100,
+      totalStock: 0,
+      showPriceId: 'price4',
+      isCustomerDisplay: false,
+      customers: [],
+      customer: null,
+      totalPrice: 0,
+      totalQtt: 0
+    };
     data = {...this.def};
     async onLoad ({goodsId, mode, customerId}) {
-      this.mode = mode ? mode : 'remind'
+      this.mode = mode ? mode : 'remind';
       this.goodsId = goodsId;
       if (customerId) {
         // let customers = await auth.getUsers();
         this.customers = await auth.getCustomers();
         this.input.customerId = customerId;
-        this.$apply()
+        this.$apply();
         this.showPriceId = `price${this.customer.priceLv}`
       }
-      let {prod, skus} = await goods.getProdAndSkuWithDetail(goodsId)
-      console.log(prod)
-      console.log(skus)
+      let {prod, skus} = await goods.getProdAndSkuWithDetail(goodsId);
+      console.log(prod);
+      console.log(skus);
       this.prod = prod.toJSON();
       this.skuList = skus.map(item => item.toJSON());
       this.showUrl = this.prod.mainPicUrl;
@@ -237,14 +237,14 @@
         this.showUrl = item;
       },
       changeColor(colorName) {
-        if (colorName == this.inputColor) {
+        if (colorName === this.inputColor) {
           this.inputColor = ''
         } else {
           this.inputColor = colorName;
         }
       },
       changeSize(sizeName) {
-        if (sizeName == this.inputSize1) {
+        if (sizeName === this.inputSize1) {
           this.inputSize1 = ''
         } else {
           this.inputSize1 = sizeName;
@@ -266,7 +266,7 @@
       },
       // 展现内页选项
       async showInner(e) {
-        let innerId = e.currentTarget.id
+        let innerId = e.currentTarget.id;
         this[innerId] = 'true';
         this.customers = await auth.getCustomers();
         this.$apply()
@@ -276,17 +276,17 @@
        */
       addReminder(sku) {
         let reminder = {sku};
-        let foundItem = this.reminders.find(item => item.sku.name === sku.name)
+        let foundItem = this.reminders.find(item => item.sku.name === sku.name);
         if (foundItem) {
           // 断货时，最大值是现货存量。
           if (foundItem.sku.isSoldOut && foundItem.qtt === foundItem.sku.stock) {
-            console.log('This product is sold out.')
+            console.log('This product is sold out.');
             return
           } else {
             foundItem.qtt ++;
           }
         } else {
-          reminder.qtt = 1
+          reminder.qtt = 1;
           this.reminders = [...this.reminders, reminder];
         }
       },
@@ -294,12 +294,11 @@
        * 下单临时记录清单
        */
       minusReminder(sku) {
-        let reminder = {sku};
         let foundItem = this.reminders.find(item => item.sku.name === sku.name)
         if (foundItem) {
           // 断货时，最大值是现货存量。
           if (foundItem.qtt === 0) {
-            console.log('Reminder is empty now.')
+            console.log('Reminder is empty now.');
             return
           } else {
             foundItem.qtt --;
@@ -316,8 +315,8 @@
       },
       // 删除所有备忘
       async deleteAllReminders() {
-        let text = ` 注意：${this.customer.nickName} 对此商品的选购备忘将被全部删除！`
-        await Tips.confirm(text, {}, '是否确认删除？')
+        let text = ` 注意：${this.customer.nickName} 对此商品的选购备忘将被全部删除！`;
+        await Tips.confirm(text, {}, '是否确认删除？');
         if (this.reminders.length > 0) {
           this.reminders = this.reminders.map(item => {
             item.qtt = 0;
@@ -325,7 +324,7 @@
           })
         }
         this.$apply()
-        await Reminder.saveReminders(this.reminders, this.customer)
+        await Reminder.saveReminders(this.reminders, this.customer);
         await Tips().success('备忘已全部删除，可以重新选择。')
         this.clearReminders()
       },
@@ -339,7 +338,7 @@
           return item;
         })
         Tips.loading();
-        let res = await Reminder.saveReminders(this.reminders, this.customer)
+        await Reminder.saveReminders(this.reminders, this.customer);
         await Tips.success('已经加入客户购物清单！', 800);
         wepy.navigateBack();
       },
@@ -349,7 +348,7 @@
       addAdjustment(sku) {
         let adjustment = {sku};
         adjustment.orgQtt = sku.stock;
-        let foundItem = this.adjustments.find(item => item.sku.name === sku.name)
+        let foundItem = this.adjustments.find(item => item.sku.name === sku.name);
         if (foundItem) {
           // 断货时，最大值是现货存量。
           if (foundItem.sku.isSoldOut && foundItem.qtt === foundItem.sku.stock) {
@@ -375,7 +374,7 @@
         if (foundItem) {
           // 断货时，最大值是现货存量。
           if (foundItem.qtt === 0) {
-            console.log('Quantity is 0 now.')
+            console.log('Quantity is 0 now.');
             return
           } else {
             foundItem.increment --;
@@ -395,9 +394,9 @@
         let adjustments = [];
         let texts = [];
         for (let adj of this.adjustments) {
-          if (adj.increment != 0) {
+          if (adj.increment !== 0) {
             let text = `${adj.sku.name}: 变更 ${adj.increment} 件，现 ${adj.qtt} 件`;
-            texts = [...texts, text]
+            texts = [...texts, text];
             adjustments = [...adjustments, adj]
           };
         };
@@ -405,18 +404,16 @@
         await Tips.confirm(texts, {}, '确认库存更改？');
         Tips.loading();
         try {
-          let res = await Reminder.saveAdjustments(adjustments);
+          await Reminder.saveAdjustments(adjustments);
           await Tips.success('库存已更改！', 800);
-        } catch(err) {
+        } catch (err) {
           if (err.code === 403) {
             await Tips.success('您没有权限操作库存', 1800)
           }
         }
         wepy.navigateBack();
       }
-    }
-
-    events = {}
+    };
 
     watch = {
       async input() {
@@ -431,8 +428,8 @@
           }
         }
         this.$apply()
-      },
-    }
+      }
+    };
 
     computed = {
       // // 注意顺序问题，很重要！
@@ -454,7 +451,7 @@
         if (this.customers.length < 1 && !this.input.customerId) {
           return null
         } else {
-          let customer = this.customers.find(item => item.objectId === this.input.customerId)
+          let customer = this.customers.find(item => item.objectId === this.input.customerId);
           return customer ? customer : null
         }
       },
@@ -463,7 +460,7 @@
         if (this.reminders.length < 1) {
           return
         }
-        let tq = this.reminders.reduce((total, item) => total + item.qtt, 0)
+        let tq = this.reminders.reduce((total, item) => total + item.qtt, 0);
         return tq
       },
       adjustTotalQtt() {
@@ -478,7 +475,7 @@
         if (this.reminders.length < 1) {
           return
         }
-        let tp = this.reminders.reduce((total, item) => total + item.sku[this.showPriceId] * item.qtt, 0)
+        let tp = this.reminders.reduce((total, item) => total + item.sku[this.showPriceId] * item.qtt, 0);
         return tp
       },
       priceTagSytle() {
@@ -486,8 +483,8 @@
           'price1': 'zan-label--primary',
           'price2': 'zan-label--green',
           'price3': 'zan-label--skyblue',
-          'price4': '',
-        }
+          'price4': ''
+        };
         return styles[this.showPriceId]
       }
     }
@@ -496,8 +493,8 @@
     components = {
       AdjustActionBar: ActionBar,
       RemindActionBar: ActionBar,
-      SliderPanelCustomer: SliderPanel,
-    }
+      SliderPanelCustomer: SliderPanel
+    };
     mixins = [base, input];
     config = {
       navigationBarTitleText: '商品详情',

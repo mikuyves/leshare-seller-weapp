@@ -38,7 +38,7 @@
       details: [
       ],
       isEmpty: false
-    }
+    };
     data = {...this.def};
     onLoad (options) {
       const param = options.details;
@@ -52,7 +52,7 @@
       },
       // 向上移动
       up(index) {
-        if (index == 0) {
+        if (index === 0) {
           return;
         }
         const target = index - 1;
@@ -60,7 +60,7 @@
       },
       // 向下移动
       down(index) {
-        if (index == this.details.length - 1) {
+        if (index === this.details.length - 1) {
           return;
         }
         const target = index + 1;
@@ -127,7 +127,7 @@
       details() {
         this.isEmpty = this.details.length < 1;
       }
-    }
+    };
     config = {
       navigationBarTitleText: '商品详情'
     };

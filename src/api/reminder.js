@@ -1,3 +1,4 @@
+/* eslint-disable new-cap */
 import base from './base';
 import LC from './leancloud';
 import Page from '../utils/Page';
@@ -17,18 +18,18 @@ export default class Reminder extends base {
    *  分页处理。获取备忘，包括 Pointer 的数据。
    */
   static getRemindersWithDetail({from, limit}) {
-    let query = new AV.Query('Reminder')
+    let query = new AV.Query('Reminder');
     let handler = new AV.Object.createWithoutData(
       '_User', AV.User.current().toJSON().objectId
-    )
-    query.equalTo('handler', handler)
-    query.descending('createdAt')
-    query.skip(from)
-    query.limit(limit)
-    query.include('sku')
-    query.include('prod')
-    query.include('customer')
-    query.include('customer.user')
+    );
+    query.equalTo('handler', handler);
+    query.descending('createdAt');
+    query.skip(from);
+    query.limit(limit);
+    query.include('sku');
+    query.include('prod');
+    query.include('customer');
+    query.include('customer.user');
     return query.find();
   }
   /**
@@ -41,12 +42,12 @@ export default class Reminder extends base {
     )
     let customer = new AV.Object.createWithoutData('_User', customerId);
     let prod = new AV.Object.createWithoutData('Prod', prodId);
-    query.equalTo('handler', handler)
-    query.equalTo('customer', customer)
-    query.equalTo('prod', prod)
-    query.include('sku')
-    let res = await query.find()
-    let data = res.map(item => item.toJSON())
+    query.equalTo('handler', handler);
+    query.equalTo('customer', customer);
+    query.equalTo('prod', prod);
+    query.include('sku');
+    let res = await query.find();
+    let data = res.map(item => item.toJSON());
     return data
   }
   /**
@@ -56,8 +57,8 @@ export default class Reminder extends base {
     let lines = [];
     // 记录操作的员工
     let handler = AV.User.current();
-    handler = new AV.Object.createWithoutData('_User', handler.toJSON().objectId)
-    customer = new AV.Object.createWithoutData('Customer', customer.objectId)
+    handler = new AV.Object.createWithoutData('_User', handler.toJSON().objectId);
+    customer = new AV.Object.createWithoutData('Customer', customer.objectId);
     for (let r of reminders) {
       let line = new AV.Object('Reminder');
       let sku = AV.Object.createWithoutData('Sku', r.sku.objectId);
@@ -76,16 +77,16 @@ export default class Reminder extends base {
         continue
       // 更新
       } else if (res) {
-          res.set('price', r.price)
-          res.set('qtt', r.qtt)
-          res.set('showPriceId', r.showPriceId)
-          res = await res.save(null, {
-          fetchWhenSave: true,
-          });
+        res.set('price', r.price);
+        res.set('qtt', r.qtt);
+        res.set('showPriceId', r.showPriceId);
+        res = await res.save(null, {
+          fetchWhenSave: true
+        });
         console.log(res)
       } else {
       // 创建
-        line.set('prod', r.sku.prod)
+        line.set('prod', r.sku.prod);
         line.set('sku', sku);
         line.set('qtt', r.qtt);
         line.set('price', r.price);
@@ -96,8 +97,8 @@ export default class Reminder extends base {
       }
     }
     // 记录客户价格等级。
-    customer.set('priceLv', reminders[0].showPriceId.slice(-1))
-    customer.save()
+    customer.set('priceLv', reminders[0].showPriceId.slice(-1));
+    customer.save();
     return AV.Object.saveAll(lines)
   }
   /**
@@ -117,35 +118,34 @@ export default class Reminder extends base {
       adj.set('increment', item.increment);
       adj.set('qtt', item.qtt);
       return adj
-    })
+    });
     // 更新 sku 库存。
     for (let item of adjustments) {
       let sku = AV.Object.createWithoutData('Sku', item.sku.objectId);
       sku.increment('stock', item.increment);
       await sku.save(null, {
-        fetchWhenSave: true,
+        fetchWhenSave: true
       });
     }
     return AV.Object.saveAll(adjs)
   }
 
-
   /** ********************* 内部数据处理方法 ********************* **/
 
   static async _getRemindersData(param) {
     let lines = await this.getRemindersWithDetail(param);
-    lines = lines.map(item => item.toJSON())
-    let data = LC.groupByPointer(lines, 'customer', 'prod')
-    console.log(data)
+    lines = lines.map(item => item.toJSON());
+    let data = LC.groupByPointer(lines, 'customer', 'prod');
+    console.log(data);
     for (let [i, c] of data.entries()) {
-      data[i].prodList = LC.groupByPointer(c.prodList, 'prod', 'sku')
+      data[i].prodList = LC.groupByPointer(c.prodList, 'prod', 'sku');
       data[i].totalQtt = this.totalList(
-          data[i].prodList.map(prod => {
+        data[i].prodList.map(prod => {
           return prod.skuList.map(sku => sku.qtt)
         })
-      )
+      );
       data[i].totalPrice = this.totalList(
-          data[i].prodList.map(prod => {
+        data[i].prodList.map(prod => {
           return prod.skuList.map(sku => sku.qtt * sku.price)
         })
       )
@@ -159,7 +159,7 @@ export default class Reminder extends base {
   }
 
   static totalList(arr) {
-    let flatList = this.flatten(arr)
+    let flatList = this.flatten(arr);
     return flatList.reduce((total, num) => total + num, 0)
   }
 }

@@ -254,6 +254,8 @@
 </template>
 
 <script>
+  /* eslint-disable no-unneeded-ternary */
+
   import wepy from 'wepy';
   import base from '../../mixins/base';
   import input from '../../mixins/input';
@@ -265,7 +267,6 @@
   import FormTips from '../../components/weui/tips';
   import ActionBar from '../../components/common/action_bar';
   import SliderPanel from '../../components/common/slider_panel';
-  import AV from '../../utils/av-weapp-min';
 
   export default class GoodsEdit extends wepy.page {
     def = {
@@ -276,7 +277,7 @@
         name: '',
         cate: '',
         brand: '',
-        supplier: '',
+        supplier: ''
       },
       details: [],
       pictures: [],
@@ -312,7 +313,7 @@
       isColorDisplay: 'false',
       editingInfo: {},
       autoTitle: ''
-    }
+    };
     data = {...this.def};
 
     async onLoad ({goodsId, mode}) {
@@ -326,22 +327,22 @@
       this.colors = await goods.getColors();
 
       // 编辑模式。
-      if (this.mode == 'edit') {
+      if (this.mode === 'edit') {
         // 此处 goodsId 可以是 objectId 或 pid。
         let {prod, skus} = await goods.getProdAndSkuWithDetail(goodsId);
         // 如果没有结果，跳转至新建商品。
         if (!prod) {
           this.$root.$navigate('edit', {goodsId, mode: 'create'});
-        };
+        }
         // 处理原始数据。
-        prod = prod.toJSON()
+        prod = prod.toJSON();
         // 转换 skuList 的值，与原来模板匹配。
         this.skuList = skus.map(item => {
           item = item.toJSON();
           item.color = item.color.name;
           item.size1 = item.size1.name;
           return item
-        })
+        });
         // 处理输入框和选择框。
         this.input.pid = Number(prod.pid);
         this.input.name = prod.name;
@@ -358,9 +359,9 @@
       }
       Event.listen(Event.GOODS_DETAILS_UPDATE, this.detailsUpdate.bind(this), this);
       // 先 $apply 一次，初始化时不要被 watcher 记录。
-      this.$apply()
+      this.$apply();
       // 初始化完成。
-      this.init = true
+      this.init = true;
       this.loaded();
     };
     methods = {
@@ -369,20 +370,20 @@
         if (!this.validate()) {
           return;
         }
-        let text = `${this.input.pid} - ${this.autoTitle}`
-        await Tips.confirm(text, {}, '是否确认新建商品？')
+        let text = `${this.input.pid} - ${this.autoTitle}`;
+        await Tips.confirm(text, {}, '是否确认新建商品？');
         const data = {
           goodsDetails: [],
           goodsSkuInfo: {},
           goodsStocks: [],
           images: []
-        }
+        };
         Tips.loading();
         // 处理图片信息
         for (let picUrl of this.pictures) {
           if (picUrl.startsWith('wxfile')) {
             const avFile = await goods.uploadImage(picUrl, this.autoTitle);
-            console.log(avFile)
+            console.log(avFile);
             data.images = [...data.images, avFile.toJSON().url]
           } else {
             data.images = [...data.images, picUrl]
@@ -399,15 +400,15 @@
         data.isOnePrice = this.isOnePrice;
         data.isAllSoldOut = this.isAllSoldOut;
         data.pid = Number(this.input.pid);
-        data.cate = this.cates.find(item => item.toJSON().name == this.input.cate);
-        data.supplier = this.suppliers.find(item => item.toJSON().name == this.input.supplier)
-        data.brand = this.brands.find(item => item.toJSON().name == this.input.brand)
-        // 处理 SKU。 
-        const skuList = this.skuList
+        data.cate = this.cates.find(item => item.toJSON().name === this.input.cate);
+        data.supplier = this.suppliers.find(item => item.toJSON().name === this.input.supplier);
+        data.brand = this.brands.find(item => item.toJSON().name === this.input.brand);
+        // 处理 SKU。
+        const skuList = this.skuList;
         data.skuList = skuList.map(skuItem => {
-          const sku = {}
-          sku.size1 = this.sizes.find(item => item.toJSON().name == skuItem.size1);
-          sku.color = this.colors.find(item => item.toJSON().name == skuItem.color);
+          const sku = {};
+          sku.size1 = this.sizes.find(item => item.toJSON().name === skuItem.size1);
+          sku.color = this.colors.find(item => item.toJSON().name === skuItem.color);
           sku.size2 = skuItem.size2;
           // TODO：为每个 price 设置一个 class，然后设置 ACL 权限。
           sku.price1 = Number(skuItem.price1);
@@ -421,7 +422,7 @@
           sku.objectId = skuItem.objectId;
           return sku
         })
-        if (this.mode == 'create') {
+        if (this.mode === 'create') {
           await goods.createOrUpdate(data);
           await Tips.success('商品新增成功！', 800);
         } else {
@@ -433,15 +434,15 @@
       },
       // 新增内页选项
       async addInner(clsName, e) {
-        let newInnerId = e.currentTarget.id
+        let newInnerId = e.currentTarget.id;
         const name = this.input.newInner;
         try {
           await goods.addInner(name, clsName);
-        } catch(err) {
+        } catch (err) {
           console.log(err)
         } finally {
           this[newInnerId] = await goods.getInner(clsName);
-          console.log(this[newInnerId])
+          console.log(this[newInnerId]);
           // TODO: 新增选项后，如果出错，未能清空输入框。
           this.input.newInner = '';
           this.loaded();
@@ -458,32 +459,31 @@
       },
       // 展现内页选项
       showInner(e) {
-        let innerId = e.currentTarget.id
-        console.log(innerId)
+        let innerId = e.currentTarget.id;
+        console.log(innerId);
         this[innerId] = 'true';
       },
       // 跳转到详情页面
       details() {
         const param = {
           details: JSON.stringify(this.details)
-        }
-
+        };
         this.$navigate('detail', param);
       },
       // 所有 SKU 同价。
       samePrice(e) {
-        this.isSamePrice = e.detail.value
+        this.isSamePrice = e.detail.value;
       },
       // 一口价。
       onePrice(e) {
-        this.isOnePrice = e.detail.value
+        this.isOnePrice = e.detail.value;
       },
       // 全部断货。
       allSoldOut(e) {
-        this.isAllSoldOut = e.detail.value
+        this.isAllSoldOut = e.detail.value;
       },
       inputRetailPrice(e) {
-        this.retailPrice = e.detail.value
+        this.retailPrice = e.detail.value;
       },
       // 扫码功能。
       async scanCode() {
@@ -499,13 +499,13 @@
     validate() {
       const picturesNum = this.pictures.length;
       const pidNum = this.input.pid.length;
-      let price1s = this.skuList.map(sku => sku.price1)
-      let price2s = this.skuList.map(sku => sku.price2)
-      let price3s = this.skuList.map(sku => sku.price3)
-      const prices = [...price1s, ...price2s, ...price3s, this.retailPrice]
-      let size1s = this.skuList.map(sku => sku.size1)
-      let size2s = this.skuList.map(sku => sku.size2)
-      let colors = this.skuList.map(sku => sku.color)
+      let price1s = this.skuList.map(sku => sku.price1);
+      let price2s = this.skuList.map(sku => sku.price2);
+      let price3s = this.skuList.map(sku => sku.price3);
+      const prices = [...price1s, ...price2s, ...price3s, this.retailPrice];
+      let size1s = this.skuList.map(sku => sku.size1);
+      let size2s = this.skuList.map(sku => sku.size2);
+      let colors = this.skuList.map(sku => sku.color);
       const stocks = this.skuList.map(sku => sku.stock);
       let rules = [
         {
@@ -611,9 +611,9 @@
         return size > 0 ? `已保存${size}条详情` : '请点击编辑详情';
       },
       autoTitle() {
-        let brand = this.input.brand ? this.input.brand : ''
-        let feat = this.input.feat ? this.input.feat : ''
-        let cate = this.input.cate ? this.input.cate : ''
+        let brand = this.input.brand ? this.input.brand : '';
+        let feat = this.input.feat ? this.input.feat : '';
+        let cate = this.input.cate ? this.input.cate : '';
         return `${brand} ${feat}${cate}`.trim()
       },
       isAllSoldOut() {
@@ -623,7 +623,7 @@
 
     watch = {
       pictures(newPics, oldPics) {
-        let dps = oldPics.filter(item => !newPics.includes(item))
+        let dps = oldPics.filter(item => !newPics.includes(item));
         if (dps.length > 0) {
           let dp = dps[0];
           if (dp.startsWith('http')) {

@@ -34,7 +34,6 @@
   import ShopItem from '../../components/shop/item';
   import Placeholder from '../../components/common/placeholder';
   import ActionBar from '../../components/common/action_bar';
-  import AV from '../../utils/av-weapp-min'
 
   export default class ShopList extends wepy.page {
     def = {
@@ -44,13 +43,13 @@
     data = {...this.def};
     async onLoad () {
       this.shops = await shop.list();
-      console.log(this.shops)
+      console.log(this.shops);
       this.loaded();
     };
     methods = {
       // 进入店铺
       async enter(shopId) {
-        await auth.setConfig('shop_id', shopId)
+        await auth.setConfig('shop_id', shopId);
         this.$switch('index');
       },
       // 重新登录

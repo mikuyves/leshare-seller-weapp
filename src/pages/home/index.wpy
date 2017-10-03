@@ -106,8 +106,6 @@
 
 <script>
   import wepy from 'wepy';
-  import count from '../../api/count';
-  import shop from '../../api/shop';
   import base from '../../mixins/base';
 
   export default class HomeIndex extends wepy.page {
@@ -117,7 +115,7 @@
       order: {},
       shop: {},
       init: false
-    }
+    };
     data = {...this.def};
     async onLoad () {
       // this.shop = await shop.info();

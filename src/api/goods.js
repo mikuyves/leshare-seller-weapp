@@ -1,12 +1,8 @@
 import base from './base';
-import wepy from 'wepy';
 import Page from '../utils/Page';
-import Lang from '../utils/Lang';
 import AV from '../utils/av-weapp-min';
-import LC from '../api/leancloud';
 
 export default class goods extends base {
-
   /**
    * 分页处理。分页方法。
    */
@@ -20,10 +16,10 @@ export default class goods extends base {
    * 获取商品及 sku 详情。
    */
   static async getProdAndSkuWithDetail(goodsId) {
-    let prod = {}
+    let prod = {};
     // 扫码入口，未完善。TODO
     if (goodsId.length === 7 && Number(goodsId)) {
-      prod = await this.getProdByPid(goodsId)
+      prod = await this.getProdByPid(goodsId);
       if (!prod) {
         return null
       }
@@ -59,19 +55,19 @@ export default class goods extends base {
   /**
    * 获取尺码列表，按指定顺序。
    */
-   static async getSizes() {
-     let query = new AV.Query('Size');
-     query.ascending('order');
-     return await query.find()
-   }
+  static async getSizes() {
+    let query = new AV.Query('Size');
+    query.ascending('order');
+    return await query.find()
+  }
   /**
    * 获取颜色列表，按指定顺序。
    */
-   static async getColors() {
-     let query = new AV.Query('Color');
-     query.ascending('order');
-     return await query.find()
-   }
+  static async getColors() {
+    let query = new AV.Query('Color');
+    query.ascending('order');
+    return await query.find()
+  }
   /**
    * 商品品牌。
    */
@@ -102,34 +98,34 @@ export default class goods extends base {
    *  获取内页选项。
    */
   static async getInner(clsName) {
-    const query = new AV.Query(clsName)
-    query.ascending('name')
+    const query = new AV.Query(clsName);
+    query.ascending('name');
     return query.find()
   }
   /**
    * 获取供应是列表。
    */
   static async getSuppliers() {
-    let query = new AV.Query('Supplier')
-    query.ascending('name')
+    let query = new AV.Query('Supplier');
+    query.ascending('name');
     return await query.find()
   }
   /**
    *  通过7位商品编码获取商品详情。
    */
   static async getProdByPid(pid) {
-    let query = new AV.Query('Prod')
-    query.equalTo('pid', Number(pid))
-    query.include('brand')
-    query.include('cate')
-    query.include('supplier')
+    let query = new AV.Query('Prod');
+    query.equalTo('pid', Number(pid));
+    query.include('brand');
+    query.include('cate');
+    query.include('supplier');
     return query.first()
   }
   /**
    *  获取单个商品列表，包括 Pointer 的数据。
    */
   static async getProdWithDetail(goodsId) {
-    let prod = AV.Object.createWithoutData('Prod', goodsId)
+    let prod = AV.Object.createWithoutData('Prod', goodsId);
     return prod.fetch({
       include: [
         'brand',
@@ -142,11 +138,11 @@ export default class goods extends base {
    *  获取单个商品的图片列表。
    */
   static async getProdPics(prod) {
-    let query = new AV.Query('ProdPicMap')
-    query.equalTo('prod', prod)
-    query.include('pic')
-    let ppm = await query.find()
-    let pics = ppm.map(item => item.toJSON().pic.url)
+    let query = new AV.Query('ProdPicMap');
+    query.equalTo('prod', prod);
+    query.include('pic');
+    let ppm = await query.find();
+    let pics = ppm.map(item => item.toJSON().pic.url);
     return pics
   }
   /**
@@ -157,7 +153,7 @@ export default class goods extends base {
       .equalTo('prod', prod)  // 此方法可以省去数倍请求次数。但获得的数据需要后续处理。
       .include('color')
       .include('size1')
-      .find()
+      .find();
     return skus
   }
   /**
@@ -165,7 +161,7 @@ export default class goods extends base {
    */
   static async getProdListWithDetail(param) {
     let {from, limit, goods_status, category_id, search_keywords} = param;
-    let query = new AV.Query('Prod')
+    let query = new AV.Query('Prod');
     // 状态：断货、一口价。
     if (goods_status) {
       if (goods_status === 'search') {
@@ -178,12 +174,12 @@ export default class goods extends base {
     if (category_id) {
       query.equalTo('cate', new AV.Object.createWithoutData('Cate', category_id))
     }
-    query.descending('createdAt')
-    query.skip(from)
-    query.limit(limit)
-    query.include('brand')
-    query.include('cate')
-    query.include('supplier')
+    query.descending('createdAt');
+    query.skip(from);
+    query.limit(limit);
+    query.include('brand');
+    query.include('cate');
+    query.include('supplier');
     return query.find();
   }
   /**
@@ -194,7 +190,7 @@ export default class goods extends base {
       .containedIn('prod', prods)  // 此方法可以省去数倍请求次数。但获得的数据需要后续处理。
       .include('color')
       .include('size1')
-      .find()
+      .find();
     return skus
   }
   /**
@@ -209,11 +205,11 @@ export default class goods extends base {
       return pointers
     }
     // 有 relations，关联起来。
-    let relationListName = relations[0].className.toLowerCase() + 'List'
-    let pointerColumnName = pointers[0].className.toLowerCase()
+    let relationListName = relations[0].className.toLowerCase() + 'List';
+    let pointerColumnName = pointers[0].className.toLowerCase();
     return pointers.map(p => {
       p.set(relationListName, relations.filter(
-        r => r['attributes'][pointerColumnName]['id'] == p.id)
+        r => r['attributes'][pointerColumnName]['id'] === p.id)
       );
       return p
     })
@@ -235,7 +231,7 @@ export default class goods extends base {
       blob: {
         uri: filePath
       }
-    })
+    });
     return await picture.save()
   }
   /**
@@ -268,15 +264,15 @@ export default class goods extends base {
     prod.set('isSamePrice', data.isSamePrice);
     prod.set('isOnePrice', data.isOnePrice);
     prod.set('isAllSoldOut', data.isAllSoldOut);
-    prod.set('cate', data.cate)
-    prod.set('brand', data.brand)
-    prod.set('supplier', data.supplier)
+    prod.set('cate', data.cate);
+    prod.set('brand', data.brand);
+    prod.set('supplier', data.supplier);
     // 处理图片。
-    prod.set('mainPicUrl', data.images[0])
-    prod.set('picUrls', data.images)  // 用 url 数组代替中间表
+    prod.set('mainPicUrl', data.images[0]);
+    prod.set('picUrls', data.images); // 用 url 数组代替中间表
     prod = await prod.save();
     // 处理 sku。
-    let skus = []
+    let skus = [];
     for (let sku of data.skuList) {
       let avSku;
       if (sku.objectId) {
@@ -284,7 +280,7 @@ export default class goods extends base {
       } else {
         avSku = new AV.Object('Sku');
       }
-      avSku.set('prod', prod)
+      avSku.set('prod', prod);
       avSku.set('size1', sku.size1);
       avSku.set('size2', sku.size2);
       avSku.set('color', sku.color);
@@ -298,18 +294,18 @@ export default class goods extends base {
       avSku.set('fullName', sku.fullName);
       skus = [...skus, avSku]
     }
-    skus = await AV.Object.saveAll(skus)
+    skus = await AV.Object.saveAll(skus);
     return [prod, skus]
   }
   /**
    * 删除商品
    */
   static async remove(goodsId, skuIdList, picUrls) {
-    let prod = new AV.Object.createWithoutData('Prod', goodsId)
-    let skus = skuIdList.map(item => new AV.Object.createWithoutData('Sku', item))
-    let query = new AV.Query('_File')
-    query.containedIn('url', picUrls)
-    let pics = await query.find()
+    let prod = new AV.Object.createWithoutData('Prod', goodsId);
+    let skus = skuIdList.map(item => new AV.Object.createWithoutData('Sku', item));
+    let query = new AV.Query('_File');
+    query.containedIn('url', picUrls);
+    let pics = await query.find();
     return AV.Promise.all([
       AV.Object.destroyAll(pics),
       prod.destroy(),
@@ -345,15 +341,15 @@ export default class goods extends base {
     const pictures = goods.images;
     const input = {
       name: goods.name,
-      status: goods.status == 0,
-      isRecommend: goods.isRecommend == 1,
+      status: goods.status === 0,
+      isRecommend: goods.isRecommend === 1,
       globalCid: goods.globalCid,
       innerCid: goods.innerCid,
       goodsId: goods.id
-    }
+    };
     let skuList;
     const details = goods.goodsDetails ? goods.goodsDetails : [];
-    if (goods.goodsSkuInfo == null || goods.goodsSkuInfo.goodsSkuDetails == null) {
+    if (goods.goodsSkuInfo === null || goods.goodsSkuInfo.goodsSkuDetails === null) {
       skuList = [{
         price: goods.sellPrice,
         stock: goods.goodsStocks[0].stock,
@@ -363,7 +359,7 @@ export default class goods extends base {
       skuList = goods.goodsSkuInfo.goodsSkuDetails.map(item => {
         const price = parseFloat(item.goodsSkuDetailBase.price).toFixed(2);
         const sku = item.sku;
-        const stock = goods.goodsStocks.find(item => item.sku == sku).stock;
+        const stock = goods.goodsStocks.find(item => item.sku === sku).stock;
         return {price, sku, stock};
       });
     }
@@ -374,7 +370,7 @@ export default class goods extends base {
    * 处理商品列表数据
    */
   static _processProdListItem(prod) {
-    let skuList = prod.attributes.skuList
+    let skuList = prod.attributes.skuList;
     // 无 SKU。
     if (!skuList || skuList.length < 1) {
       return prod.toJSON()
@@ -402,7 +398,7 @@ export default class goods extends base {
     prod.set('stock', sumStock);
     prod.set('skuColorsTxt', skuNames);
     prod.set('skuSizesTxt', skuSizes);
-    if (maxPrice != minPrice) {
+    if (maxPrice !== minPrice) {
       prod.set('priceText', `￥${minPrice} ~ ${maxPrice}`);
     } else {
       prod.set('priceText', `￥${minPrice}`);
