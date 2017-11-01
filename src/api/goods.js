@@ -73,6 +73,7 @@ export default class goods extends base {
    */
   static async getBrands() {
     let query = new AV.Query('Brand')
+    query.limit(200)
     query.ascending('name')
     return await query.find()
   }
