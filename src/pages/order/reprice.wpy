@@ -10,7 +10,7 @@
           <view class="weui-label">现价</view>
         </view>
         <view class="weui-cell__bd">
-          <input class="weui-input" id="modifyPrice" @input="input" value="{{input.modifyPrice}}" placeholder="请输入需要修改订单价格"/>
+          <input class="weui-input" id="modifyPrice"  type="digit" @input="input" value="{{input.modifyPrice}}" placeholder="请输入需要修改订单价格"/>
         </view>
         <view class="weui-cell__ft">
         </view>
@@ -20,7 +20,7 @@
           <view class="weui-label">现运费</view>
         </view>
         <view class="weui-cell__bd">
-          <input class="weui-input" id="modifyPost" @input="input" value="{{input.modifyPost}}" placeholder="请输入需要修改的运费"/>
+          <input class="weui-input" id="modifyPost"  type="digit" @input="input" value="{{input.modifyPost}}" placeholder="请输入需要修改的运费"/>
         </view>
         <view class="weui-cell__ft">
         </view>
@@ -98,6 +98,8 @@
         const finalPrice = Lang.sum([this.input.modifyPrice, this.input.modifyPost, -this.input.modifyCoupon]);
         if (isNaN(finalPrice)) {
           return '请输入有效数字';
+        } else if (this.input.modifyPrice <= 0) {
+          return '商品价格不能为0';
         } else if (finalPrice < 0) {
           return '总价不能为负数';
         } else {
@@ -110,20 +112,27 @@
     };
     methods = {
       async submit() {
-        if (!this.isValid) {
-          this.tips('请正确填写修改价格');
-          return;
+        try {
+          if (!this.isValid) {
+            this.tips('请正确填写修改价格');
+            return;
+          }
+          const orderId = this.order.orderId;
+          const param = {
+            modifyPrice: this.input.modifyPrice,
+            modifyPost: this.input.modifyPost
+          };
+          await Tips.confirm(`是否确认修改订单总价为￥${this.modifyFinal}?`);
+          await order.reprice(orderId, param);
+          Event.emit(Event.ORDER_LIST_UPDATE);
+          await Tips.success('改价成功！');
+          this.$switch('index');
+        } catch (e) {
+          if (e.message) {
+            this.tips('改价失败，请联系客服');
+            Tips.loaded();
+          }
         }
-        const orderId = this.order.orderId;
-        const param = {
-          modifyPrice: this.input.modifyPrice,
-          modifyPost: this.input.modifyPost
-        };
-        await Tips.confirm(`是否确认修改订单总价为￥${this.modifyFinal}?`);
-        await order.reprice(orderId, param);
-        Event.emit(Event.ORDER_LIST_UPDATE);
-        await Tips.success('改价成功！');
-        this.$switch('index');
       }
     };
     components = {

@@ -11,19 +11,35 @@
     methods = {};
     events = {};
     data = {
-      isPageEmpty: false
+      isPageLoading: false,
+      isPageEmpty: false,
+      isPageReachBottom: false
     };
-
     /**
      * 下一页
      */
     async next () {
-      const param = this.params ? this.params() : {};
-      await this.page.next(param);
-      this.isPageEmpty = this.page.list.length == 0;
-      this.init = true;
-      this.$apply();
-      Tips.loaded();
+      try {
+        if (this.page.reachBottom) {
+          return;
+        }
+        if (this.page.start != 0) {
+          Tips.setLoading();
+        }
+        this.isPageLoading = true;
+        const param = this.params ? this.params() : {};
+        await this.page.next(param);
+        this.isPageReachBottom = this.page.reachBottom;
+        this.isPageEmpty = this.page.list.length == 0;
+        if (this.onPageLoad) {
+          this.onPageLoad();
+        }
+      } finally {
+        this.isPageLoading = false;
+        this.init = true;
+        this.$apply();
+        Tips.loaded();
+      }
     }
 
     /**

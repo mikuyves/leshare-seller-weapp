@@ -11,7 +11,7 @@
           <text class="muted xs ml10" wx:if="{{goods.skuCount > 0}}">[{{goods.skuCount}}规格]</text>
         </view>
         <view class="desc-box row">
-          <text class="muted">库存：{{0}}</text>
+          <text class="muted">库存：{{goods.totalStock}}</text>
           <text class="muted ml20">销量：{{goods.salesVolume}}</text>
           <text class="muted ml20">收藏：{{goods.favoriteCount}}</text>
         </view>
@@ -22,9 +22,10 @@
     <view class="item-action row-between">
       <text class="muted xs ml20">分类：{{goods.innerCategoryName}}</text>
       <view>
+        <view class="zan-btn zan-btn--small"  @tap="comment({{goods.id}})" >评价</view>
         <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="delete({{goods.id}})" >删除</view>
         <view class="zan-btn zan-btn--small" wx:if="{{goods.status != 1}}" @tap="offSale({{goods.id}})">下架</view>
-        <view class="zan-btn zan-btn--small" wx:if="{{goods.status == 1}}" @tap="onSale({{goods.id}})">上架</view>
+        <view class="zan-btn zan-btn--small  {{ goods.totalStock == 0 ?  'zan-btn--disabled ' : ''}}"  wx:if="{{goods.status == 1}}" @tap="onSale({{goods.id}}, {{goods.totalStock}})">上架</view>
         <view class="zan-btn zan-btn--small zan-btn--primary" @tap="edit({{goods.id}})">编辑</view>
       </view>
     </view>
@@ -48,6 +49,9 @@
         await Tips.success('删除成功');
         Event.emit(Event.GOODS_LIST_UPDATE);
       },
+      async comment(goodsId) {
+        this.$root.$navigate('comment', {goodsId});
+      },
       async edit(goodsId) {
         this.$root.$navigate('edit', {goodsId, mode: 'edit'});
       },
@@ -57,7 +61,11 @@
         await Tips.success('下架成功');
         Event.emit(Event.GOODS_LIST_UPDATE);
       },
-      async onSale(goodsId) {
+      async onSale(goodsId, stock) {
+        if (stock == 0) {
+          Tips.alert('无库存');
+          return;
+        }
         await Tips.confirm('是否确认上架该商品？');
         await goods.onSale(goodsId);
         await Tips.success('上架成功');

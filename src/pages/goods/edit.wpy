@@ -22,32 +22,22 @@
     <view class="detail-box">
       <view class="weui-cells-form">
 
-        <view class="weui-cell weui-cell_input"  @tap="showInner">
+        <view class="weui-cell"  @tap="showInner">
           <view class="weui-cell__hd">
             <view class="weui-label">商品分类</view>
           </view>
-          <view class="weui-cell__bd">
-            <input class="weui-input" placeholder="请选择商品分类" disabled value="{{input.inner}}" />
+          <view class="weui-cell__bd" >
+            {{input.inner ? input.inner : '请选择商品分类'}}
           </view>
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
 
-        <view class="weui-cell weui-cell_input"  @tap="select">
-          <view class="weui-cell__hd">
-            <view class="weui-label">运费</view>
-          </view>
-          <view class="weui-cell__bd">
-            <input class="weui-input" placeholder="请选择运费模板" disabled />
-          </view>
-          <view class="weui-cell__ft weui-cell__ft_in-access"></view>
-        </view>
-
-        <view class="weui-cell weui-cell_input"  @tap="details">
+        <view class="weui-cell"  @tap="details">
           <view class="weui-cell__hd">
             <view class="weui-label">商品详情</view>
           </view>
           <view class="weui-cell__bd">
-            <input class="weui-input"  disabled  placeholder="{{detailText}}"  />
+            {{detailText}}
           </view>
           <view class="weui-cell__ft weui-cell__ft_in-access"></view>
         </view>
@@ -129,7 +119,7 @@
       innerCategories: [],
       init: false,
       isInnerDisplay: 'false'
-    }
+    };
     data = {...this.def};
     async onLoad ({goodsId, mode}) {
       this.mode = mode;
@@ -156,11 +146,11 @@
           goodsSkuInfo: {},
           goodsStocks: [],
           images: []
-        }
-        Tips.loading();
+        };
+        Tips.loading('保存中');
         // 处理图片信息
         for (let picture of this.pictures) {
-          if (picture.url.substring(0, 6) == 'wxfile') {
+          if (picture.url.substring(0, 6) == 'wxfile' || picture.url.substring(0, 11) == 'http://tmp/') {
             const result = await goods.image(picture.url);
             const image = JSON.parse(result);
             data.images.push(image);
@@ -168,6 +158,7 @@
             data.images.push(picture);
           }
         }
+        Tips.loading('保存中', true);
         // 字段信息
         data.name = this.input.name;
         data.isRecommend = this.input.isRecommend ? 1 : 0;
@@ -184,7 +175,7 @@
           const stock = {
             sku: null,
             stock: sku.stock
-          }
+          };
           data.goodsSkuInfo = null;
           data.stock = sku.stock;
           data.goodsStocks.push(stock);
@@ -209,6 +200,10 @@
               stock: item.stock
             }
           });
+          // 库存求和
+          data.stock = skuList.map(item => item.stock).reduce((pre, cur) => parseInt(pre) + parseInt(cur));
+          // 售价求最低值
+          data.sellPrice = Math.min(...skuList.map(item => item.price));
         }
         if (this.mode == 'create') {
           await goods.create(data);
@@ -225,6 +220,7 @@
         const name = this.input.newInner;
         await goods.addInnerCategories(name);
         this.innerCategories = await goods.getInnerCategories();
+        Event.emit(Event.CATEGORY_LIST_UPDATE);
         this.loaded();
       },
       // 选择分类
@@ -239,7 +235,7 @@
       details() {
         const param = {
           details: JSON.stringify(this.details)
-        }
+        };
 
         this.$navigate('detail', param);
       }
@@ -270,6 +266,12 @@
           method: 'minlength',
           param: '2',
           message: '商品标题太短'
+        },
+        {
+          value: this.input.name,
+          method: 'maxlength',
+          param: '30',
+          message: '商品标题太长'
         },
         {
           value: prices,
@@ -338,7 +340,7 @@
           {
             value: sku,
             method: 'maxlength',
-            param: 10,
+            param: 20,
             message: '型号名称太长'
           },
           {
@@ -348,7 +350,18 @@
           }
         ]);
       }
-      return this.check(rules);
+      const result = this.check(rules);
+      if (!result) {
+        return false;
+      }
+      // 库存校验
+      const empty = stocks.every(item => item == 0);
+      if (empty && this.input.status) {
+        this.tips('无库存商品不能上架');
+        this.input.status = false;
+        return false;
+      }
+      return true;
     }
 
     computed = {
@@ -372,9 +385,5 @@
 </script>
 <style lang="scss">
   @import "../../styles/variable";
-
-  .detail-box{
-    border-top: $border;
-  }
 
 </style>

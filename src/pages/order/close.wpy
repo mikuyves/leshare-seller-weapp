@@ -1,4 +1,5 @@
 <template>
+  <Tips />
   <view class="container" wx:if="{{init}}">
     <view class="weui-cells form">
       <view class="weui-cell weui-cell_select">
@@ -29,6 +30,7 @@
   import Tips from '../../utils/Tips';
   import Event from '../../utils/Event';
   import ActionBar from '../../components/common/action_bar';
+  import FormTips from '../../components/weui/tips';
   import OrderItem from '../../components/order/item';
 
   export default class OrderClose extends wepy.page {
@@ -45,6 +47,7 @@
     async onLoad (options) {
       const orderId = options.orderId;
       this.order = await order.detail(orderId);
+      this.input.reasonIndex = 0;
       this.init = true;
       this.$apply();
       Tips.loaded();
@@ -55,12 +58,17 @@
         try {
           const orderId = this.order.orderId;
           await Tips.confirm('您确认要关闭该订单？');
-          await order.close(orderId, this.seletedReason);
+          const reason = this.seletedReason ? this.seletedReason : '卖家关闭';
+          await order.close(orderId, reason);
           Event.emit(Event.ORDER_LIST_UPDATE);
           await Tips.success('关闭成功');
           this.$switch('index');
         } catch (e) {
-          Tips.error('关闭失败请联系客服');
+          console.info(e);
+          if (e.message) {
+            this.tips('关闭失败，请联系客服');
+            Tips.loaded();
+          }
         }
       }
     };
@@ -72,7 +80,8 @@
     };
     components = {
       ActionBar: ActionBar,
-      OrderItem: OrderItem
+      OrderItem: OrderItem,
+      Tips: FormTips
     };
     mixins = [input]
     config = {

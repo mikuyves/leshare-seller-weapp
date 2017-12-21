@@ -2,17 +2,22 @@
 <template>
   <view class="container" wx:if="{{init}}">
     <!--TAB 页-->
-    <ZanTab :tab="tab" handler="onTabChange" />
+    <ZanTab :tab.sync="tab" @change.user="switchTap" />
 
     <!--订单列表-->
     <repeat for="{{page.list}}" key="index" index="index" item="item">
-      <OrderItem :order="item"></OrderItem>
+      <OrderItem :order.sync="item" @tap.user="detail" @receive.user="receive"></OrderItem>
     </repeat>
+
+    <!-- 加载提示 -->
+    <Loadmore :page.sync="page"/>
+
     <view class="tab-border" />
     <!--占位符-->
     <Placeholder :show.sync="isPageEmpty" message="您还没有相关订单"/>
   </view>
 </template>
+
 <style lang="scss">
 </style>
 
@@ -21,9 +26,11 @@
   import pagination from '../../mixins/pagination';
   import order from '../../api/order';
   import Event from '../../utils/Event';
-  import ZanTab from '../../components/zanui/tab';
+  import ZanTab from '../../components/zanui/expand-tab';
   import OrderItem from '../../components/order/item';
   import Placeholder from '../../components/common/placeholder';
+  import Loadmore from '../../components/weui/loadmore';
+  import Tips from '../../utils/Tips';
 
   export default class OrderIndex extends wepy.page {
     // 页面数据
@@ -36,28 +43,80 @@
       },
       tab: {
         list: [
-          {id: '0', title: '全部'},
-          {id: '1', title: '待付款'},
-          {id: '2', title: '待发货'},
-          {id: '3', title: '待收货'},
+          {id: '2', title: '待接单'},
+          {id: '9', title: '待发货'},
+          {id: '3', title: '待送达'},
           {id: '5', title: '待退款'}
         ],
-        selectedId: '0',
+        expand: [
+          {id: '0', title: '全部'},
+          {id: '1', title: '待付款'},
+          {id: '4', title: '待评价'},
+          {id: '6', title: '已完成'},
+          {id: '7', title: '已关闭'},
+          {id: '8', title: '已退款'}
+        ],
+        expandDefaultText: '其他状态',
+        selectedId: '2',
         scroll: false
-      }
+      },
+      status: '2'
     };
-    async onLoad () {
-      this.page = order.page(this);
+    async onLoad (options, {preload}) {
+      // 处理初始化的状态
+      const status = preload ? preload.status : null;
+      if (status) {
+        this.status = status;
+        this.tab.selectedId = status;
+      }
+      // 页面加载
+      this.page = order.page();
       this.orders = this.page.list;
       await this.next();
+      // 事件监听
       Event.listen(Event.ORDER_LIST_UPDATE, this.update.bind(this), this);
+      Event.listen(Event.ORDER_TAB_UPDATE, this.updateStatus.bind(this), this);
+      Event.listen(Event.USER_LOGOUT, this.clear.bind(this), this);
     };
+    async onShow () {
+      if (!this.init) {
+        this.page.reset();
+        await this.next();
+      }
+    }
     // 获取分页参数
     params() {
-      return { status: this.tab.selectedId };
+      return { status: this.status };
     }
-
+    // 切换状态
+    updateStatus(status) {
+      this.tab.selectedId = status;
+      this.status = status;
+      this.update();
+    }
+    clear() {
+      this.page.clear();
+      this.init = false;
+    }
     methods = {
+      switchTap({selectedId}) {
+        this.status = selectedId;
+        this.reload();
+      },
+      detail(orderId) {
+        this.$navigate('detail', {orderId});
+      },
+      async receive(orderId) {
+        await Tips.confirm('是否确认客户已收到货品？');
+        try {
+          await order.confirmOrder(orderId);
+          await Tips.success('订单已完成');
+        } catch (e) {
+          console.warn(e);
+          await Tips.success('操作失败');
+        }
+        Event.emit(Event.ORDER_LIST_UPDATE);
+      }
     };
     config = {
       navigationBarTitleText: '订单管理',
@@ -66,13 +125,9 @@
     components = {
       ZanTab: ZanTab,
       OrderItem: OrderItem,
-      Placeholder: Placeholder
+      Placeholder: Placeholder,
+      Loadmore: Loadmore
     };
     mixins = [pagination];
-    watch = {
-      tab() {
-        this.reload();
-      }
-    }
   }
 </script>

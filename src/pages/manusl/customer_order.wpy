@@ -1,0 +1,118 @@
+<!--订单列表页面-->
+<template>
+  <view class="container" wx:if="{{init}}">
+    <!--TAB 页-->
+    <ZanTab :tab.sync="tab" @change.user="switchTap" />
+
+    <!--订单列表-->
+    <repeat for="{{page.list}}" key="index" index="index" item="item">
+      <OrderItem :order.sync="item" @tap.user="detail" action="0"/>
+    </repeat>
+
+    <!-- 加载提示 -->
+    <Loadmore :page.sync="page"/>
+
+    <view class="tab-border" />
+    <!--占位符-->
+    <Placeholder :show.sync="isPageEmpty" message="您还没有相关订单"/>
+  </view>
+</template>
+
+<style lang="scss">
+</style>
+
+<script>
+  import wepy from 'wepy';
+  import pagination from '../../mixins/pagination';
+  import order from '../../api/order';
+  import Event from '../../utils/Event';
+  import ZanTab from '../../components/zanui/expand-tab';
+  import OrderItem from '../../components/order/item';
+  import Placeholder from '../../components/common/placeholder';
+  import Loadmore from '../../components/weui/loadmore';
+
+  export default class OrderIndex extends wepy.page {
+    // 页面数据
+    data = {
+      init: false,
+      page: {
+        list: [
+          {orderGoodsInfos: []}
+        ]
+      },
+      tab: {
+        list: [
+          {id: '2', title: '待接单'},
+          {id: '9', title: '待发货'},
+          {id: '3', title: '待送达'},
+          {id: '5', title: '待退款'}
+        ],
+        expand: [
+          {id: '0', title: '全部'},
+          {id: '1', title: '待付款'},
+          {id: '4', title: '待评价'},
+          {id: '6', title: '已完成'},
+          {id: '7', title: '已关闭'},
+          {id: '8', title: '已退款'}
+        ],
+        expandDefaultText: '其他状态',
+        selectedId: '2',
+        scroll: false
+      },
+      status: '2',
+      memberId: 0,
+      customerId: 0
+    };
+    async onLoad (options) {
+      const {customerId, memberId} = JSON.parse(options.params);
+      this.memberId = memberId;
+      this.customerId = customerId;
+      // 页面加载
+      this.page = order.hisPage();
+      await this.next();
+      // 事件监听
+      Event.listen(Event.USER_LOGOUT, this.clear.bind(this), this);
+    };
+    async onShow () {
+      if (!this.init) {
+        this.page.reset();
+        await this.next();
+      }
+    }
+    // 获取分页参数
+    params() {
+      return {
+        status: this.status,
+        customer_id: this.customerId,
+        member_id: this.memberId
+      };
+    }
+    clear() {
+      this.page.clear();
+      this.init = false;
+    }
+    methods = {
+      switchTap({selectedId}) {
+        this.status = selectedId;
+        this.reload();
+      },
+      detail(orderId) {
+        this.$navigate('../order/detail', {orderId});
+      }
+    };
+    config = {
+      navigationBarTitleText: '历史订单',
+      enablePullDownRefresh: true
+    };
+    components = {
+      ZanTab: ZanTab,
+      OrderItem: OrderItem,
+      Placeholder: Placeholder,
+      Loadmore: Loadmore
+    };
+    mixins = [pagination];
+  }
+</script>
+<style lang="scss">
+  @import "../../styles/variable";
+</style>

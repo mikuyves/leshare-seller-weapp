@@ -15,14 +15,30 @@ $text-nm: 28rpx;
 $text-lg: 30rpx;
 $text-sm: 26rpx;
 $text-xs: 24rpx;
+$text-xxs: 22rpx;
 $text-form: 17px;
 
 
 //******边框样式******/
 $color-border: #EDEDED;
 $border: 1px solid $color-border;
+$border-dot: 1px dotted #EFF0F2;
 
 //******背景样式******/
 $color-bg-body: #F5F5F5;
 $color-bg-item: #FAFAFA;
 
+//function
+@function rpx($value) {@return $value * 1rpx;}
+
+//mixin
+@mixin icon-image($size){
+  height: $size;
+  width: $size;
+  vertical-align: middle;
+}
+
+@mixin icon-round($size){
+  @include icon-image($size);
+  border-radius: 50%;
+}

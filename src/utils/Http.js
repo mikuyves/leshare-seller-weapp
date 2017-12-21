@@ -5,18 +5,17 @@ const app = getApp();
 // HTTP工具类
 export default class http {
   static async request (method, url, data) {
-    // const header = this.createAuthHeader();
     const param = {
       url: url,
       method: method,
-      // header: header,
       data: data
-    }
+    };
     Tips.loading();
     const res = await wepy.request(param);
     if (this.isSuccess(res)) {
       return res.data.data;
     } else {
+      console.error(method, url, data, res);
       throw this.requestException(res);
     }
   }
@@ -43,24 +42,12 @@ export default class http {
     const wxData = res.data;
     const serverData = wxData.data;
     if (serverData) {
-      error.serverCode = serverData.code;
+      error.serverCode = wxData.code;
       error.message = serverData.message;
+      error.serverData = serverData;
     }
     return error;
   }
-  /**
-   * 构造权限头部
-   */
-  // static createAuthHeader () {
-  //   const loginCode = wepy.$instance.globalData.auth.login_code;
-  //   const shopId = wepy.$instance.globalData.auth.shop_id;
-  //   const header = {};
-  //   if (loginCode) {
-  //     header['login_code'] = loginCode;
-  //     header['shop_id'] = shopId;
-  //   }
-  //   return header;
-  // }
 
   static get (url, data) {
     return this.request('GET', url, data)

@@ -2,9 +2,8 @@
  * 提示与加载工具类
  */
 export default class Tips {
-  constructor () {
-    this.isLoading = false
-  }
+  static isLoading = false;
+  static pause = false;
   /**
    * 弹出提示框
    */
@@ -23,6 +22,25 @@ export default class Tips {
         }, duration);
       });
     }
+  }
+
+  /**
+   * 弹出确认窗口
+   */
+  static modal (text, title = '提示') {
+    return new Promise((resolve, reject) => {
+      wx.showModal({
+        title: title,
+        content: text,
+        showCancel: false,
+        success: res => {
+          resolve(res)
+        },
+        fail: res => {
+          reject(res);
+        }
+      })
+    })
   }
 
   /**
@@ -72,9 +90,13 @@ export default class Tips {
       image: '/images/icons/alert.png',
       mask: true,
       duration: 500
-    })
+    });
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve();
+      }, 500);
+    });
   }
-
   /**
    * 错误框
    */
@@ -85,7 +107,7 @@ export default class Tips {
       image: '/images/icons/error.png',
       mask: true,
       duration: 500
-    })
+    });
     // 隐藏结束回调
     if (onHide) {
       setTimeout(() => {
@@ -97,24 +119,32 @@ export default class Tips {
   /**
    * 弹出加载提示
    */
-  static loading (title = '加载中') {
-    if (Tips.isLoading) {
-      return
+  static loading (title = '加载中', force = false) {
+    if (this.isLoading && !force) {
+      return;
     }
-    Tips.isLoading = true
-    wx.showLoading({
-      title: title,
-      mask: true
-    })
+    this.isLoading = true;
+    if (wx.showLoading) {
+      wx.showLoading({
+        title: title,
+        mask: true
+      });
+    } else {
+      wx.showNavigationBarLoading();
+    }
   }
 
   /**
    * 加载完毕
    */
   static loaded () {
-    if (Tips.isLoading) {
-      Tips.isLoading = false
-      wx.hideLoading()
+    if (this.isLoading) {
+      this.isLoading = false;
+      if (wx.hideLoading) {
+        wx.hideLoading();
+      } else {
+        wx.hideNavigationBarLoading();
+      }
     }
   }
 
@@ -151,8 +181,6 @@ export default class Tips {
     })
   }
 
-
-
   static share (title, url, desc) {
     return {
       title: title,
@@ -163,9 +191,8 @@ export default class Tips {
       }
     }
   }
-}
 
-/**
- * 静态变量，是否加载中
- */
-Tips.isLoading = false;
+  static setLoading () {
+    this.isLoading = true;
+  }
+}

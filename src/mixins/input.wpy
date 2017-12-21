@@ -53,6 +53,10 @@
       }
       return true;
     }
+    onInput(e) {
+      const fieldName = e.currentTarget.id;
+      this.input[fieldName] = e.detail.value;
+    }
     methods = {
       // 处理输入事件
       input(e) {
