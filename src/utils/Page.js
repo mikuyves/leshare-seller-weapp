@@ -41,6 +41,7 @@ export default class Pagination {
     try {
       Object.assign(param, args);
       const data = await http.get(this.url, param);
+      console.log(data)
       // 底部判断
       if (data === null || data.length < 1) {
         if (this.toClear) {

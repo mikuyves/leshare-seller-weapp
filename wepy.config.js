@@ -37,7 +37,8 @@ module.exports = {
 if (prod) {
   delete module.exports.compilers.babel.sourcesMap;
   // 压缩sass
-  module.exports.compilers['sass'] = {outputStyle: 'compressed'};
+  // TODO: 报错 './app.wxss  unexpected "?" at pos 1' -ISSUE#423@wepy
+  // module.exports.compilers['sass'] = {outputStyle: 'compressed'};
 
   // 压缩js
   module.exports.plugins = {

@@ -66,10 +66,14 @@
       app_code: '1jAB5uZLs57cH1gq6ujRnOdVLDqu2qle',
       // baseUrl: 'https://api.leshare.shop/v2/seller'
       // baseUrl: 'http://192.168.31.124:9999/v2/seller'
-      baseUrl: 'http://106.14.195.68:9999/v2/seller'
+//      baseUrl: 'http://106.14.195.68:9999/v2/seller'
+//      baseUrl: 'http://localhost:3000'
+//      baseUrl: 'http://localhost:3000/api/v1.0'
+      baseUrl: 'http://huayejian.leanapp.cn/api/v1.0'
     };
     config = {
       pages: [
+        'pages/goods/list',
         'pages/home/index',
         'pages/customer/address_list',
         'pages/customer/coupon_send',
@@ -96,7 +100,6 @@
         'pages/shop/reduce_list',
         'pages/shop/reduce_edit',
         'pages/shop/edit',
-        'pages/goods/list',
         'pages/goods/category',
         'pages/goods/category_edit',
         'pages/home/home',

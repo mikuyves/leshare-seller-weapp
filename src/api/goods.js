@@ -22,7 +22,8 @@ export default class goods extends base {
    */
   static page() {
     const url = `${this.baseUrl}/goods`;
-    return new Page(url, this._processGoodsListItem.bind(this));
+    // return new Page(url, this._processGoodsListItem.bind(this));
+    return new Page(url);
   }
 
   /**
