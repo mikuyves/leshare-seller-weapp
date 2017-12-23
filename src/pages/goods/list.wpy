@@ -3,6 +3,19 @@
     <!--TAB 页-->
     <CategoryTab :tab="tab" :categories.sync="categories" categoriesTitle="商品分类" @change.user="change"  />
 
+    <!-- 搜索框 -->
+    <view wx:if="{{ tab.selectedId == 'search'}}" class="zan-cell zan-form__item">
+      <input class="zan-form__input zan-cell__bd" value="{{inputSearchKeyword}}" placeholder="请输入关键字..." @input="inputKeyword" />
+    </view>
+    <view>
+      <block wx:for="{{search_keywords}}">
+        <view @tap="deleteKeyword({{item}})" class="zan-label zan-label--small zan-label--plain">{{item}} <span style="color: grey;">  x</span></view>
+      </block>
+      <block wx:if="{{search_keywords.length > 0}}">
+        <view @tap="clearKeyword" class="zan-label zan-label--small zan-label--plain"><span style="color: grey;">清空</span></view>
+      </block>
+    </view>
+
     <!-- 商品列表 -->
     <repeat for="{{page.list}}" key="index" index="index" item="item">
       <GoodsItem :goods="item"></GoodsItem>
@@ -39,16 +52,20 @@
       },
       tab: {
         list: [
-          {id: 'onSale', title: '出售中'},
-          {id: 'sellOut', title: '售罄的'},
-          {id: 'offSale', title: '仓库中'}
+          {id: '', title: '全部'},
+          {id: 'isAllSoldOut', title: '已断货'},
+          {id: 'isOnePrice', title: '一口价'},
+          {id: 'search', title: '搜索'}
         ],
-        selectedId: 'onSale',
-        categoryId: '0',
+        selectedId: '',
+        categoryId: '',
         scroll: false
       },
-      categories: []
-    }
+      categories: [],
+      cateTxt: '',
+      inputSearchKeyword: '',
+      search_keywords: []
+    };
     data = {...this.def};
     async onLoad () {
       this.page = goods.page(this);
@@ -62,7 +79,8 @@
     params() {
       return {
         goods_status: this.tab.selectedId,
-        category_id: this.tab.categoryId
+        category_id: this.tab.categoryId,
+        search_keywords: this.search_keywords
       };
     }
     // 更新分类
@@ -76,8 +94,24 @@
       },
       change() {
         this.reload();
+      },
+      inputKeyword(e) {
+        let input = e.detail.value;
+        let keywords = [...new Set(input.trim().split(/\s+/))];
+        this.inputSearchKeyword = input;
+        this.search_keywords = keywords.filter(kw => kw !== '');
+      },
+      deleteKeyword(item) {
+        let keywords = this.search_keywords.filter(kw => kw !== item);
+        let input = keywords.join(' ').trim();
+        this.search_keywords = keywords;
+        this.inputSearchKeyword = input;
+      },
+      clearKeyword() {
+        this.search_keywords = [];
+        this.inputSearchKeyword = ''
       }
-    }
+    };
     events = {};
     components = {
       CategoryTab: CategoryTab,
