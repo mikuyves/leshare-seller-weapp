@@ -101,18 +101,6 @@
         this.inputSearchKeyword = input;
         this.search_keywords = keywords.filter(kw => kw !== '');
       },
-      async test() {
-        let query = new AV.Query('Prod');
-        query.descending('createdAt');
-        query.limit(10);
-        let prods = await query.find();
-        console.log(prods);
-        for (let prod of prods) {
-          let q = new AV.Query('Sku');
-          q.equalTo('prod', prod);
-          q.find().then(skus => console.log(skus))
-        }
-      },
       deleteKeyword(item) {
         let keywords = this.search_keywords.filter(kw => kw !== item);
         let input = keywords.join(' ').trim();
